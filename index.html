@@ -112,12 +112,12 @@
       margin-top: 6px;
       color: var(--muted);
       font-size: 0.82rem;
-      line-height: 1.35;
+      line-height: 1.4;
     }
 
     .dashboard-grid {
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
       gap: 20px;
       margin-bottom: 20px;
     }
@@ -138,6 +138,7 @@
       width: 100%;
     }
 
+    /* BÚSSOLA */
     .compass-card {
       display: flex;
       flex-direction: column;
@@ -146,94 +147,150 @@
       min-height: 100%;
     }
 
+    .compass-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 8px auto;
+    }
+
     .compass {
       position: relative;
-      width: 240px;
-      height: 240px;
-      border: 10px solid #cbd5e1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 10px solid #94a3b8;
       border-radius: 50%;
       background:
-        radial-gradient(circle, #ffffff 0 62%, transparent 63%),
-        conic-gradient(#e2e8f0, #ffffff, #e2e8f0, #ffffff, #e2e8f0);
-      box-shadow: inset 0 0 20px rgba(15, 23, 42, 0.12);
+        radial-gradient(circle at center, #ffffff 0 59%, transparent 60%),
+        conic-gradient(
+          #e2e8f0 0deg 45deg,
+          #ffffff 45deg 90deg,
+          #e2e8f0 90deg 135deg,
+          #ffffff 135deg 180deg,
+          #e2e8f0 180deg 225deg,
+          #ffffff 225deg 270deg,
+          #e2e8f0 270deg 315deg,
+          #ffffff 315deg 360deg
+        );
+      box-shadow:
+        inset 0 0 20px rgba(15, 23, 42, 0.12),
+        0 8px 20px rgba(15, 23, 42, 0.1);
     }
 
     .direction {
       position: absolute;
+      z-index: 4;
+      font-size: 1rem;
       font-weight: bold;
-      font-size: 1.15rem;
       color: #334155;
     }
 
     .north {
-      top: 8px;
+      top: 13px;
       left: 50%;
-      transform: translateX(-50%);
       color: #dc2626;
+      font-size: 1.3rem;
+      transform: translateX(-50%);
     }
 
     .south {
-      bottom: 8px;
+      bottom: 13px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .east {
       top: 50%;
-      right: 10px;
+      right: 17px;
       transform: translateY(-50%);
     }
 
     .west {
       top: 50%;
-      left: 10px;
+      left: 17px;
       transform: translateY(-50%);
+    }
+
+    .northeast {
+      top: 43px;
+      right: 42px;
+      font-size: 0.8rem;
+    }
+
+    .southeast {
+      right: 42px;
+      bottom: 43px;
+      font-size: 0.8rem;
+    }
+
+    .southwest {
+      bottom: 43px;
+      left: 42px;
+      font-size: 0.8rem;
+    }
+
+    .northwest {
+      top: 43px;
+      left: 42px;
+      font-size: 0.8rem;
+    }
+
+    .needle-wrapper {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      transition: transform 0.8s ease;
     }
 
     .needle {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 10px;
-      height: 92px;
+      width: 16px;
+      height: 125px;
+      transform: translate(-50%, -100%);
       transform-origin: 50% 100%;
-      transform: translate(-50%, -100%) rotate(0deg);
-      transition: transform 0.8s ease;
-      z-index: 2;
     }
 
     .needle::before {
-      content: "";
       position: absolute;
+      top: 0;
+      left: 50%;
       width: 0;
       height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 76px solid #dc2626;
+      content: "";
+      transform: translateX(-50%);
+      border-right: 8px solid transparent;
+      border-bottom: 102px solid #dc2626;
+      border-left: 8px solid transparent;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
     }
 
     .needle::after {
-      content: "";
       position: absolute;
-      bottom: -30px;
-      left: 1px;
-      width: 8px;
-      height: 38px;
+      bottom: -35px;
+      left: 50%;
+      width: 12px;
+      height: 46px;
+      content: "";
+      transform: translateX(-50%);
+      border-radius: 0 0 10px 10px;
       background: #334155;
-      border-radius: 0 0 8px 8px;
     }
 
     .compass-center {
       position: absolute;
+      z-index: 5;
       top: 50%;
       left: 50%;
-      width: 24px;
-      height: 24px;
-      background: #334155;
-      border: 4px solid white;
-      border-radius: 50%;
+      width: 28px;
+      height: 28px;
       transform: translate(-50%, -50%);
-      z-index: 3;
+      border: 5px solid #ffffff;
+      border-radius: 50%;
+      background: #334155;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
     }
 
     .wind-info {
@@ -243,20 +300,20 @@
 
     .wind-value {
       font-size: 1.8rem;
-      color: var(--secondary);
       font-weight: bold;
+      color: var(--secondary);
     }
 
     .wind-label {
-      color: var(--muted);
       margin-top: 4px;
+      color: var(--muted);
       font-size: 0.9rem;
     }
 
     .wind-speed {
+      width: 100%;
       margin-top: 14px;
       padding-top: 14px;
-      width: 100%;
       border-top: 1px solid var(--border);
       text-align: center;
     }
@@ -270,18 +327,12 @@
 
     .wind-speed-value {
       margin-top: 5px;
-      color: var(--primary);
       font-size: 1.5rem;
       font-weight: bold;
+      color: var(--primary);
     }
 
-    .footer-info {
-      color: var(--muted);
-      font-size: 0.84rem;
-      text-align: center;
-      margin-top: 12px;
-    }
-
+    /* ANÁLISE */
     .ia-section {
       display: grid;
       gap: 20px;
@@ -298,14 +349,32 @@
 
     .ia-badge {
       display: inline-flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
       padding: 8px 12px;
       border-radius: 20px;
       background: #ede9fe;
       color: var(--purple);
-      font-weight: bold;
       font-size: 0.82rem;
+      font-weight: bold;
+    }
+
+    .resumo-ia {
+      border: 1px solid #a7f3d0;
+      background: linear-gradient(135deg, #ecfeff, #f0fdf4);
+    }
+
+    .resumo-texto {
+      margin: 0;
+      color: #134e4a;
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    .analise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
     }
 
     .risk-card {
@@ -343,12 +412,6 @@
       color: var(--danger);
     }
 
-    .analise-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
     .analise-lista {
       margin: 0;
       padding: 0;
@@ -368,11 +431,11 @@
 
     .tag {
       display: inline-block;
+      margin-right: 6px;
       padding: 3px 7px;
       border-radius: 5px;
       font-size: 0.72rem;
       font-weight: bold;
-      margin-right: 6px;
     }
 
     .tag.ok {
@@ -400,18 +463,6 @@
       background: #dbeafe;
     }
 
-    .resumo-ia {
-      background: linear-gradient(135deg, #ecfeff, #f0fdf4);
-      border: 1px solid #a7f3d0;
-    }
-
-    .resumo-texto {
-      margin: 0;
-      color: #134e4a;
-      font-size: 0.98rem;
-      line-height: 1.65;
-    }
-
     .previsao-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
@@ -420,8 +471,8 @@
 
     .previsao-item {
       padding: 13px;
-      border-radius: 10px;
       border: 1px solid var(--border);
+      border-radius: 10px;
       background: #f8fafc;
     }
 
@@ -443,6 +494,14 @@
       margin-top: 5px;
       color: var(--muted);
       font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .footer-info {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-align: center;
     }
 
     @media (max-width: 900px) {
@@ -455,7 +514,7 @@
       }
 
       .compass-card {
-        min-height: 360px;
+        min-height: 440px;
       }
 
       .chart-wrapper {
@@ -469,44 +528,43 @@
   <main class="container">
     <header>
       <div>
-        <h1>Estação Ambiental - Bairro Alto Umuarama - Uberlândia - MG </h1>
+        <h1>Dashboard Climático Inteligente</h1>
         <p class="subtitle">
-          Monitoramento em tempo real via ThingSpeak — Canal
-          <strong id="channelId"></strong>
+          Monitoramento via ThingSpeak — Canal <strong id="channelId"></strong>
         </p>
       </div>
 
-      <div class="status" id="status">Carregando dados...</div>
+      <div id="status" class="status">Carregando dados...</div>
     </header>
 
     <section class="kpis">
       <article class="card">
         <div class="kpi-label">Temperatura atual</div>
-        <div class="kpi-value" id="tempAtual">-- °C</div>
-        <div class="kpi-detail" id="tempMedia">Média: -- °C</div>
+        <div id="tempAtual" class="kpi-value">-- °C</div>
+        <div id="tempMedia" class="kpi-detail">Média: -- °C</div>
       </article>
 
       <article class="card">
         <div class="kpi-label">Umidade atual</div>
-        <div class="kpi-value" id="umidadeAtual">-- %</div>
-        <div class="kpi-detail" id="umidadeMedia">Média: -- %</div>
+        <div id="umidadeAtual" class="kpi-value">-- %</div>
+        <div id="umidadeMedia" class="kpi-detail">Média: -- %</div>
       </article>
 
       <article class="card">
         <div class="kpi-label">Conforto térmico</div>
-        <div class="kpi-value" id="confortoTermico">--</div>
-        <div class="kpi-detail" id="confortoDescricao">Aguardando leitura...</div>
+        <div id="confortoTermico" class="kpi-value">--</div>
+        <div id="confortoDescricao" class="kpi-detail">Aguardando leitura...</div>
       </article>
 
       <article class="card">
         <div class="kpi-label">Qualidade do ar</div>
-        <div class="kpi-value" id="qualidadeAr">--</div>
-        <div class="kpi-detail" id="qualidadeArDescricao">Aguardando leitura...</div>
+        <div id="qualidadeAr" class="kpi-value">--</div>
+        <div id="qualidadeArDescricao" class="kpi-detail">Aguardando leitura...</div>
       </article>
 
       <article class="card">
         <div class="kpi-label">Última atualização</div>
-        <div class="kpi-value" id="ultimaAtualizacao" style="font-size: 1.1rem;">--</div>
+        <div id="ultimaAtualizacao" class="kpi-value" style="font-size: 1.1rem;">--</div>
         <div class="kpi-detail">Horário do último registro recebido</div>
       </article>
     </section>
@@ -532,31 +590,40 @@
           <div class="chart-wrapper">
             <canvas id="graficoPoluente"></canvas>
           </div>
-          <p class="footer-info" id="descricaoGraficoPoluente"></p>
+          <p id="descricaoGraficoPoluente" class="footer-info"></p>
         </article>
       </div>
 
       <article class="card compass-card">
         <h2>Direção do vento</h2>
 
-        <div class="compass">
-          <span class="direction north">N</span>
-          <span class="direction south">S</span>
-          <span class="direction east">L</span>
-          <span class="direction west">O</span>
+        <div class="compass-container">
+          <div class="compass">
+            <span class="direction north">N</span>
+            <span class="direction south">S</span>
+            <span class="direction east">L</span>
+            <span class="direction west">O</span>
+            <span class="direction northeast">NE</span>
+            <span class="direction southeast">SE</span>
+            <span class="direction southwest">SO</span>
+            <span class="direction northwest">NO</span>
 
-          <div class="needle" id="needle"></div>
-          <div class="compass-center"></div>
+            <div id="needleWrapper" class="needle-wrapper">
+              <div class="needle"></div>
+            </div>
+
+            <div class="compass-center"></div>
+          </div>
         </div>
 
         <div class="wind-info">
-          <div class="wind-value" id="direcaoVento">--°</div>
-          <div class="wind-label" id="direcaoTexto">Sem dados de direção</div>
+          <div id="direcaoVento" class="wind-value">--°</div>
+          <div id="direcaoTexto" class="wind-label">Sem dados de direção</div>
         </div>
 
         <div class="wind-speed">
           <div class="wind-speed-label">Velocidade do vento</div>
-          <div class="wind-speed-value" id="velocidadeVento">-- km/h</div>
+          <div id="velocidadeVento" class="wind-speed-value">-- km/h</div>
         </div>
       </article>
     </section>
@@ -568,46 +635,45 @@
           <span class="ia-badge">● Análise estatística inteligente</span>
         </div>
 
-        <p class="resumo-texto" id="resumoIA">
+        <p id="resumoIA" class="resumo-texto">
           Aguardando dados suficientes para gerar o resumo automático.
         </p>
       </article>
 
       <section class="analise-grid">
-        <article class="card risk-card" id="cardRisco">
+        <article id="cardRisco" class="card risk-card">
           <h2>Índice de risco climático</h2>
-          <div class="risk-level" id="nivelRisco">--</div>
-          <div class="kpi-detail" id="descricaoRisco">
-            Aguardando dados para calcular o risco.
-          </div>
-          <div class="kpi-detail" id="pontuacaoRisco"></div>
+          <div id="nivelRisco" class="risk-level">--</div>
+          <div id="descricaoRisco" class="kpi-detail">Aguardando dados.</div>
+          <div id="pontuacaoRisco" class="kpi-detail"></div>
         </article>
 
         <article class="card">
           <h2>Detecção de anomalias</h2>
-          <ul class="analise-lista" id="listaAnomalias">
+          <ul id="listaAnomalias" class="analise-lista">
             <li>Processando padrão histórico...</li>
           </ul>
         </article>
 
         <article class="card">
-          <h2>Correlação vento × CO</h2>
-          <ul class="analise-lista" id="listaCorrelacao">
+          <h2>Correlação vento × poluente</h2>
+          <ul id="listaCorrelacao" class="analise-lista">
             <li>Aguardando dados suficientes...</li>
           </ul>
         </article>
 
         <article class="card">
-          <h2>Tendências e sazonalidade</h2>
-          <ul class="analise-lista" id="listaTendencias">
-            <li>Calculando padrões por horário...</li>
+          <h2>Tendências</h2>
+          <ul id="listaTendencias" class="analise-lista">
+            <li>Calculando tendências...</li>
           </ul>
         </article>
       </section>
 
       <article class="card">
         <h2>Previsão de curto prazo</h2>
-        <div class="previsao-grid" id="gridPrevisoes">
+
+        <div id="gridPrevisoes" class="previsao-grid">
           <div class="previsao-item">
             <div class="previsao-hora">Previsão</div>
             <div class="previsao-valor">--</div>
@@ -616,75 +682,47 @@
         </div>
 
         <p class="footer-info">
-          Estimativas baseadas em regressão linear dos registros recentes e média circular para direção do vento.
+          Estimativas baseadas em regressão linear dos registros recentes.
           Não substitui previsões meteorológicas oficiais.
         </p>
       </article>
     </section>
 
-    <p class="footer-info">
-      Atualização automática a cada 30 segundos.
-    </p>
+    <p class="footer-info">Atualização automática a cada 30 segundos.</p>
   </main>
 
   <script>
+    "use strict";
+
+    /*
+      CONFIGURAÇÃO DO CANAL
+
+      field1 = Temperatura
+      field2 = Umidade
+      field4 = Velocidade do vento
+      field6 = Direção do vento
+      field7 = Poluente (CO)
+    */
     const CONFIG = {
       channelId: "321770",
       readApiKey: "0EPAIXIM4UL9LIW9",
-      totalRegistros: 8000,
+
+      // Reduzido para evitar travamento e página em branco com gráficos muito grandes.
+      totalRegistros: 1000,
 
       campoTemperatura: "field1",
       campoUmidade: "field2",
-      campoDirecaoVento: "field3",
       campoVelocidadeVento: "field4",
+      campoDirecaoVento: "field6",
       campoPoluente: "field7",
 
-      /* CO medido em ppm */
+      direcaoEmSetores: false,
       poluenteField7: "CO",
-
-      /* Velocidade do vento já é recebida em km/h */
-      unidadeVelocidadeVento: "km/h",
-
       intervaloAtualizacao: 30000,
       timeoutRequisicao: 15000
     };
 
     const POLUENTES_CONAMA = {
-      MP10: {
-        nome: "MP10",
-        unidade: "µg/m³",
-        janelaHoras: 24,
-        descricaoMedia: "Média móvel de 24 horas",
-        limiteReferencia: 100
-      },
-      "MP2.5": {
-        nome: "MP2,5",
-        unidade: "µg/m³",
-        janelaHoras: 24,
-        descricaoMedia: "Média móvel de 24 horas",
-        limiteReferencia: 50
-      },
-      O3: {
-        nome: "Ozônio (O₃)",
-        unidade: "µg/m³",
-        janelaHoras: 8,
-        descricaoMedia: "Média móvel de 8 horas",
-        limiteReferencia: 130
-      },
-      NO2: {
-        nome: "Dióxido de nitrogênio (NO₂)",
-        unidade: "µg/m³",
-        janelaHoras: 1,
-        descricaoMedia: "Média móvel de 1 hora",
-        limiteReferencia: 190
-      },
-      SO2: {
-        nome: "Dióxido de enxofre (SO₂)",
-        unidade: "µg/m³",
-        janelaHoras: 24,
-        descricaoMedia: "Média móvel de 24 horas",
-        limiteReferencia: 50
-      },
       CO: {
         nome: "Monóxido de carbono (CO)",
         unidade: "ppm",
@@ -710,8 +748,26 @@
       return Number.isFinite(numero) ? numero : null;
     }
 
+    function limitar(valor, minimo, maximo) {
+      return Math.max(minimo, Math.min(maximo, valor));
+    }
+
+    function normalizarDirecao(valor) {
+      if (valor === null || !Number.isFinite(valor)) {
+        return null;
+      }
+
+      let direcao = valor;
+
+      if (CONFIG.direcaoEmSetores) {
+        direcao *= 45;
+      }
+
+      return ((direcao % 360) + 360) % 360;
+    }
+
     function calcularMedia(valores) {
-      const validos = valores.filter(valor => valor !== null);
+      const validos = valores.filter(valor => valor !== null && Number.isFinite(valor));
 
       if (!validos.length) {
         return null;
@@ -721,7 +777,7 @@
     }
 
     function calcularDesvioPadrao(valores) {
-      const validos = valores.filter(valor => valor !== null);
+      const validos = valores.filter(valor => valor !== null && Number.isFinite(valor));
 
       if (validos.length < 2) {
         return null;
@@ -729,33 +785,11 @@
 
       const media = calcularMedia(validos);
 
-      const variancia = validos.reduce((soma, valor) => {
-        return soma + Math.pow(valor - media, 2);
-      }, 0) / validos.length;
+      const variancia =
+        validos.reduce((soma, valor) => soma + ((valor - media) ** 2), 0) /
+        validos.length;
 
       return Math.sqrt(variancia);
-    }
-
-    function limitar(valor, minimo, maximo) {
-      return Math.max(minimo, Math.min(maximo, valor));
-    }
-
-    function obterUltimoValorValido(registros, campo) {
-      for (let indice = registros.length - 1; indice >= 0; indice--) {
-        const valor = converterNumero(registros[indice][campo]);
-
-        if (valor !== null) {
-          return {
-            valor,
-            data: registros[indice].created_at
-          };
-        }
-      }
-
-      return {
-        valor: null,
-        data: null
-      };
     }
 
     function formatarData(dataISO) {
@@ -772,19 +806,27 @@
       });
     }
 
-    function obterHoraLocal(dataISO) {
-      const partes = new Intl.DateTimeFormat("pt-BR", {
-        timeZone: "America/Sao_Paulo",
-        hour: "2-digit",
-        hourCycle: "h23"
-      }).formatToParts(new Date(dataISO));
+    function obterUltimoValorValido(registros, campo, comoDirecao = false) {
+      for (let i = registros.length - 1; i >= 0; i--) {
+        let valor = converterNumero(registros[i][campo]);
 
-      const hora = partes.find(parte => parte.type === "hour");
-      return hora ? Number(hora.value) : null;
+        if (comoDirecao) {
+          valor = normalizarDirecao(valor);
+        }
+
+        if (valor !== null) {
+          return {
+            valor,
+            data: registros[i].created_at
+          };
+        }
+      }
+
+      return { valor: null, data: null };
     }
 
     function obterDirecaoCardinal(graus) {
-      if (graus === null || Number.isNaN(graus)) {
+      if (graus === null || !Number.isFinite(graus)) {
         return "Sem dados";
       }
 
@@ -804,7 +846,10 @@
 
     function avaliarConforto(temperatura, umidade) {
       if (temperatura === null || umidade === null) {
-        return { nivel: "--", descricao: "Dados insuficientes" };
+        return {
+          nivel: "--",
+          descricao: "Dados insuficientes"
+        };
       }
 
       if (umidade < 30) {
@@ -845,7 +890,7 @@
       if (valor === null) {
         return {
           nivel: "--",
-          descricao: "Sem leituras válidas de CO"
+          descricao: "Sem leituras válidas do poluente"
         };
       }
 
@@ -854,27 +899,27 @@
       if (percentual <= 50) {
         return {
           nivel: "Boa",
-          descricao: `${valor.toFixed(1)} ppm — ${percentual.toFixed(0)}% da referência`
+          descricao: `${valor.toFixed(2)} ${poluente.unidade} — ${percentual.toFixed(0)}% da referência`
         };
       }
 
       if (percentual <= 80) {
         return {
           nivel: "Atenção",
-          descricao: `${valor.toFixed(1)} ppm — próximo à referência`
+          descricao: `${valor.toFixed(2)} ${poluente.unidade} — próximo à referência`
         };
       }
 
       if (percentual <= 100) {
         return {
           nivel: "Alerta",
-          descricao: `${valor.toFixed(1)} ppm — faixa crítica`
+          descricao: `${valor.toFixed(2)} ${poluente.unidade} — faixa crítica`
         };
       }
 
       return {
         nivel: "Acima do limite",
-        descricao: `${valor.toFixed(1)} ppm — referência excedida`
+        descricao: `${valor.toFixed(2)} ${poluente.unidade} — referência excedida`
       };
     }
 
@@ -882,7 +927,6 @@
       const janelaMs = janelaHoras * 60 * 60 * 1000;
       const resultado = [];
       const fila = [];
-
       let soma = 0;
       let inicio = 0;
 
@@ -890,7 +934,7 @@
         const timestamp = new Date(registro.created_at).getTime();
         const valor = converterNumero(registro[campo]);
 
-        if (valor !== null) {
+        if (valor !== null && Number.isFinite(timestamp)) {
           fila.push({ timestamp, valor });
           soma += valor;
         }
@@ -903,7 +947,11 @@
           inicio++;
         }
 
-        resultado.push(inicio < fila.length ? soma / (fila.length - inicio) : null);
+        resultado.push(
+          inicio < fila.length
+            ? soma / (fila.length - inicio)
+            : null
+        );
       });
 
       return resultado;
@@ -921,8 +969,9 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          normalized: true,
           animation: {
-            duration: 450
+            duration: 300
           },
           interaction: {
             mode: "index",
@@ -935,6 +984,11 @@
             tooltip: {
               mode: "index",
               intersect: false
+            },
+            decimation: {
+              enabled: true,
+              algorithm: "lttb",
+              samples: 250
             }
           },
           scales: {
@@ -951,7 +1005,8 @@
                 text: "Data e hora"
               },
               ticks: {
-                maxTicksLimit: 8
+                maxTicksLimit: 8,
+                maxRotation: 0
               }
             }
           }
@@ -959,7 +1014,7 @@
       });
     }
 
-    function atualizarGraficos(labels, temperaturas, umidades, poluente, mediasMoveis) {
+    function atualizarGraficos(labels, temperaturas, umidades, poluentes, mediasMoveis) {
       const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
 
       if (graficoTemperatura) graficoTemperatura.destroy();
@@ -976,10 +1031,10 @@
           backgroundColor: "rgba(220, 38, 38, 0.15)",
           fill: true,
           tension: 0.35,
-          spanGaps: false,
-          pointRadius: 1.5,
-          pointHoverRadius: 5,
-          borderWidth: 2
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          spanGaps: true
         }],
         "Temperatura (°C)"
       );
@@ -994,10 +1049,10 @@
           backgroundColor: "rgba(2, 132, 199, 0.15)",
           fill: true,
           tension: 0.35,
-          spanGaps: false,
-          pointRadius: 1.5,
-          pointHoverRadius: 5,
-          borderWidth: 2
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          spanGaps: true
         }],
         "Umidade (%)",
         {
@@ -1011,27 +1066,27 @@
         labels,
         [
           {
-            label: "Leitura de CO (ppm)",
-            data: poluente,
+            label: `Leitura instantânea (${configPoluente.unidade})`,
+            data: poluentes,
             borderColor: "#7c3aed",
             tension: 0.25,
-            pointRadius: 1.5,
-            pointHoverRadius: 5,
+            pointRadius: 0,
+            pointHoverRadius: 4,
             borderWidth: 2,
-            spanGaps: false
+            spanGaps: true
           },
           {
             label: configPoluente.descricaoMedia,
             data: mediasMoveis,
             borderColor: "#f59e0b",
             tension: 0.35,
-            pointRadius: 1,
-            pointHoverRadius: 5,
+            pointRadius: 0,
+            pointHoverRadius: 4,
             borderWidth: 3,
-            spanGaps: false
+            spanGaps: true
           },
           {
-            label: `Referência (${configPoluente.limiteReferencia} ppm)`,
+            label: `Referência (${configPoluente.limiteReferencia} ${configPoluente.unidade})`,
             data: Array(labels.length).fill(configPoluente.limiteReferencia),
             borderColor: "#dc2626",
             borderDash: [8, 6],
@@ -1039,39 +1094,37 @@
             borderWidth: 2
           }
         ],
-        "Monóxido de carbono (CO) — ppm",
+        `${configPoluente.nome} (${configPoluente.unidade})`,
         {
           beginAtZero: true
         }
       );
 
       document.getElementById("tituloGraficoPoluente").textContent =
-        "Monóxido de carbono (CO) — leitura instantânea e média móvel";
+        `${configPoluente.nome} — leitura instantânea e média móvel`;
 
       document.getElementById("descricaoGraficoPoluente").textContent =
-        `${configPoluente.descricaoMedia}. Linha tracejada: referência configurada de ` +
-        `${configPoluente.limiteReferencia} ppm.`;
+        `${configPoluente.descricaoMedia}. Linha tracejada: referência de ` +
+        `${configPoluente.limiteReferencia} ${configPoluente.unidade}.`;
     }
 
     function atualizarBussola(direcao) {
-      const needle = document.getElementById("needle");
-      const direcaoVento = document.getElementById("direcaoVento");
-      const direcaoTexto = document.getElementById("direcaoTexto");
+      const agulha = document.getElementById("needleWrapper");
+      const campoDirecao = document.getElementById("direcaoVento");
+      const textoDirecao = document.getElementById("direcaoTexto");
 
       if (direcao === null) {
-        needle.style.transform = "translate(-50%, -100%) rotate(0deg)";
-        direcaoVento.textContent = "--°";
-        direcaoTexto.textContent = "Sem dados de direção";
+        agulha.style.transform = "rotate(0deg)";
+        campoDirecao.textContent = "--°";
+        textoDirecao.textContent = "Sem dados de direção";
         return;
       }
 
-      const graus = ((direcao % 360) + 360) % 360;
+      const graus = normalizarDirecao(direcao);
 
-      needle.style.transform =
-        `translate(-50%, -100%) rotate(${graus}deg)`;
-
-      direcaoVento.textContent = `${graus.toFixed(0)}°`;
-      direcaoTexto.textContent = `Vento de ${obterDirecaoCardinal(graus)}`;
+      agulha.style.transform = `rotate(${graus}deg)`;
+      campoDirecao.textContent = `${graus.toFixed(0)}°`;
+      textoDirecao.textContent = `Vento de ${obterDirecaoCardinal(graus)}`;
     }
 
     function atualizarStatus(mensagem, tipo = "") {
@@ -1080,179 +1133,96 @@
       status.className = `status ${tipo}`;
     }
 
-    function calcularZScore(valor, valoresHistoricos) {
-      const media = calcularMedia(valoresHistoricos);
-      const desvioPadrao = calcularDesvioPadrao(valoresHistoricos);
+    function calcularZScore(valor, historico) {
+      const media = calcularMedia(historico);
+      const desvio = calcularDesvioPadrao(historico);
 
       if (
         valor === null ||
         media === null ||
-        desvioPadrao === null ||
-        desvioPadrao === 0
+        desvio === null ||
+        desvio === 0
       ) {
         return null;
       }
 
-      return (valor - media) / desvioPadrao;
+      return (valor - media) / desvio;
     }
 
-    function detectarAnomalia(valorAtual, valoresHistoricos, limiteZ = 2.5) {
-      if (valorAtual === null || valoresHistoricos.length < 10) {
+    function detectarAnomalia(valorAtual, historico, limite = 2.5) {
+      if (valorAtual === null || historico.length < 10) {
         return {
-          disponivel: false,
           anomalia: false,
-          zScore: null,
           classificacao: "Dados insuficientes"
         };
       }
 
-      const zScore = calcularZScore(valorAtual, valoresHistoricos);
+      const z = calcularZScore(valorAtual, historico);
 
-      if (zScore === null) {
+      if (z === null) {
         return {
-          disponivel: false,
           anomalia: false,
-          zScore: null,
           classificacao: "Sem variação histórica"
         };
       }
 
-      const anomalia = Math.abs(zScore) >= limiteZ;
-
-      let classificacao = "Dentro do padrão";
-
-      if (zScore >= limiteZ) {
-        classificacao = "Acima do padrão histórico";
-      }
-
-      if (zScore <= -limiteZ) {
-        classificacao = "Abaixo do padrão histórico";
-      }
-
-      return {
-        disponivel: true,
-        anomalia,
-        zScore,
-        classificacao
-      };
-    }
-
-    function calcularMediaCircular(direcoes) {
-      const validas = direcoes.filter(valor => valor !== null);
-
-      if (!validas.length) {
-        return null;
-      }
-
-      const senoMedio = validas.reduce((soma, graus) => {
-        return soma + Math.sin(graus * Math.PI / 180);
-      }, 0) / validas.length;
-
-      const cossenoMedio = validas.reduce((soma, graus) => {
-        return soma + Math.cos(graus * Math.PI / 180);
-      }, 0) / validas.length;
-
-      let graus = Math.atan2(senoMedio, cossenoMedio) * 180 / Math.PI;
-
-      if (graus < 0) {
-        graus += 360;
-      }
-
-      return graus;
-    }
-
-    function diferencaAngular(grauA, grauB) {
-      const diferenca = Math.abs(grauA - grauB) % 360;
-      return diferenca > 180 ? 360 - diferenca : diferenca;
-    }
-
-    function detectarAnomaliaDirecao(direcaoAtual, direcoesHistoricas) {
-      if (direcaoAtual === null || direcoesHistoricas.length < 10) {
+      if (z >= limite) {
         return {
-          disponivel: false,
-          anomalia: false,
-          diferenca: null,
-          mediaHistorica: null
+          anomalia: true,
+          classificacao: "Acima do padrão histórico"
         };
       }
 
-      const mediaHistorica = calcularMediaCircular(direcoesHistoricas);
-
-      if (mediaHistorica === null) {
+      if (z <= -limite) {
         return {
-          disponivel: false,
-          anomalia: false,
-          diferenca: null,
-          mediaHistorica: null
+          anomalia: true,
+          classificacao: "Abaixo do padrão histórico"
         };
       }
 
-      const diferenca = diferencaAngular(direcaoAtual, mediaHistorica);
-
       return {
-        disponivel: true,
-        anomalia: diferenca >= 80,
-        diferenca,
-        mediaHistorica
+        anomalia: false,
+        classificacao: "Dentro do padrão histórico"
       };
     }
 
     function calcularCorrelacaoPearson(valoresX, valoresY) {
       const pares = [];
 
-      for (let indice = 0; indice < valoresX.length; indice++) {
-        if (
-          valoresX[indice] !== null &&
-          valoresY[indice] !== null
-        ) {
-          pares.push({
-            x: valoresX[indice],
-            y: valoresY[indice]
-          });
+      for (let i = 0; i < valoresX.length; i++) {
+        if (valoresX[i] !== null && valoresY[i] !== null) {
+          pares.push({ x: valoresX[i], y: valoresY[i] });
         }
       }
 
       if (pares.length < 10) {
-        return {
-          correlacao: null,
-          quantidade: pares.length
-        };
+        return null;
       }
 
-      const mediaX = pares.reduce((soma, par) => soma + par.x, 0) / pares.length;
-      const mediaY = pares.reduce((soma, par) => soma + par.y, 0) / pares.length;
+      const mediaX = pares.reduce((soma, p) => soma + p.x, 0) / pares.length;
+      const mediaY = pares.reduce((soma, p) => soma + p.y, 0) / pares.length;
 
       let numerador = 0;
-      let denominadorX = 0;
-      let denominadorY = 0;
+      let somaX = 0;
+      let somaY = 0;
 
-      pares.forEach(par => {
-        const diferencaX = par.x - mediaX;
-        const diferencaY = par.y - mediaY;
+      pares.forEach(p => {
+        const dx = p.x - mediaX;
+        const dy = p.y - mediaY;
 
-        numerador += diferencaX * diferencaY;
-        denominadorX += diferencaX * diferencaX;
-        denominadorY += diferencaY * diferencaY;
+        numerador += dx * dy;
+        somaX += dx * dx;
+        somaY += dy * dy;
       });
 
-      const denominador = Math.sqrt(denominadorX * denominadorY);
+      const denominador = Math.sqrt(somaX * somaY);
 
-      if (denominador === 0) {
-        return {
-          correlacao: null,
-          quantidade: pares.length
-        };
-      }
-
-      return {
-        correlacao: numerador / denominador,
-        quantidade: pares.length
-      };
+      return denominador === 0 ? null : numerador / denominador;
     }
 
     function interpretarCorrelacao(correlacao) {
       if (correlacao === null) {
-        return "Dados insuficientes para calcular a correlação.";
+        return "Dados insuficientes para análise.";
       }
 
       const intensidade = Math.abs(correlacao);
@@ -1269,31 +1239,28 @@
       let sentido = "sem relação linear clara";
 
       if (correlacao >= 0.2) {
-        sentido = "quanto maior o vento, maior tende a ser a concentração de CO";
-      }
-
-      if (correlacao <= -0.2) {
-        sentido = "quanto maior o vento, menor tende a ser a concentração de CO";
+        sentido = "quanto maior o vento, maior tende a ser a concentração";
+      } else if (correlacao <= -0.2) {
+        sentido = "quanto maior o vento, menor tende a ser a concentração";
       }
 
       return `Correlação ${forca} (${correlacao.toFixed(2)}): ${sentido}.`;
     }
 
     function calcularRegressaoLinear(pontos) {
-      if (!Array.isArray(pontos) || pontos.length < 3) {
+      if (pontos.length < 5) {
         return null;
       }
 
-      const quantidade = pontos.length;
-      const mediaX = pontos.reduce((soma, ponto) => soma + ponto.x, 0) / quantidade;
-      const mediaY = pontos.reduce((soma, ponto) => soma + ponto.y, 0) / quantidade;
+      const mediaX = pontos.reduce((soma, p) => soma + p.x, 0) / pontos.length;
+      const mediaY = pontos.reduce((soma, p) => soma + p.y, 0) / pontos.length;
 
       let numerador = 0;
       let denominador = 0;
 
-      pontos.forEach(ponto => {
-        numerador += (ponto.x - mediaX) * (ponto.y - mediaY);
-        denominador += Math.pow(ponto.x - mediaX, 2);
+      pontos.forEach(p => {
+        numerador += (p.x - mediaX) * (p.y - mediaY);
+        denominador += (p.x - mediaX) ** 2;
       });
 
       if (denominador === 0) {
@@ -1301,126 +1268,47 @@
       }
 
       const inclinacao = numerador / denominador;
-      const intercepto = mediaY - inclinacao * mediaX;
+      const intercepto = mediaY - (inclinacao * mediaX);
 
       return {
-        inclinacao,
-        intercepto,
-        prever: valorX => inclinacao * valorX + intercepto
+        prever(x) {
+          return (inclinacao * x) + intercepto;
+        }
       };
     }
 
-    function preverVariavel(registros, campo, horasFuturas) {
-      const limiteRegistros = 150;
-      const registrosRecentes = registros.slice(-limiteRegistros);
-      const pontos = [];
+    function preverVariavel(registros, campo, horas) {
+      const pontos = registros
+        .slice(-150)
+        .map(registro => {
+          const valor = converterNumero(registro[campo]);
+          const data = new Date(registro.created_at).getTime();
 
-      registrosRecentes.forEach(registro => {
-        const valor = converterNumero(registro[campo]);
-        const timestamp = new Date(registro.created_at).getTime();
+          if (valor === null || !Number.isFinite(data)) {
+            return null;
+          }
 
-        if (valor !== null && Number.isFinite(timestamp)) {
-          pontos.push({
-            x: timestamp / (1000 * 60 * 60),
+          return {
+            x: data / 3600000,
             y: valor
-          });
-        }
-      });
-
-      if (pontos.length < 5) {
-        return null;
-      }
+          };
+        })
+        .filter(Boolean);
 
       const regressao = calcularRegressaoLinear(pontos);
 
-      if (!regressao) {
+      if (!regressao || !pontos.length) {
         return null;
       }
 
-      const ultimoPonto = pontos[pontos.length - 1];
+      const ultimoX = pontos[pontos.length - 1].x;
       const previsoes = {};
 
-      horasFuturas.forEach(hora => {
-        previsoes[hora] = regressao.prever(ultimoPonto.x + hora);
+      horas.forEach(hora => {
+        previsoes[hora] = regressao.prever(ultimoX + hora);
       });
 
-      return {
-        previsoes,
-        inclinacaoPorHora: regressao.inclinacao,
-        quantidadePontos: pontos.length
-      };
-    }
-
-    function preverDirecaoVento(registros, campo, horasFuturas) {
-      const direcoesRecentes = registros
-        .slice(-100)
-        .map(registro => converterNumero(registro[campo]))
-        .filter(valor => valor !== null);
-
-      if (direcoesRecentes.length < 5) {
-        return null;
-      }
-
-      const mediaCircular = calcularMediaCircular(direcoesRecentes);
-
-      if (mediaCircular === null) {
-        return null;
-      }
-
-      const previsoes = {};
-
-      horasFuturas.forEach(hora => {
-        previsoes[hora] = mediaCircular;
-      });
-
-      return {
-        previsoes,
-        quantidadePontos: direcoesRecentes.length
-      };
-    }
-
-    function analisarSazonalidade(registros, campo) {
-      const acumuladoPorHora = {};
-
-      registros.forEach(registro => {
-        const hora = obterHoraLocal(registro.created_at);
-        const valor = converterNumero(registro[campo]);
-
-        if (hora === null || valor === null) {
-          return;
-        }
-
-        if (!acumuladoPorHora[hora]) {
-          acumuladoPorHora[hora] = {
-            soma: 0,
-            quantidade: 0
-          };
-        }
-
-        acumuladoPorHora[hora].soma += valor;
-        acumuladoPorHora[hora].quantidade++;
-      });
-
-      const medias = Object.entries(acumuladoPorHora)
-        .map(([hora, dados]) => ({
-          hora: Number(hora),
-          media: dados.soma / dados.quantidade,
-          quantidade: dados.quantidade
-        }))
-        .filter(item => item.quantidade >= 2);
-
-      if (!medias.length) {
-        return null;
-      }
-
-      const maior = [...medias].sort((a, b) => b.media - a.media)[0];
-      const menor = [...medias].sort((a, b) => a.media - b.media)[0];
-
-      return {
-        maior,
-        menor,
-        medias
-      };
+      return previsoes;
     }
 
     function obterClasseRisco(pontuacao) {
@@ -1436,7 +1324,7 @@
         return {
           nivel: "ALERTA",
           classe: "alerta",
-          descricao: "Há variáveis em faixa de risco ou comportamento anormal."
+          descricao: "Há variáveis em faixa de risco."
         };
       }
 
@@ -1451,18 +1339,11 @@
       return {
         nivel: "NORMAL",
         classe: "normal",
-        descricao: "As condições atuais estão predominantemente dentro da normalidade."
+        descricao: "Condições atuais predominantemente dentro da normalidade."
       };
     }
 
-    function calcularIndiceRisco(
-      temperatura,
-      umidade,
-      poluente,
-      velocidadeVentoKmh,
-      configPoluente,
-      anomalias
-    ) {
+    function calcularIndiceRisco(temperatura, umidade, poluente, velocidade, configPoluente) {
       let pontuacao = 0;
       const fatores = [];
 
@@ -1473,9 +1354,6 @@
         } else if (temperatura >= 30) {
           pontuacao += 15;
           fatores.push("temperatura elevada");
-        } else if (temperatura <= 10) {
-          pontuacao += 10;
-          fatores.push("temperatura baixa");
         }
       }
 
@@ -1490,35 +1368,23 @@
       }
 
       if (poluente !== null) {
-        const percentualPoluente =
-          (poluente / configPoluente.limiteReferencia) * 100;
+        const percentual = (poluente / configPoluente.limiteReferencia) * 100;
 
-        if (percentualPoluente > 100) {
+        if (percentual > 100) {
           pontuacao += 35;
           fatores.push("CO acima do limite");
-        } else if (percentualPoluente > 80) {
+        } else if (percentual > 80) {
           pontuacao += 20;
           fatores.push("CO próximo ao limite");
-        } else if (percentualPoluente > 50) {
+        } else if (percentual > 50) {
           pontuacao += 10;
           fatores.push("CO em elevação");
         }
       }
 
-      /* Velocidade recebida diretamente em km/h */
-      if (velocidadeVentoKmh !== null && velocidadeVentoKmh >= 54) {
+      if (velocidade !== null && velocidade >= 54) {
         pontuacao += 10;
         fatores.push("vento intenso");
-      }
-
-      const totalAnomalias = anomalias.filter(item => item.anomalia).length;
-
-      if (totalAnomalias >= 3) {
-        pontuacao += 20;
-        fatores.push("múltiplas anomalias históricas");
-      } else if (totalAnomalias >= 1) {
-        pontuacao += 10;
-        fatores.push("anomalia detectada");
       }
 
       return {
@@ -1527,447 +1393,168 @@
       };
     }
 
-    function criarItemLista(tag, texto) {
+    function criarItemLista(tag, classe, texto) {
       return `
         <li>
-          <span class="tag ${tag.classe}">${tag.texto}</span>
+          <span class="tag ${classe}">${tag}</span>
           ${texto}
         </li>
       `;
     }
 
-    function obterTagAnomalia(resultado) {
-      if (!resultado.disponivel) {
-        return {
-          texto: "SEM DADOS",
-          classe: "info"
-        };
-      }
-
-      if (resultado.anomalia) {
-        return {
-          texto: "ANOMALIA",
-          classe: "alerta"
-        };
-      }
-
-      return {
-        texto: "NORMAL",
-        classe: "ok"
-      };
-    }
-
-    function atualizarAnaliseIA(registros, dadosAtuais) {
+    function atualizarAnalise(registros, atuais, mediaMovelPoluente) {
       const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
 
       const temperaturas = registros
-        .map(registro => converterNumero(registro[CONFIG.campoTemperatura]))
-        .filter(valor => valor !== null);
+        .map(r => converterNumero(r[CONFIG.campoTemperatura]))
+        .filter(v => v !== null);
 
       const umidades = registros
-        .map(registro => converterNumero(registro[CONFIG.campoUmidade]))
-        .filter(valor => valor !== null);
-
-      /*
-        A velocidade do vento é medida diretamente em km/h.
-        Não há conversão para m/s.
-      */
-      const velocidadesKmh = registros
-        .map(registro => converterNumero(registro[CONFIG.campoVelocidadeVento]))
-        .filter(valor => valor !== null);
-
-      const velocidadesKmhComNulos = registros
-        .map(registro => converterNumero(registro[CONFIG.campoVelocidadeVento]));
+        .map(r => converterNumero(r[CONFIG.campoUmidade]))
+        .filter(v => v !== null);
 
       const poluentes = registros
-        .map(registro => converterNumero(registro[CONFIG.campoPoluente]))
-        .filter(valor => valor !== null);
+        .map(r => converterNumero(r[CONFIG.campoPoluente]))
+        .filter(v => v !== null);
 
-      const direcoes = registros
-        .map(registro => converterNumero(registro[CONFIG.campoDirecaoVento]))
-        .filter(valor => valor !== null);
+      const velocidades = registros
+        .map(r => converterNumero(r[CONFIG.campoVelocidadeVento]))
+        .filter(v => v !== null);
 
-      const poluentesComNulos = registros
-        .map(registro => converterNumero(registro[CONFIG.campoPoluente]));
+      const anomaliaTemp = detectarAnomalia(atuais.temperatura, temperaturas.slice(0, -1));
+      const anomaliaUmidade = detectarAnomalia(atuais.umidade, umidades.slice(0, -1));
+      const anomaliaCO = detectarAnomalia(atuais.poluente, poluentes.slice(0, -1));
 
-      const anomaliaTemperatura = detectarAnomalia(
-        dadosAtuais.temperatura,
-        temperaturas.slice(0, -1)
-      );
-
-      const anomaliaUmidade = detectarAnomalia(
-        dadosAtuais.umidade,
-        umidades.slice(0, -1)
-      );
-
-      const anomaliaPoluente = detectarAnomalia(
-        dadosAtuais.poluente,
-        poluentes.slice(0, -1)
-      );
-
-      const anomaliaVelocidade = detectarAnomalia(
-        dadosAtuais.velocidade,
-        velocidadesKmh.slice(0, -1)
-      );
-
-      const anomaliaDirecao = detectarAnomaliaDirecao(
-        dadosAtuais.direcao,
-        direcoes.slice(0, -1)
-      );
-
-      const anomalias = [
-        anomaliaTemperatura,
-        anomaliaUmidade,
-        anomaliaPoluente,
-        anomaliaVelocidade,
-        anomaliaDirecao
-      ];
-
-      const listaAnomalias = document.getElementById("listaAnomalias");
-
-      const zTemp = anomaliaTemperatura.zScore !== null
-        ? ` | desvio: ${anomaliaTemperatura.zScore.toFixed(2)}σ`
-        : "";
-
-      const zUmidade = anomaliaUmidade.zScore !== null
-        ? ` | desvio: ${anomaliaUmidade.zScore.toFixed(2)}σ`
-        : "";
-
-      const zPoluente = anomaliaPoluente.zScore !== null
-        ? ` | desvio: ${anomaliaPoluente.zScore.toFixed(2)}σ`
-        : "";
-
-      const zVento = anomaliaVelocidade.zScore !== null
-        ? ` | desvio: ${anomaliaVelocidade.zScore.toFixed(2)}σ`
-        : "";
-
-      listaAnomalias.innerHTML = [
+      document.getElementById("listaAnomalias").innerHTML = [
         criarItemLista(
-          obterTagAnomalia(anomaliaTemperatura),
-          `Temperatura: ${anomaliaTemperatura.classificacao}${zTemp}`
+          anomaliaTemp.anomalia ? "ANOMALIA" : "NORMAL",
+          anomaliaTemp.anomalia ? "alerta" : "ok",
+          `Temperatura: ${anomaliaTemp.classificacao}.`
         ),
         criarItemLista(
-          obterTagAnomalia(anomaliaUmidade),
-          `Umidade: ${anomaliaUmidade.classificacao}${zUmidade}`
+          anomaliaUmidade.anomalia ? "ANOMALIA" : "NORMAL",
+          anomaliaUmidade.anomalia ? "alerta" : "ok",
+          `Umidade: ${anomaliaUmidade.classificacao}.`
         ),
         criarItemLista(
-          obterTagAnomalia(anomaliaPoluente),
-          `CO: ${anomaliaPoluente.classificacao}${zPoluente}`
-        ),
-        criarItemLista(
-          obterTagAnomalia(anomaliaVelocidade),
-          `Velocidade do vento: ${anomaliaVelocidade.classificacao}${zVento}`
-        ),
-        criarItemLista(
-          {
-            texto: anomaliaDirecao.anomalia ? "ANOMALIA" : "NORMAL",
-            classe: anomaliaDirecao.anomalia ? "alerta" : "ok"
-          },
-          anomaliaDirecao.disponivel
-            ? `Direção do vento: ${
-                anomaliaDirecao.anomalia
-                  ? `diferença de ${anomaliaDirecao.diferenca.toFixed(0)}° em relação ao padrão histórico`
-                  : "dentro do padrão histórico"
-              }`
-            : "Direção do vento: dados insuficientes"
+          anomaliaCO.anomalia ? "ANOMALIA" : "NORMAL",
+          anomaliaCO.anomalia ? "alerta" : "ok",
+          `CO: ${anomaliaCO.classificacao}.`
         )
       ].join("");
 
       const correlacao = calcularCorrelacaoPearson(
-        velocidadesKmhComNulos,
-        poluentesComNulos
+        registros.map(r => converterNumero(r[CONFIG.campoVelocidadeVento])),
+        registros.map(r => converterNumero(r[CONFIG.campoPoluente]))
       );
 
-      const listaCorrelacao = document.getElementById("listaCorrelacao");
-      const velocidadeMediaKmh = calcularMedia(velocidadesKmh);
+      const velocidadeMedia = calcularMedia(velocidades);
 
-      listaCorrelacao.innerHTML = [
+      document.getElementById("listaCorrelacao").innerHTML = [
         criarItemLista(
-          {
-            texto: correlacao.correlacao === null ? "SEM DADOS" : "ANÁLISE",
-            classe: correlacao.correlacao === null ? "info" : "ok"
-          },
-          correlacao.correlacao !== null
-            ? `Velocidade do vento (km/h) × CO (ppm): ${interpretarCorrelacao(correlacao.correlacao)}`
-            : "São necessários pelo menos 10 pares válidos de velocidade e CO."
+          correlacao === null ? "SEM DADOS" : "ANÁLISE",
+          correlacao === null ? "info" : "ok",
+          correlacao === null
+            ? "São necessários pelo menos 10 pares válidos de velocidade e CO."
+            : `Velocidade do vento × CO: ${interpretarCorrelacao(correlacao)}`
         ),
         criarItemLista(
-          {
-            texto: "MÉDIA",
-            classe: "info"
-          },
-          velocidadeMediaKmh !== null
-            ? `Velocidade média registrada: ${velocidadeMediaKmh.toFixed(1)} km/h.`
-            : "Sem dados suficientes de velocidade do vento."
-        ),
-        criarItemLista(
-          {
-            texto: "AMOSTRA",
-            classe: "info"
-          },
-          `${correlacao.quantidade} pares válidos utilizados no cálculo estatístico.`
+          "MÉDIA",
+          "info",
+          velocidadeMedia !== null
+            ? `Velocidade média registrada: ${velocidadeMedia.toFixed(1)} km/h.`
+            : "Sem dados suficientes de velocidade."
         )
       ].join("");
 
-      const sazonalidadeTemperatura = analisarSazonalidade(
-        registros,
-        CONFIG.campoTemperatura
-      );
+      const previsaoTemp = preverVariavel(registros, CONFIG.campoTemperatura, [1, 3, 6]);
+      const previsaoUmidade = preverVariavel(registros, CONFIG.campoUmidade, [1, 3, 6]);
+      const previsaoVento = preverVariavel(registros, CONFIG.campoVelocidadeVento, [1, 3, 6]);
+      const previsaoCO = preverVariavel(registros, CONFIG.campoPoluente, [1, 3, 6]);
 
-      const sazonalidadeUmidade = analisarSazonalidade(
-        registros,
-        CONFIG.campoUmidade
-      );
-
-      const sazonalidadePoluente = analisarSazonalidade(
-        registros,
-        CONFIG.campoPoluente
-      );
-
-      const listaTendencias = document.getElementById("listaTendencias");
-      const tendencias = [];
-
-      if (sazonalidadeTemperatura) {
-        tendencias.push(
-          criarItemLista(
-            {
-              texto: "CALOR",
-              classe: "alerta"
-            },
-            `Maior temperatura média por volta de ${String(sazonalidadeTemperatura.maior.hora).padStart(2, "0")}:00: ` +
-            `${sazonalidadeTemperatura.maior.media.toFixed(1)} °C.`
-          )
-        );
-      }
-
-      if (sazonalidadeUmidade) {
-        tendencias.push(
-          criarItemLista(
-            {
-              texto: "UMIDADE",
-              classe: "atencao"
-            },
-            `Menor umidade média por volta de ${String(sazonalidadeUmidade.menor.hora).padStart(2, "0")}:00: ` +
-            `${sazonalidadeUmidade.menor.media.toFixed(1)}%.`
-          )
-        );
-      }
-
-      if (sazonalidadePoluente) {
-        tendencias.push(
-          criarItemLista(
-            {
-              texto: "POLUIÇÃO",
-              classe: "alerta"
-            },
-            `Maior concentração média de CO por volta de ` +
-            `${String(sazonalidadePoluente.maior.hora).padStart(2, "0")}:00: ` +
-            `${sazonalidadePoluente.maior.media.toFixed(1)} ppm.`
-          )
-        );
-      }
-
-      if (!tendencias.length) {
-        tendencias.push(
-          criarItemLista(
-            {
-              texto: "SEM DADOS",
-              classe: "info"
-            },
-            "Não há registros suficientes para identificar sazonalidade por horário."
-          )
-        );
-      }
-
-      listaTendencias.innerHTML = tendencias.join("");
-
-      const previsaoTemperatura = preverVariavel(
-        registros,
-        CONFIG.campoTemperatura,
-        [1, 3, 6]
-      );
-
-      const previsaoUmidade = preverVariavel(
-        registros,
-        CONFIG.campoUmidade,
-        [1, 3, 6]
-      );
-
-      const previsaoVelocidade = preverVariavel(
-        registros,
-        CONFIG.campoVelocidadeVento,
-        [1, 3, 6]
-      );
-
-      const previsaoPoluente = preverVariavel(
-        registros,
-        CONFIG.campoPoluente,
-        [1, 3, 6]
-      );
-
-      const previsaoDirecao = preverDirecaoVento(
-        registros,
-        CONFIG.campoDirecaoVento,
-        [1, 3, 6]
-      );
-
-      const gridPrevisoes = document.getElementById("gridPrevisoes");
-      const horasPrevisao = [1, 3, 6];
-
-      gridPrevisoes.innerHTML = horasPrevisao.map(hora => {
-        const temperaturaPrevista = previsaoTemperatura?.previsoes[hora];
-        const umidadePrevista = previsaoUmidade?.previsoes[hora];
-        const velocidadePrevista = previsaoVelocidade?.previsoes[hora];
-        const poluentePrevisto = previsaoPoluente?.previsoes[hora];
-        const direcaoPrevista = previsaoDirecao?.previsoes[hora];
+      document.getElementById("gridPrevisoes").innerHTML = [1, 3, 6].map(hora => {
+        const temp = previsaoTemp?.[hora];
+        const umidade = previsaoUmidade?.[hora];
+        const vento = previsaoVento?.[hora];
+        const co = previsaoCO?.[hora];
 
         return `
           <div class="previsao-item">
             <div class="previsao-hora">Daqui a ${hora} hora${hora > 1 ? "s" : ""}</div>
             <div class="previsao-valor">
-              ${
-                temperaturaPrevista !== undefined
-                  ? `${temperaturaPrevista.toFixed(1)} °C`
-                  : "-- °C"
-              }
+              ${temp !== undefined ? `${temp.toFixed(1)} °C` : "-- °C"}
             </div>
             <div class="previsao-detalhe">
-              Umidade:
-              ${
-                umidadePrevista !== undefined
-                  ? `${limitar(umidadePrevista, 0, 100).toFixed(1)}%`
-                  : "--"
-              }
-              <br />
-              Vento:
-              ${
-                velocidadePrevista !== undefined
-                  ? `${Math.max(0, velocidadePrevista).toFixed(1)} km/h`
-                  : "--"
-              }
-              ${
-                direcaoPrevista !== undefined
-                  ? ` (${obterDirecaoCardinal(direcaoPrevista)})`
-                  : ""
-              }
-              <br />
-              CO:
-              ${
-                poluentePrevisto !== undefined
-                  ? `${Math.max(0, poluentePrevisto).toFixed(1)} ppm`
-                  : "--"
-              }
+              Umidade: ${umidade !== undefined ? `${limitar(umidade, 0, 100).toFixed(1)}%` : "--"}<br>
+              Vento: ${vento !== undefined ? `${Math.max(0, vento).toFixed(1)} km/h` : "--"}<br>
+              CO: ${co !== undefined ? `${Math.max(0, co).toFixed(2)} ppm` : "--"}
             </div>
           </div>
         `;
       }).join("");
 
-      const indiceRisco = calcularIndiceRisco(
-        dadosAtuais.temperatura,
-        dadosAtuais.umidade,
-        dadosAtuais.poluente,
-        dadosAtuais.velocidade,
-        configPoluente,
-        anomalias
-      );
-
-      const classificacaoRisco = obterClasseRisco(indiceRisco.pontuacao);
-
-      const cardRisco = document.getElementById("cardRisco");
-      const nivelRisco = document.getElementById("nivelRisco");
-
-      cardRisco.className = `card risk-card ${classificacaoRisco.classe}`;
-      nivelRisco.className = `risk-level ${classificacaoRisco.classe}`;
-      nivelRisco.textContent = classificacaoRisco.nivel;
-
-      document.getElementById("descricaoRisco").textContent =
-        classificacaoRisco.descricao;
-
-      document.getElementById("pontuacaoRisco").textContent =
-        `Pontuação: ${indiceRisco.pontuacao}/100` +
-        (
-          indiceRisco.fatores.length
-            ? ` | Fatores: ${indiceRisco.fatores.join(", ")}.`
-            : ""
-        );
-
-      const qualidadeAr = avaliarQualidadeAr(
-        dadosAtuais.mediaMovelPoluente,
+      const risco = calcularIndiceRisco(
+        atuais.temperatura,
+        atuais.umidade,
+        atuais.poluente,
+        atuais.velocidade,
         configPoluente
       );
 
-      const tendenciaTemperatura = previsaoTemperatura
-        ? previsaoTemperatura.inclinacaoPorHora
-        : null;
+      const classificacao = obterClasseRisco(risco.pontuacao);
+      const cardRisco = document.getElementById("cardRisco");
+      const nivelRisco = document.getElementById("nivelRisco");
 
-      const tendenciaTexto = tendenciaTemperatura === null
-        ? "Não foi possível estimar a tendência térmica."
-        : tendenciaTemperatura > 0.15
-          ? "A tendência de curto prazo indica elevação da temperatura."
-          : tendenciaTemperatura < -0.15
-            ? "A tendência de curto prazo indica redução da temperatura."
-            : "A temperatura tende a permanecer relativamente estável no curto prazo.";
+      cardRisco.className = `card risk-card ${classificacao.classe}`;
+      nivelRisco.className = `risk-level ${classificacao.classe}`;
+      nivelRisco.textContent = classificacao.nivel;
 
-      const anomaliasAtivas = anomalias.filter(item => item.anomalia).length;
-      const resumo = [];
+      document.getElementById("descricaoRisco").textContent = classificacao.descricao;
+      document.getElementById("pontuacaoRisco").textContent =
+        `Pontuação: ${risco.pontuacao}/100` +
+        (risco.fatores.length ? ` | Fatores: ${risco.fatores.join(", ")}.` : "");
 
-      resumo.push(
+      document.getElementById("listaTendencias").innerHTML = [
+        criarItemLista(
+          "MÉDIA",
+          "info",
+          `Temperatura média do período: ${calcularMedia(temperaturas)?.toFixed(1) ?? "--"} °C.`
+        ),
+        criarItemLista(
+          "MÉDIA",
+          "info",
+          `Umidade média do período: ${calcularMedia(umidades)?.toFixed(1) ?? "--"}%.`
+        ),
+        criarItemLista(
+          "CO",
+          "atencao",
+          `Concentração média de CO: ${calcularMedia(poluentes)?.toFixed(2) ?? "--"} ppm.`
+        )
+      ].join("");
+
+      const qualidade = avaliarQualidadeAr(mediaMovelPoluente, configPoluente);
+
+      document.getElementById("resumoIA").textContent =
         `No momento, a temperatura é de ${
-          dadosAtuais.temperatura !== null
-            ? `${dadosAtuais.temperatura.toFixed(1)} °C`
-            : "sem leitura"
-        } e a umidade relativa é de ${
-          dadosAtuais.umidade !== null
-            ? `${dadosAtuais.umidade.toFixed(1)}%`
-            : "sem leitura"
-        }.`
-      );
-
-      resumo.push(
-        `A qualidade do ar para CO está classificada como ${qualidadeAr.nivel.toLowerCase()}.`
-      );
-
-      resumo.push(tendenciaTexto);
-
-      if (anomaliasAtivas > 0) {
-        resumo.push(
-          `Foram identificadas ${anomaliasAtivas} anomalia${anomaliasAtivas > 1 ? "s" : ""} em relação ao padrão histórico recente.`
-        );
-      } else {
-        resumo.push(
-          "As variáveis monitoradas permanecem dentro do padrão estatístico histórico."
-        );
-      }
-
-      if (correlacao.correlacao !== null) {
-        resumo.push(
-          `A relação entre velocidade do vento em km/h e concentração de CO em ppm apresenta correlação de ${correlacao.correlacao.toFixed(2)}.`
-        );
-      }
-
-      resumo.push(
-        `O índice consolidado de risco climático está em nível ${classificacaoRisco.nivel.toLowerCase()}.`
-      );
-
-      document.getElementById("resumoIA").textContent = resumo.join(" ");
+          atuais.temperatura !== null ? `${atuais.temperatura.toFixed(1)} °C` : "sem leitura"
+        }, com umidade relativa de ${
+          atuais.umidade !== null ? `${atuais.umidade.toFixed(1)}%` : "sem leitura"
+        }. A velocidade do vento é de ${
+          atuais.velocidade !== null ? `${atuais.velocidade.toFixed(1)} km/h` : "sem leitura"
+        }, vindo de ${
+          atuais.direcao !== null ? obterDirecaoCardinal(atuais.direcao) : "direção não identificada"
+        }. A qualidade do ar para CO está classificada como ${
+          qualidade.nivel.toLowerCase()
+        }. O índice de risco climático é ${classificacao.nivel.toLowerCase()}.`;
     }
 
     function atualizarInterface(registros) {
       const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
 
-      const labels = registros.map(registro => formatarData(registro.created_at));
-
-      const temperaturas = registros.map(registro =>
-        converterNumero(registro[CONFIG.campoTemperatura])
-      );
-
-      const umidades = registros.map(registro =>
-        converterNumero(registro[CONFIG.campoUmidade])
-      );
-
-      const poluentes = registros.map(registro =>
-        converterNumero(registro[CONFIG.campoPoluente])
-      );
+      const labels = registros.map(r => formatarData(r.created_at));
+      const temperaturas = registros.map(r => converterNumero(r[CONFIG.campoTemperatura]));
+      const umidades = registros.map(r => converterNumero(r[CONFIG.campoUmidade]));
+      const poluentes = registros.map(r => converterNumero(r[CONFIG.campoPoluente]));
 
       const mediasMoveis = calcularMediaMovelTemporal(
         registros,
@@ -1975,19 +1562,14 @@
         configPoluente.janelaHoras
       );
 
-      const temperaturaAtual = obterUltimoValorValido(
-        registros,
-        CONFIG.campoTemperatura
-      );
+      const temperaturaAtual = obterUltimoValorValido(registros, CONFIG.campoTemperatura);
+      const umidadeAtual = obterUltimoValorValido(registros, CONFIG.campoUmidade);
 
-      const umidadeAtual = obterUltimoValorValido(
-        registros,
-        CONFIG.campoUmidade
-      );
-
+      // DIREÇÃO ALTERADA PARA field6
       const direcaoAtual = obterUltimoValorValido(
         registros,
-        CONFIG.campoDirecaoVento
+        CONFIG.campoDirecaoVento,
+        true
       );
 
       const velocidadeAtual = obterUltimoValorValido(
@@ -2009,7 +1591,7 @@
         umidadeAtual.valor
       );
 
-      const qualidadeAr = avaliarQualidadeAr(
+      const qualidade = avaliarQualidadeAr(
         ultimaMediaMovel,
         configPoluente
       );
@@ -2019,11 +1601,9 @@
           ? `${temperaturaAtual.valor.toFixed(1)} °C`
           : "-- °C";
 
-      const mediaTemperatura = calcularMedia(temperaturas);
-
       document.getElementById("tempMedia").textContent =
-        mediaTemperatura !== null
-          ? `Média do período: ${mediaTemperatura.toFixed(1)} °C`
+        calcularMedia(temperaturas) !== null
+          ? `Média do período: ${calcularMedia(temperaturas).toFixed(1)} °C`
           : "Média: -- °C";
 
       document.getElementById("umidadeAtual").textContent =
@@ -2031,24 +1611,19 @@
           ? `${umidadeAtual.valor.toFixed(1)} %`
           : "-- %";
 
-      const mediaUmidade = calcularMedia(umidades);
-
       document.getElementById("umidadeMedia").textContent =
-        mediaUmidade !== null
-          ? `Média do período: ${mediaUmidade.toFixed(1)} %`
+        calcularMedia(umidades) !== null
+          ? `Média do período: ${calcularMedia(umidades).toFixed(1)} %`
           : "Média: -- %";
 
       document.getElementById("confortoTermico").textContent = conforto.nivel;
       document.getElementById("confortoDescricao").textContent = conforto.descricao;
 
-      document.getElementById("qualidadeAr").textContent = qualidadeAr.nivel;
-      document.getElementById("qualidadeArDescricao").textContent =
-        qualidadeAr.descricao;
-
-      const dataMaisRecente = registros[registros.length - 1].created_at;
+      document.getElementById("qualidadeAr").textContent = qualidade.nivel;
+      document.getElementById("qualidadeArDescricao").textContent = qualidade.descricao;
 
       document.getElementById("ultimaAtualizacao").textContent =
-        formatarData(dataMaisRecente);
+        formatarData(registros[registros.length - 1].created_at);
 
       document.getElementById("velocidadeVento").textContent =
         velocidadeAtual.valor !== null
@@ -2065,16 +1640,16 @@
         mediasMoveis
       );
 
-      atualizarAnaliseIA(
+      atualizarAnalise(
         registros,
         {
           temperatura: temperaturaAtual.valor,
           umidade: umidadeAtual.valor,
           direcao: direcaoAtual.valor,
           velocidade: velocidadeAtual.valor,
-          poluente: poluenteAtual.valor,
-          mediaMovelPoluente: ultimaMediaMovel
-        }
+          poluente: poluenteAtual.valor
+        },
+        ultimaMediaMovel
       );
     }
 
@@ -2083,31 +1658,28 @@
         return;
       }
 
-      if (!POLUENTES_CONAMA[CONFIG.poluenteField7]) {
-        atualizarStatus("Poluente configurado inválido.", "erro");
-        return;
-      }
-
       requisicaoEmAndamento = true;
 
       const controller = new AbortController();
-
       const timeout = setTimeout(
         () => controller.abort(),
         CONFIG.timeoutRequisicao
       );
 
       try {
+        if (typeof Chart === "undefined") {
+          throw new Error("Chart.js não foi carregado. Verifique sua conexão com a internet.");
+        }
+
         atualizarStatus("Atualizando dados...");
 
         const parametros = new URLSearchParams({
           api_key: CONFIG.readApiKey,
-          results: CONFIG.totalRegistros
+          results: String(CONFIG.totalRegistros)
         });
 
         const url =
-          `https://api.thingspeak.com/channels/${CONFIG.channelId}/feeds.json?` +
-          parametros.toString();
+          `https://api.thingspeak.com/channels/${CONFIG.channelId}/feeds.json?${parametros}`;
 
         const resposta = await fetch(url, {
           signal: controller.signal,
@@ -2126,10 +1698,8 @@
 
         const registros = dados.feeds
           .filter(registro => registro.created_at)
-          .sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime()
+          .sort((a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           );
 
         if (!registros.length) {
@@ -2138,19 +1708,19 @@
 
         atualizarInterface(registros);
 
-        atualizarStatus("Dados e análise inteligente atualizados", "ok");
+        atualizarStatus(
+          `Dados atualizados: ${registros.length} registros processados`,
+          "ok"
+        );
       } catch (erro) {
+        console.error("Erro ThingSpeak:", erro);
+
         const mensagem =
           erro.name === "AbortError"
             ? "Tempo limite excedido ao consultar o ThingSpeak."
             : erro.message;
 
-        console.error("Erro ao carregar dados:", erro);
-
-        atualizarStatus(
-          `Erro ao carregar dados: ${mensagem}`,
-          "erro"
-        );
+        atualizarStatus(`Erro ao carregar dados: ${mensagem}`, "erro");
       } finally {
         clearTimeout(timeout);
         requisicaoEmAndamento = false;
