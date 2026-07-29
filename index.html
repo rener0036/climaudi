@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Climático Inteligente — ThingSpeak</title>
+  <title>ClimaUdia - Soluções em sistemas climatológicos</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
   <style>
     :root {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --primary: #0f766e;
-      --secondary: #0284c7;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --danger: #dc2626;
-      --warning: #d97706;
-      --success: #15803d;
-      --info: #1d4ed8;
-      --purple: #7c3aed;
+      --bg: #f4f8fc;
+      --panel: #ffffff;
+      --panel-2: #edf5fb;
+      --line: #c9d9e6;
+      --text: #1e2e3d;
+      --muted: #62788b;
+      --primary: #078bb8;
+      --success: #21a45d;
+      --warning: #d99210;
+      --danger: #d74a4a;
+      --shadow: 0 8px 24px rgba(37, 70, 98, 0.12);
     }
 
     * {
@@ -29,1710 +28,1538 @@
 
     body {
       margin: 0;
-      padding: 24px;
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top right, rgba(7, 139, 184, 0.1), transparent 30%),
+        var(--bg);
       color: var(--text);
     }
 
-    .container {
-      max-width: 1450px;
-      margin: 0 auto;
+    header {
+      padding: 22px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
     }
 
-    header {
+    .header-content {
+      max-width: 1500px;
+      margin: 0 auto;
       display: flex;
-      flex-wrap: wrap;
+      gap: 18px;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
+      flex-wrap: wrap;
     }
 
     h1 {
+      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
       margin: 0;
-      font-size: 1.7rem;
+      color: #17334a;
     }
 
     .subtitle {
-      margin: 6px 0 0;
+      margin: 5px 0 0;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
-    .status {
-      padding: 10px 14px;
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      color: #fff;
+      background: var(--primary);
       border-radius: 8px;
-      font-size: 0.88rem;
+      padding: 10px 14px;
+      cursor: pointer;
       font-weight: bold;
-      background: #dbeafe;
-      color: #1d4ed8;
+      transition: 0.2s ease;
     }
 
-    .status.erro {
-      background: #fee2e2;
-      color: var(--danger);
+    button:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
     }
 
-    .status.ok {
-      background: #dcfce7;
-      color: var(--success);
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
     }
 
-    .kpis {
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--success);
+      display: inline-block;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(33, 164, 93, 0.65);
+    }
+
+    main {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .tab-button {
+      background: var(--panel);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .tab-button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .timestamp-panel {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel);
+      color: #29445b;
+      font-size: 0.92rem;
+      box-shadow: 0 3px 10px rgba(37, 70, 98, 0.05);
+    }
+
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card,
+    .chart-card,
+    .table-card,
+    .analysis-card,
+    .compass-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
       padding: 18px;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+      box-shadow: var(--shadow);
     }
 
-    .kpi-label {
+    .metric-label {
       color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: bold;
-      text-transform: uppercase;
+      font-size: 0.85rem;
+      margin-bottom: 9px;
     }
 
-    .kpi-value {
-      margin-top: 8px;
+    .metric-value {
       font-size: 1.8rem;
-      font-weight: bold;
+      font-weight: 700;
+      color: #17334a;
+    }
+
+    .metric-unit {
+      font-size: 0.9rem;
       color: var(--primary);
+      margin-left: 4px;
     }
 
-    .kpi-detail {
-      margin-top: 6px;
+    .metric-detail {
+      font-size: 0.78rem;
+      margin-top: 10px;
       color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.4;
     }
 
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-      gap: 20px;
-      margin-bottom: 20px;
+    .chart-card h2,
+    .table-card h2,
+    .analysis-card h2,
+    .compass-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      color: #17334a;
     }
 
-    .charts-grid {
-      display: grid;
-      gap: 20px;
-    }
-
-    .card h2 {
-      margin: 0 0 16px;
-      font-size: 1.1rem;
-    }
-
-    .chart-wrapper {
+    /* Altura fixa: impede o crescimento contínuo dos gráficos. */
+    .chart-box {
       position: relative;
-      height: 310px;
       width: 100%;
+      height: 350px;
+      overflow: hidden;
     }
 
-    /* BÚSSOLA */
+    .chart-box canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+    }
+
     .compass-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100%;
-    }
-
-    .compass-container {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      margin: 8px auto;
     }
 
     .compass {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      border: 10px solid #94a3b8;
+      width: 280px;
+      height: 280px;
+      max-width: 90vw;
+      max-height: 90vw;
+      border: 5px solid #7693aa;
       border-radius: 50%;
+      position: relative;
       background:
-        radial-gradient(circle at center, #ffffff 0 59%, transparent 60%),
-        conic-gradient(
-          #e2e8f0 0deg 45deg,
-          #ffffff 45deg 90deg,
-          #e2e8f0 90deg 135deg,
-          #ffffff 135deg 180deg,
-          #e2e8f0 180deg 225deg,
-          #ffffff 225deg 270deg,
-          #e2e8f0 270deg 315deg,
-          #ffffff 315deg 360deg
-        );
-      box-shadow:
-        inset 0 0 20px rgba(15, 23, 42, 0.12),
-        0 8px 20px rgba(15, 23, 42, 0.1);
+        radial-gradient(circle, rgba(7, 139, 184, 0.13) 0 8%, transparent 8%),
+        repeating-conic-gradient(
+          from -1deg,
+          #6d91ad 0deg 1deg,
+          transparent 1deg 10deg
+        ),
+        #f7fbff;
+      box-shadow: inset 0 0 35px rgba(7, 139, 184, 0.1);
     }
 
-    .direction {
+    .compass::before,
+    .compass::after {
+      content: "";
       position: absolute;
+      background: rgba(40, 83, 115, 0.3);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .compass::before {
+      width: 2px;
+      height: 90%;
+    }
+
+    .compass::after {
+      width: 90%;
+      height: 2px;
+    }
+
+    .direction-arrow {
+      position: absolute;
+      left: calc(50% - 4px);
+      top: 25px;
+      width: 8px;
+      height: 118px;
+      transform-origin: 4px 115px;
+      background: linear-gradient(to top, var(--danger) 0 75%, transparent 75%);
       z-index: 4;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #334155;
+      transition: transform 0.5s ease;
     }
 
-    .north {
-      top: 13px;
-      left: 50%;
-      color: #dc2626;
-      font-size: 1.3rem;
-      transform: translateX(-50%);
-    }
-
-    .south {
-      bottom: 13px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .east {
-      top: 50%;
-      right: 17px;
-      transform: translateY(-50%);
-    }
-
-    .west {
-      top: 50%;
-      left: 17px;
-      transform: translateY(-50%);
-    }
-
-    .northeast {
-      top: 43px;
-      right: 42px;
-      font-size: 0.8rem;
-    }
-
-    .southeast {
-      right: 42px;
-      bottom: 43px;
-      font-size: 0.8rem;
-    }
-
-    .southwest {
-      bottom: 43px;
-      left: 42px;
-      font-size: 0.8rem;
-    }
-
-    .northwest {
-      top: 43px;
-      left: 42px;
-      font-size: 0.8rem;
-    }
-
-    .needle-wrapper {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      transition: transform 0.8s ease;
-    }
-
-    .needle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 16px;
-      height: 125px;
-      transform: translate(-50%, -100%);
-      transform-origin: 50% 100%;
-    }
-
-    .needle::before {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 0;
-      height: 0;
+    .direction-arrow::before {
       content: "";
-      transform: translateX(-50%);
-      border-right: 8px solid transparent;
-      border-bottom: 102px solid #dc2626;
-      border-left: 8px solid transparent;
-      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
-    }
-
-    .needle::after {
       position: absolute;
-      bottom: -35px;
-      left: 50%;
-      width: 12px;
-      height: 46px;
-      content: "";
-      transform: translateX(-50%);
-      border-radius: 0 0 10px 10px;
-      background: #334155;
+      top: -13px;
+      left: -10px;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 25px solid var(--danger);
     }
 
     .compass-center {
       position: absolute;
-      z-index: 5;
       top: 50%;
       left: 50%;
-      width: 28px;
-      height: 28px;
-      transform: translate(-50%, -50%);
-      border: 5px solid #ffffff;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border: 5px solid var(--primary);
       border-radius: 50%;
-      background: #334155;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+      transform: translate(-50%, -50%);
+      z-index: 5;
     }
 
-    .wind-info {
-      margin-top: 18px;
-      text-align: center;
-    }
-
-    .wind-value {
-      font-size: 1.8rem;
+    .cardinal {
+      position: absolute;
       font-weight: bold;
-      color: var(--secondary);
+      color: #244a67;
+      z-index: 6;
+      font-size: 0.87rem;
     }
 
-    .wind-label {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .wind-speed {
-      width: 100%;
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-
-    .wind-speed-label {
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .wind-speed-value {
-      margin-top: 5px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--primary);
-    }
-
-    /* ANÁLISE */
-    .ia-section {
-      display: grid;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .ia-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .ia-badge {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 20px;
-      background: #ede9fe;
-      color: var(--purple);
-      font-size: 0.82rem;
-      font-weight: bold;
-    }
-
-    .resumo-ia {
-      border: 1px solid #a7f3d0;
-      background: linear-gradient(135deg, #ecfeff, #f0fdf4);
-    }
-
-    .resumo-texto {
-      margin: 0;
-      color: #134e4a;
-      font-size: 0.98rem;
-      line-height: 1.65;
-    }
-
-    .analise-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    .risk-card {
-      border-left: 6px solid var(--info);
-    }
-
-    .risk-card.atencao {
-      border-left-color: var(--warning);
-    }
-
-    .risk-card.alerta {
-      border-left-color: #ea580c;
-    }
-
-    .risk-card.critico {
-      border-left-color: var(--danger);
-    }
-
-    .risk-level {
-      margin-top: 4px;
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--info);
-    }
-
-    .risk-level.atencao {
-      color: var(--warning);
-    }
-
-    .risk-level.alerta {
-      color: #ea580c;
-    }
-
-    .risk-level.critico {
+    .n {
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
       color: var(--danger);
     }
 
-    .analise-lista {
-      margin: 0;
-      padding: 0;
-      list-style: none;
+    .s {
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    .analise-lista li {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-      line-height: 1.45;
+    .e {
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
-    .analise-lista li:last-child {
-      border-bottom: none;
+    .w {
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
-    .tag {
-      display: inline-block;
-      margin-right: 6px;
-      padding: 3px 7px;
-      border-radius: 5px;
-      font-size: 0.72rem;
-      font-weight: bold;
+    .ne {
+      top: 38px;
+      right: 36px;
     }
 
-    .tag.ok {
-      color: #166534;
-      background: #dcfce7;
+    .nw {
+      top: 38px;
+      left: 36px;
     }
 
-    .tag.atencao {
-      color: #92400e;
-      background: #fef3c7;
+    .se {
+      bottom: 38px;
+      right: 36px;
     }
 
-    .tag.alerta {
-      color: #9a3412;
-      background: #ffedd5;
+    .sw {
+      bottom: 38px;
+      left: 36px;
     }
 
-    .tag.critico {
-      color: #991b1b;
-      background: #fee2e2;
-    }
-
-    .tag.info {
-      color: #1e40af;
-      background: #dbeafe;
-    }
-
-    .previsao-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-      gap: 12px;
-    }
-
-    .previsao-item {
-      padding: 13px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #f8fafc;
-    }
-
-    .previsao-hora {
+    .compass-readout {
+      margin-top: 15px;
       color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .previsao-valor {
-      margin-top: 7px;
-      color: var(--primary);
-      font-size: 1.15rem;
-      font-weight: bold;
-    }
-
-    .previsao-detalhe {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.5;
-    }
-
-    .footer-info {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.84rem;
       text-align: center;
     }
 
-    @media (max-width: 900px) {
-      body {
-        padding: 16px;
-      }
+    .compass-readout strong {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
 
-      .dashboard-grid {
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 520px;
+    }
+
+    th,
+    td {
+      padding: 11px;
+      text-align: left;
+      border-bottom: 1px solid rgba(67, 107, 135, 0.15);
+    }
+
+    th {
+      color: var(--primary);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: #29445b;
+      font-size: 0.92rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.77rem;
+      font-weight: bold;
+    }
+
+    .good {
+      background: rgba(33, 164, 93, 0.14);
+      color: #168045;
+    }
+
+    .attention {
+      background: rgba(217, 146, 16, 0.15);
+      color: #a86800;
+    }
+
+    .critical {
+      background: rgba(215, 74, 74, 0.14);
+      color: #b12f2f;
+    }
+
+    .analysis-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .analysis-item {
+      padding: 14px;
+      border-left: 4px solid var(--primary);
+      border-radius: 6px;
+      background: #f5faff;
+      color: #29445b;
+      line-height: 1.5;
+    }
+
+    .analysis-item.warning {
+      border-left-color: var(--warning);
+    }
+
+    .analysis-item.danger {
+      border-left-color: var(--danger);
+    }
+
+    .formula {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f7fafc;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .loading {
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .error {
+      color: #a72e2e;
+      background: rgba(215, 74, 74, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(215, 74, 74, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 {
         grid-template-columns: 1fr;
       }
 
-      .compass-card {
-        min-height: 440px;
+      .chart-box {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 540px) {
+      main {
+        padding: 14px;
       }
 
-      .chart-wrapper {
-        height: 280px;
+      header {
+        padding: 16px 14px;
+      }
+
+      .chart-box {
+        height: 260px;
+      }
+
+      .compass {
+        width: 245px;
+        height: 245px;
+      }
+
+      .direction-arrow {
+        top: 22px;
+        height: 102px;
+        transform-origin: 4px 100px;
       }
     }
   </style>
 </head>
 
 <body>
-  <main class="container">
-    <header>
+  <header>
+    <div class="header-content">
       <div>
-        <h1>Dashboard Climático Inteligente</h1>
+        <h1>ClimaUdia - Soluções em sistemas climatológicos</h1>
         <p class="subtitle">
-          Monitoramento via ThingSpeak — Canal <strong id="channelId"></strong>
+          Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental
         </p>
       </div>
 
-      <div id="status" class="status">Carregando dados...</div>
-    </header>
+      <div class="header-actions">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="connectionStatus">Aguardando leitura</span>
+        <button id="refreshButton" type="button">Atualizar agora</button>
+      </div>
+    </div>
+  </header>
 
-    <section class="kpis">
-      <article class="card">
-        <div class="kpi-label">Temperatura atual</div>
-        <div id="tempAtual" class="kpi-value">-- °C</div>
-        <div id="tempMedia" class="kpi-detail">Média: -- °C</div>
-      </article>
+  <main>
+    <div class="tabs">
+      <button class="tab-button active" data-tab="clima">Dados climatológicos</button>
+      <button class="tab-button" data-tab="vento">Termodinâmica eólica</button>
+      <button class="tab-button" data-tab="ambiental">Dados ambientais</button>
+      <button class="tab-button" data-tab="inteligente">Climático Inteligente</button>
+    </div>
 
-      <article class="card">
-        <div class="kpi-label">Umidade atual</div>
-        <div id="umidadeAtual" class="kpi-value">-- %</div>
-        <div id="umidadeMedia" class="kpi-detail">Média: -- %</div>
-      </article>
-
-      <article class="card">
-        <div class="kpi-label">Conforto térmico</div>
-        <div id="confortoTermico" class="kpi-value">--</div>
-        <div id="confortoDescricao" class="kpi-detail">Aguardando leitura...</div>
-      </article>
-
-      <article class="card">
-        <div class="kpi-label">Qualidade do ar</div>
-        <div id="qualidadeAr" class="kpi-value">--</div>
-        <div id="qualidadeArDescricao" class="kpi-detail">Aguardando leitura...</div>
-      </article>
-
-      <article class="card">
-        <div class="kpi-label">Última atualização</div>
-        <div id="ultimaAtualizacao" class="kpi-value" style="font-size: 1.1rem;">--</div>
-        <div class="kpi-detail">Horário do último registro recebido</div>
-      </article>
-    </section>
-
-    <section class="dashboard-grid">
-      <div class="charts-grid">
-        <article class="card">
-          <h2>Temperatura ao longo do tempo</h2>
-          <div class="chart-wrapper">
-            <canvas id="graficoTemperatura"></canvas>
-          </div>
-        </article>
-
-        <article class="card">
-          <h2>Umidade relativa do ar ao longo do tempo</h2>
-          <div class="chart-wrapper">
-            <canvas id="graficoUmidade"></canvas>
-          </div>
-        </article>
-
-        <article class="card">
-          <h2 id="tituloGraficoPoluente">CO — leitura e média móvel</h2>
-          <div class="chart-wrapper">
-            <canvas id="graficoPoluente"></canvas>
-          </div>
-          <p id="descricaoGraficoPoluente" class="footer-info"></p>
-        </article>
+    <section id="clima" class="tab-content active">
+      <div class="timestamp-panel">
+        <span>🕒</span>
+        <strong id="dashboardTimestamp">Carregando data e hora...</strong>
       </div>
 
-      <article class="card compass-card">
-        <h2>Direção do vento</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="metric-label">Temperatura atual</div>
+          <div class="metric-value">
+            <span id="currentTemperature">--</span><span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail" id="temperatureDate">Sem leitura disponível</div>
+        </div>
 
-        <div class="compass-container">
+        <div class="card">
+          <div class="metric-label">Temperatura mínima no período</div>
+          <div class="metric-value">
+            <span id="periodMinTemperature">--</span><span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail">Considerando os últimos 12 meses</div>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">Temperatura máxima no período</div>
+          <div class="metric-value">
+            <span id="periodMaxTemperature">--</span><span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail">Considerando os últimos 12 meses</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Temperatura mínima e máxima — últimos 12 meses</h2>
+        <div class="chart-box">
+          <canvas id="temperatureChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="vento" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="metric-label">Velocidade / rajada atual</div>
+          <div class="metric-value">
+            <span id="windSpeed">--</span><span class="metric-unit">m/s</span>
+          </div>
+          <div class="metric-detail">Leitura do <strong>field4</strong></div>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">Direção atual do vento</div>
+          <div class="metric-value">
+            <span id="windDirectionValue">--</span><span class="metric-unit">°</span>
+          </div>
+          <div class="metric-detail">
+            <span id="windDirectionText">--</span> · Leitura do <strong>field6</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">Maior rajada no período</div>
+          <div class="metric-value">
+            <span id="periodMaxGust">--</span><span class="metric-unit">m/s</span>
+          </div>
+          <div class="metric-detail">Últimos 12 meses</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="compass-card">
+          <h2>Bússola graduada — direção do vento</h2>
+
           <div class="compass">
-            <span class="direction north">N</span>
-            <span class="direction south">S</span>
-            <span class="direction east">L</span>
-            <span class="direction west">O</span>
-            <span class="direction northeast">NE</span>
-            <span class="direction southeast">SE</span>
-            <span class="direction southwest">SO</span>
-            <span class="direction northwest">NO</span>
-
-            <div id="needleWrapper" class="needle-wrapper">
-              <div class="needle"></div>
-            </div>
-
+            <div id="directionArrow" class="direction-arrow"></div>
             <div class="compass-center"></div>
+
+            <span class="cardinal n">N</span>
+            <span class="cardinal ne">NE</span>
+            <span class="cardinal e">L</span>
+            <span class="cardinal se">SE</span>
+            <span class="cardinal s">S</span>
+            <span class="cardinal sw">SO</span>
+            <span class="cardinal w">O</span>
+            <span class="cardinal nw">NO</span>
+          </div>
+
+          <div class="compass-readout">
+            Direção identificada: <strong id="compassDirection">--</strong>
           </div>
         </div>
 
-        <div class="wind-info">
-          <div id="direcaoVento" class="wind-value">--°</div>
-          <div id="direcaoTexto" class="wind-label">Sem dados de direção</div>
+        <div class="chart-card">
+          <h2>Rajadas máximas — últimos 12 meses</h2>
+          <div class="chart-box">
+            <canvas id="gustChart"></canvas>
+          </div>
         </div>
+      </div>
 
-        <div class="wind-speed">
-          <div class="wind-speed-label">Velocidade do vento</div>
-          <div id="velocidadeVento" class="wind-speed-value">-- km/h</div>
+      <div class="table-card">
+        <h2>Rajadas mais fortes por hora do dia</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Rajada máxima</th>
+                <th>Data e hora do registro</th>
+              </tr>
+            </thead>
+            <tbody id="gustTableBody">
+              <tr>
+                <td colspan="3" class="loading">Carregando dados de rajada...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </article>
+      </div>
     </section>
 
-    <section class="ia-section">
-      <article class="card resumo-ia">
-        <div class="ia-header">
-          <h2>Resumo automático dos dados</h2>
-          <span class="ia-badge">● Análise estatística inteligente</span>
+    <section id="ambiental" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="metric-label">Monóxido de carbono — CO</div>
+          <div class="metric-value">
+            <span id="coValue">--</span><span class="metric-unit">ppm</span>
+          </div>
+          <div class="metric-detail">Leitura do <strong>field7</strong></div>
         </div>
 
-        <p id="resumoIA" class="resumo-texto">
-          Aguardando dados suficientes para gerar o resumo automático.
-        </p>
-      </article>
+        <div class="card">
+          <div class="metric-label">Dióxido de carbono — CO₂</div>
+          <div class="metric-value">
+            <span id="co2Value">--</span><span class="metric-unit">ppm</span>
+          </div>
+          <div class="metric-detail">Leitura do <strong>field8</strong></div>
+        </div>
 
-      <section class="analise-grid">
-        <article id="cardRisco" class="card risk-card">
-          <h2>Índice de risco climático</h2>
-          <div id="nivelRisco" class="risk-level">--</div>
-          <div id="descricaoRisco" class="kpi-detail">Aguardando dados.</div>
-          <div id="pontuacaoRisco" class="kpi-detail"></div>
-        </article>
-
-        <article class="card">
-          <h2>Detecção de anomalias</h2>
-          <ul id="listaAnomalias" class="analise-lista">
-            <li>Processando padrão histórico...</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>Correlação vento × poluente</h2>
-          <ul id="listaCorrelacao" class="analise-lista">
-            <li>Aguardando dados suficientes...</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>Tendências</h2>
-          <ul id="listaTendencias" class="analise-lista">
-            <li>Calculando tendências...</li>
-          </ul>
-        </article>
-      </section>
-
-      <article class="card">
-        <h2>Previsão de curto prazo</h2>
-
-        <div id="gridPrevisoes" class="previsao-grid">
-          <div class="previsao-item">
-            <div class="previsao-hora">Previsão</div>
-            <div class="previsao-valor">--</div>
-            <div class="previsao-detalhe">Aguardando histórico.</div>
+        <div class="card">
+          <div class="metric-label">CO — média móvel de 8 horas</div>
+          <div class="metric-value">
+            <span id="coMovingAverage">--</span><span class="metric-unit">ppm</span>
+          </div>
+          <div class="metric-detail">
+            Referência operacional: padrão de 8 horas da Resolução CONAMA nº 506/2024
           </div>
         </div>
 
-        <p class="footer-info">
-          Estimativas baseadas em regressão linear dos registros recentes.
-          Não substitui previsões meteorológicas oficiais.
-        </p>
-      </article>
+        <div class="card">
+          <div class="metric-label">Classificação indicativa do CO</div>
+          <div class="metric-value" id="coStatus">--</div>
+          <div class="metric-detail" id="coStatusDetail">Aguardando leitura</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>CO — série recente e média móvel de 8 horas</h2>
+        <div class="chart-box">
+          <canvas id="coChart"></canvas>
+        </div>
+
+        <div class="formula">
+          Para o acompanhamento do CO, a média móvel é calculada usando as leituras disponíveis dentro da janela de 8 horas:
+          <br /><br />
+          <strong>Média móvel de CO = soma das leituras de CO nas últimas 8 h ÷ quantidade de leituras válidas</strong>
+          <br /><br />
+          O limite de referência apresentado no painel é <strong>9 ppm para 8 horas</strong>.
+        </div>
+      </div>
     </section>
 
-    <p class="footer-info">Atualização automática a cada 30 segundos.</p>
+    <section id="inteligente" class="tab-content">
+      <div class="analysis-card">
+        <h2>Climático Inteligente — análise automática</h2>
+        <div id="smartAnalysis" class="analysis-list">
+          <div class="loading">Processando os dados meteorológicos e ambientais...</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
-    "use strict";
-
     /*
-      CONFIGURAÇÃO DO CANAL
-
+      MAPEAMENTO DEFINITIVO DOS CAMPOS:
       field1 = Temperatura
-      field2 = Umidade
-      field4 = Velocidade do vento
+      field4 = Velocidade do vento / rajadas / dinâmica eólica
       field6 = Direção do vento
-      field7 = Poluente (CO)
+      field7 = CO
+      field8 = CO₂
     */
-    const CONFIG = {
-      channelId: "321770",
-      readApiKey: "0EPAIXIM4UL9LIW9",
 
-      // Reduzido para evitar travamento e página em branco com gráficos muito grandes.
-      totalRegistros: 1000,
+    const CHANNEL_ID = "321770";
+    const READ_API_KEY = "0EPAIXIM4UL9LIW";
+    const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`;
 
-      campoTemperatura: "field1",
-      campoUmidade: "field2",
-      campoVelocidadeVento: "field4",
-      campoDirecaoVento: "field6",
-      campoPoluente: "field7",
-
-      direcaoEmSetores: false,
-      poluenteField7: "CO",
-      intervaloAtualizacao: 30000,
-      timeoutRequisicao: 15000
+    const FIELDS = {
+      temperature: "field1",
+      windSpeed: "field4",
+      windDirection: "field6",
+      co: "field7",
+      co2: "field8"
     };
 
-    const POLUENTES_CONAMA = {
-      CO: {
-        nome: "Monóxido de carbono (CO)",
-        unidade: "ppm",
-        janelaHoras: 8,
-        descricaoMedia: "Média móvel de 8 horas",
-        limiteReferencia: 9
-      }
-    };
+    const MAIN_RECORD_LIMIT = 1000;
+    const HISTORY_RECORD_LIMIT = 1000;
+    const AUTO_REFRESH_MS = 5 * 60 * 1000;
 
-    let graficoTemperatura = null;
-    let graficoUmidade = null;
-    let graficoPoluente = null;
-    let requisicaoEmAndamento = false;
+    let temperatureChart = null;
+    let gustChart = null;
+    let coChart = null;
+    let refreshTimer = null;
+    let isUpdating = false;
 
-    document.getElementById("channelId").textContent = CONFIG.channelId;
-
-    function converterNumero(valor) {
-      if (valor === null || valor === undefined || valor === "") {
+    function parseValue(value) {
+      if (value === null || value === undefined || value === "") {
         return null;
       }
 
-      const numero = Number.parseFloat(String(valor).replace(",", "."));
-      return Number.isFinite(numero) ? numero : null;
+      const parsed = Number(String(value).replace(",", "."));
+      return Number.isFinite(parsed) ? parsed : null;
     }
 
-    function limitar(valor, minimo, maximo) {
-      return Math.max(minimo, Math.min(maximo, valor));
-    }
+    function formatNumber(value, decimals = 1) {
+      const number = Number(value);
 
-    function normalizarDirecao(valor) {
-      if (valor === null || !Number.isFinite(valor)) {
-        return null;
-      }
-
-      let direcao = valor;
-
-      if (CONFIG.direcaoEmSetores) {
-        direcao *= 45;
-      }
-
-      return ((direcao % 360) + 360) % 360;
-    }
-
-    function calcularMedia(valores) {
-      const validos = valores.filter(valor => valor !== null && Number.isFinite(valor));
-
-      if (!validos.length) {
-        return null;
-      }
-
-      return validos.reduce((soma, valor) => soma + valor, 0) / validos.length;
-    }
-
-    function calcularDesvioPadrao(valores) {
-      const validos = valores.filter(valor => valor !== null && Number.isFinite(valor));
-
-      if (validos.length < 2) {
-        return null;
-      }
-
-      const media = calcularMedia(validos);
-
-      const variancia =
-        validos.reduce((soma, valor) => soma + ((valor - media) ** 2), 0) /
-        validos.length;
-
-      return Math.sqrt(variancia);
-    }
-
-    function formatarData(dataISO) {
-      if (!dataISO) {
+      if (!Number.isFinite(number)) {
         return "--";
       }
 
-      return new Date(dataISO).toLocaleString("pt-BR", {
+      return number.toLocaleString("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function formatDate(value, withSeconds = false) {
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "--";
+      }
+
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: withSeconds ? "medium" : "short",
+        timeZone: "America/Sao_Paulo"
+      }).format(date);
+    }
+
+    function getDatePartsSP(value) {
+      const date = new Date(value);
+
+      const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: "America/Sao_Paulo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        hourCycle: "h23"
+      }).formatToParts(date);
+
+      const result = {};
+
+      parts.forEach((part) => {
+        if (part.type !== "literal") {
+          result[part.type] = part.value;
+        }
+      });
+
+      return result;
+    }
+
+    function getDashboardNowSP() {
+      const parts = getDatePartsSP(new Date());
+
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month) - 1
+      };
+    }
+
+    function updateHeaderTimestamp() {
+      const timestamp = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        weekday: "long",
         day: "2-digit",
         month: "2-digit",
+        year: "numeric",
         hour: "2-digit",
-        minute: "2-digit"
-      });
+        minute: "2-digit",
+        second: "2-digit"
+      }).format(new Date());
+
+      document.getElementById("dashboardTimestamp").textContent = timestamp;
     }
 
-    function obterUltimoValorValido(registros, campo, comoDirecao = false) {
-      for (let i = registros.length - 1; i >= 0; i--) {
-        let valor = converterNumero(registros[i][campo]);
+    function setConnectionStatus(text, type = "ok") {
+      const status = document.getElementById("connectionStatus");
+      const dot = document.getElementById("statusDot");
 
-        if (comoDirecao) {
-          valor = normalizarDirecao(valor);
-        }
+      const colors = {
+        ok: "#21a45d",
+        loading: "#d99210",
+        error: "#d74a4a"
+      };
 
-        if (valor !== null) {
+      const color = colors[type] || colors.ok;
+
+      status.textContent = text;
+      dot.style.background = color;
+      dot.style.boxShadow = `0 0 10px ${color}`;
+    }
+
+    function getLastValidFeed(feeds, fieldName) {
+      for (let index = feeds.length - 1; index >= 0; index--) {
+        const value = parseValue(feeds[index][fieldName]);
+
+        if (value !== null) {
           return {
-            valor,
-            data: registros[i].created_at
+            feed: feeds[index],
+            value
           };
         }
       }
 
-      return { valor: null, data: null };
+      return null;
     }
 
-    function obterDirecaoCardinal(graus) {
-      if (graus === null || !Number.isFinite(graus)) {
-        return "Sem dados";
-      }
-
-      const direcoes = [
-        "Norte",
-        "Nordeste",
-        "Leste",
-        "Sudeste",
-        "Sul",
-        "Sudoeste",
-        "Oeste",
-        "Noroeste"
+    function windDirectionName(degrees) {
+      const directions = [
+        "N", "NNE", "NE", "ENE",
+        "L", "LSE", "SE", "SSE",
+        "S", "SSO", "SO", "OSO",
+        "O", "ONO", "NO", "NNO"
       ];
 
-      return direcoes[Math.round(graus / 45) % 8];
+      const normalized = ((degrees % 360) + 360) % 360;
+      const index = Math.round(normalized / 22.5) % 16;
+
+      return directions[index];
     }
 
-    function avaliarConforto(temperatura, umidade) {
-      if (temperatura === null || umidade === null) {
-        return {
-          nivel: "--",
-          descricao: "Dados insuficientes"
-        };
-      }
+    function getMonthLabel(year, monthIndex) {
+      const label = new Intl.DateTimeFormat("pt-BR", {
+        month: "short",
+        year: "numeric",
+        timeZone: "America/Sao_Paulo"
+      }).format(new Date(Date.UTC(year, monthIndex, 1)));
 
-      if (umidade < 30) {
-        return {
-          nivel: "Baixa umidade",
-          descricao: "Atenção à hidratação e à saúde respiratória"
-        };
-      }
-
-      if (temperatura >= 30 && umidade >= 60) {
-        return {
-          nivel: "Alto",
-          descricao: "Sensação de calor elevada"
-        };
-      }
-
-      if (temperatura >= 25 && umidade >= 40 && umidade <= 70) {
-        return {
-          nivel: "Bom",
-          descricao: "Condição térmica favorável"
-        };
-      }
-
-      if (temperatura < 18) {
-        return {
-          nivel: "Frio",
-          descricao: "Temperatura abaixo da faixa de conforto"
-        };
-      }
-
-      return {
-        nivel: "Moderado",
-        descricao: "Condição climática intermediária"
-      };
+      return label
+        .replace(".", "")
+        .replace(" de ", "/");
     }
 
-    function avaliarQualidadeAr(valor, poluente) {
-      if (valor === null) {
-        return {
-          nivel: "--",
-          descricao: "Sem leituras válidas do poluente"
-        };
+    /*
+      Gera rigorosamente os últimos 12 meses, incluindo o mês atual.
+      Exemplo em julho/2026:
+      ago/2025, set/2025, ..., jun/2026, jul/2026.
+    */
+    function getPrevious12Months() {
+      const current = getDashboardNowSP();
+      const months = [];
+
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date(current.year, current.month - i, 1);
+
+        months.push({
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          label: getMonthLabel(date.getFullYear(), date.getMonth())
+        });
       }
 
-      const percentual = (valor / poluente.limiteReferencia) * 100;
-
-      if (percentual <= 50) {
-        return {
-          nivel: "Boa",
-          descricao: `${valor.toFixed(2)} ${poluente.unidade} — ${percentual.toFixed(0)}% da referência`
-        };
-      }
-
-      if (percentual <= 80) {
-        return {
-          nivel: "Atenção",
-          descricao: `${valor.toFixed(2)} ${poluente.unidade} — próximo à referência`
-        };
-      }
-
-      if (percentual <= 100) {
-        return {
-          nivel: "Alerta",
-          descricao: `${valor.toFixed(2)} ${poluente.unidade} — faixa crítica`
-        };
-      }
-
-      return {
-        nivel: "Acima do limite",
-        descricao: `${valor.toFixed(2)} ${poluente.unidade} — referência excedida`
-      };
+      return months;
     }
 
-    function calcularMediaMovelTemporal(registros, campo, janelaHoras) {
-      const janelaMs = janelaHoras * 60 * 60 * 1000;
-      const resultado = [];
-      const fila = [];
-      let soma = 0;
-      let inicio = 0;
+    function buildUtcDate(year, monthIndex, day, hour, minute, second) {
+      return new Date(Date.UTC(year, monthIndex, day, hour, minute, second)).toISOString();
+    }
 
-      registros.forEach(registro => {
-        const timestamp = new Date(registro.created_at).getTime();
-        const valor = converterNumero(registro[campo]);
+    async function fetchFeeds(params = {}) {
+      const url = new URL(THINGSPEAK_URL);
 
-        if (valor !== null && Number.isFinite(timestamp)) {
-          fila.push({ timestamp, valor });
-          soma += valor;
-        }
+      url.searchParams.set("api_key", READ_API_KEY);
+      url.searchParams.set("_", Date.now().toString());
 
-        while (
-          inicio < fila.length &&
-          fila[inicio].timestamp < timestamp - janelaMs
-        ) {
-          soma -= fila[inicio].valor;
-          inicio++;
-        }
-
-        resultado.push(
-          inicio < fila.length
-            ? soma / (fila.length - inicio)
-            : null
-        );
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
       });
 
-      return resultado;
+      const response = await fetch(url.toString(), {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(`ThingSpeak retornou o código ${response.status}.`);
+      }
+
+      const data = await response.json();
+      return data.feeds || [];
     }
 
-    function criarGrafico(canvasId, labels, datasets, tituloEixoY, opcoesY = {}) {
-      const canvas = document.getElementById(canvasId);
-
-      return new Chart(canvas, {
-        type: "line",
-        data: {
-          labels,
-          datasets
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          normalized: true,
-          animation: {
-            duration: 300
-          },
-          interaction: {
-            mode: "index",
-            intersect: false
-          },
-          plugins: {
-            legend: {
-              display: true
-            },
-            tooltip: {
-              mode: "index",
-              intersect: false
-            },
-            decimation: {
-              enabled: true,
-              algorithm: "lttb",
-              samples: 250
-            }
-          },
-          scales: {
-            y: {
-              ...opcoesY,
-              title: {
-                display: true,
-                text: tituloEixoY
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: "Data e hora"
-              },
-              ticks: {
-                maxTicksLimit: 8,
-                maxRotation: 0
-              }
-            }
-          }
-        }
+    /*
+      Leitura operacional: sempre os últimos 1000 registros.
+    */
+    async function fetchMainFeeds() {
+      return fetchFeeds({
+        results: MAIN_RECORD_LIMIT
       });
     }
 
-    function atualizarGraficos(labels, temperaturas, umidades, poluentes, mediasMoveis) {
-      const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
+    /*
+      Leitura histórica: uma consulta independente para cada mês.
+      Isso impede que os 1000 registros mais recentes, concentrados
+      em julho, eliminem os demais meses do gráfico anual.
+    */
+    async function fetchMonthFeeds(year, monthIndex) {
+      const start = buildUtcDate(year, monthIndex, 1, 0, 0, 0);
+      const end = buildUtcDate(year, monthIndex + 1, 1, 0, 0, 0);
 
-      if (graficoTemperatura) graficoTemperatura.destroy();
-      if (graficoUmidade) graficoUmidade.destroy();
-      if (graficoPoluente) graficoPoluente.destroy();
-
-      graficoTemperatura = criarGrafico(
-        "graficoTemperatura",
-        labels,
-        [{
-          label: "Temperatura (°C)",
-          data: temperaturas,
-          borderColor: "#dc2626",
-          backgroundColor: "rgba(220, 38, 38, 0.15)",
-          fill: true,
-          tension: 0.35,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          borderWidth: 2,
-          spanGaps: true
-        }],
-        "Temperatura (°C)"
-      );
-
-      graficoUmidade = criarGrafico(
-        "graficoUmidade",
-        labels,
-        [{
-          label: "Umidade relativa (%)",
-          data: umidades,
-          borderColor: "#0284c7",
-          backgroundColor: "rgba(2, 132, 199, 0.15)",
-          fill: true,
-          tension: 0.35,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          borderWidth: 2,
-          spanGaps: true
-        }],
-        "Umidade (%)",
-        {
-          min: 0,
-          max: 100
-        }
-      );
-
-      graficoPoluente = criarGrafico(
-        "graficoPoluente",
-        labels,
-        [
-          {
-            label: `Leitura instantânea (${configPoluente.unidade})`,
-            data: poluentes,
-            borderColor: "#7c3aed",
-            tension: 0.25,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            borderWidth: 2,
-            spanGaps: true
-          },
-          {
-            label: configPoluente.descricaoMedia,
-            data: mediasMoveis,
-            borderColor: "#f59e0b",
-            tension: 0.35,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            borderWidth: 3,
-            spanGaps: true
-          },
-          {
-            label: `Referência (${configPoluente.limiteReferencia} ${configPoluente.unidade})`,
-            data: Array(labels.length).fill(configPoluente.limiteReferencia),
-            borderColor: "#dc2626",
-            borderDash: [8, 6],
-            pointRadius: 0,
-            borderWidth: 2
-          }
-        ],
-        `${configPoluente.nome} (${configPoluente.unidade})`,
-        {
-          beginAtZero: true
-        }
-      );
-
-      document.getElementById("tituloGraficoPoluente").textContent =
-        `${configPoluente.nome} — leitura instantânea e média móvel`;
-
-      document.getElementById("descricaoGraficoPoluente").textContent =
-        `${configPoluente.descricaoMedia}. Linha tracejada: referência de ` +
-        `${configPoluente.limiteReferencia} ${configPoluente.unidade}.`;
-    }
-
-    function atualizarBussola(direcao) {
-      const agulha = document.getElementById("needleWrapper");
-      const campoDirecao = document.getElementById("direcaoVento");
-      const textoDirecao = document.getElementById("direcaoTexto");
-
-      if (direcao === null) {
-        agulha.style.transform = "rotate(0deg)";
-        campoDirecao.textContent = "--°";
-        textoDirecao.textContent = "Sem dados de direção";
-        return;
-      }
-
-      const graus = normalizarDirecao(direcao);
-
-      agulha.style.transform = `rotate(${graus}deg)`;
-      campoDirecao.textContent = `${graus.toFixed(0)}°`;
-      textoDirecao.textContent = `Vento de ${obterDirecaoCardinal(graus)}`;
-    }
-
-    function atualizarStatus(mensagem, tipo = "") {
-      const status = document.getElementById("status");
-      status.textContent = mensagem;
-      status.className = `status ${tipo}`;
-    }
-
-    function calcularZScore(valor, historico) {
-      const media = calcularMedia(historico);
-      const desvio = calcularDesvioPadrao(historico);
-
-      if (
-        valor === null ||
-        media === null ||
-        desvio === null ||
-        desvio === 0
-      ) {
-        return null;
-      }
-
-      return (valor - media) / desvio;
-    }
-
-    function detectarAnomalia(valorAtual, historico, limite = 2.5) {
-      if (valorAtual === null || historico.length < 10) {
-        return {
-          anomalia: false,
-          classificacao: "Dados insuficientes"
-        };
-      }
-
-      const z = calcularZScore(valorAtual, historico);
-
-      if (z === null) {
-        return {
-          anomalia: false,
-          classificacao: "Sem variação histórica"
-        };
-      }
-
-      if (z >= limite) {
-        return {
-          anomalia: true,
-          classificacao: "Acima do padrão histórico"
-        };
-      }
-
-      if (z <= -limite) {
-        return {
-          anomalia: true,
-          classificacao: "Abaixo do padrão histórico"
-        };
-      }
-
-      return {
-        anomalia: false,
-        classificacao: "Dentro do padrão histórico"
-      };
-    }
-
-    function calcularCorrelacaoPearson(valoresX, valoresY) {
-      const pares = [];
-
-      for (let i = 0; i < valoresX.length; i++) {
-        if (valoresX[i] !== null && valoresY[i] !== null) {
-          pares.push({ x: valoresX[i], y: valoresY[i] });
-        }
-      }
-
-      if (pares.length < 10) {
-        return null;
-      }
-
-      const mediaX = pares.reduce((soma, p) => soma + p.x, 0) / pares.length;
-      const mediaY = pares.reduce((soma, p) => soma + p.y, 0) / pares.length;
-
-      let numerador = 0;
-      let somaX = 0;
-      let somaY = 0;
-
-      pares.forEach(p => {
-        const dx = p.x - mediaX;
-        const dy = p.y - mediaY;
-
-        numerador += dx * dy;
-        somaX += dx * dx;
-        somaY += dy * dy;
+      return fetchFeeds({
+        start,
+        end,
+        results: HISTORY_RECORD_LIMIT
       });
-
-      const denominador = Math.sqrt(somaX * somaY);
-
-      return denominador === 0 ? null : numerador / denominador;
     }
 
-    function interpretarCorrelacao(correlacao) {
-      if (correlacao === null) {
-        return "Dados insuficientes para análise.";
-      }
+    async function fetchLast12MonthsHistory() {
+      const months = getPrevious12Months();
 
-      const intensidade = Math.abs(correlacao);
-      let forca = "muito fraca";
-
-      if (intensidade >= 0.7) {
-        forca = "forte";
-      } else if (intensidade >= 0.4) {
-        forca = "moderada";
-      } else if (intensidade >= 0.2) {
-        forca = "fraca";
-      }
-
-      let sentido = "sem relação linear clara";
-
-      if (correlacao >= 0.2) {
-        sentido = "quanto maior o vento, maior tende a ser a concentração";
-      } else if (correlacao <= -0.2) {
-        sentido = "quanto maior o vento, menor tende a ser a concentração";
-      }
-
-      return `Correlação ${forca} (${correlacao.toFixed(2)}): ${sentido}.`;
-    }
-
-    function calcularRegressaoLinear(pontos) {
-      if (pontos.length < 5) {
-        return null;
-      }
-
-      const mediaX = pontos.reduce((soma, p) => soma + p.x, 0) / pontos.length;
-      const mediaY = pontos.reduce((soma, p) => soma + p.y, 0) / pontos.length;
-
-      let numerador = 0;
-      let denominador = 0;
-
-      pontos.forEach(p => {
-        numerador += (p.x - mediaX) * (p.y - mediaY);
-        denominador += (p.x - mediaX) ** 2;
-      });
-
-      if (denominador === 0) {
-        return null;
-      }
-
-      const inclinacao = numerador / denominador;
-      const intercepto = mediaY - (inclinacao * mediaX);
-
-      return {
-        prever(x) {
-          return (inclinacao * x) + intercepto;
-        }
-      };
-    }
-
-    function preverVariavel(registros, campo, horas) {
-      const pontos = registros
-        .slice(-150)
-        .map(registro => {
-          const valor = converterNumero(registro[campo]);
-          const data = new Date(registro.created_at).getTime();
-
-          if (valor === null || !Number.isFinite(data)) {
-            return null;
-          }
+      const requests = months.map(async (month) => {
+        try {
+          const feeds = await fetchMonthFeeds(month.year, month.month);
 
           return {
-            x: data / 3600000,
-            y: valor
+            ...month,
+            feeds
           };
-        })
-        .filter(Boolean);
+        } catch (error) {
+          console.warn(`Falha ao consultar ${month.label}:`, error);
 
-      const regressao = calcularRegressaoLinear(pontos);
-
-      if (!regressao || !pontos.length) {
-        return null;
-      }
-
-      const ultimoX = pontos[pontos.length - 1].x;
-      const previsoes = {};
-
-      horas.forEach(hora => {
-        previsoes[hora] = regressao.prever(ultimoX + hora);
+          return {
+            ...month,
+            feeds: []
+          };
+        }
       });
 
-      return previsoes;
+      return Promise.all(requests);
     }
 
-    function obterClasseRisco(pontuacao) {
-      if (pontuacao >= 75) {
-        return {
-          nivel: "CRÍTICO",
-          classe: "critico",
-          descricao: "Condições potencialmente severas. Recomenda-se atenção imediata."
-        };
+    function destroyChart(chart) {
+      if (chart) {
+        chart.destroy();
       }
+    }
 
-      if (pontuacao >= 50) {
-        return {
-          nivel: "ALERTA",
-          classe: "alerta",
-          descricao: "Há variáveis em faixa de risco."
-        };
-      }
+    function getValuesFromMonth(month, field) {
+      return month.feeds
+        .map((feed) => parseValue(feed[field]))
+        .filter((value) => value !== null);
+    }
 
-      if (pontuacao >= 25) {
-        return {
-          nivel: "ATENÇÃO",
-          classe: "atencao",
-          descricao: "Existem condições que exigem acompanhamento."
-        };
-      }
-
+    function chartBaseOptions(yUnit, beginAtZero = false) {
       return {
-        nivel: "NORMAL",
-        classe: "normal",
-        descricao: "Condições atuais predominantemente dentro da normalidade."
-      };
-    }
-
-    function calcularIndiceRisco(temperatura, umidade, poluente, velocidade, configPoluente) {
-      let pontuacao = 0;
-      const fatores = [];
-
-      if (temperatura !== null) {
-        if (temperatura >= 35) {
-          pontuacao += 25;
-          fatores.push("temperatura muito elevada");
-        } else if (temperatura >= 30) {
-          pontuacao += 15;
-          fatores.push("temperatura elevada");
-        }
-      }
-
-      if (umidade !== null) {
-        if (umidade < 20) {
-          pontuacao += 25;
-          fatores.push("umidade crítica");
-        } else if (umidade < 30) {
-          pontuacao += 15;
-          fatores.push("umidade baixa");
-        }
-      }
-
-      if (poluente !== null) {
-        const percentual = (poluente / configPoluente.limiteReferencia) * 100;
-
-        if (percentual > 100) {
-          pontuacao += 35;
-          fatores.push("CO acima do limite");
-        } else if (percentual > 80) {
-          pontuacao += 20;
-          fatores.push("CO próximo ao limite");
-        } else if (percentual > 50) {
-          pontuacao += 10;
-          fatores.push("CO em elevação");
-        }
-      }
-
-      if (velocidade !== null && velocidade >= 54) {
-        pontuacao += 10;
-        fatores.push("vento intenso");
-      }
-
-      return {
-        pontuacao: limitar(pontuacao, 0, 100),
-        fatores
-      };
-    }
-
-    function criarItemLista(tag, classe, texto) {
-      return `
-        <li>
-          <span class="tag ${classe}">${tag}</span>
-          ${texto}
-        </li>
-      `;
-    }
-
-    function atualizarAnalise(registros, atuais, mediaMovelPoluente) {
-      const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
-
-      const temperaturas = registros
-        .map(r => converterNumero(r[CONFIG.campoTemperatura]))
-        .filter(v => v !== null);
-
-      const umidades = registros
-        .map(r => converterNumero(r[CONFIG.campoUmidade]))
-        .filter(v => v !== null);
-
-      const poluentes = registros
-        .map(r => converterNumero(r[CONFIG.campoPoluente]))
-        .filter(v => v !== null);
-
-      const velocidades = registros
-        .map(r => converterNumero(r[CONFIG.campoVelocidadeVento]))
-        .filter(v => v !== null);
-
-      const anomaliaTemp = detectarAnomalia(atuais.temperatura, temperaturas.slice(0, -1));
-      const anomaliaUmidade = detectarAnomalia(atuais.umidade, umidades.slice(0, -1));
-      const anomaliaCO = detectarAnomalia(atuais.poluente, poluentes.slice(0, -1));
-
-      document.getElementById("listaAnomalias").innerHTML = [
-        criarItemLista(
-          anomaliaTemp.anomalia ? "ANOMALIA" : "NORMAL",
-          anomaliaTemp.anomalia ? "alerta" : "ok",
-          `Temperatura: ${anomaliaTemp.classificacao}.`
-        ),
-        criarItemLista(
-          anomaliaUmidade.anomalia ? "ANOMALIA" : "NORMAL",
-          anomaliaUmidade.anomalia ? "alerta" : "ok",
-          `Umidade: ${anomaliaUmidade.classificacao}.`
-        ),
-        criarItemLista(
-          anomaliaCO.anomalia ? "ANOMALIA" : "NORMAL",
-          anomaliaCO.anomalia ? "alerta" : "ok",
-          `CO: ${anomaliaCO.classificacao}.`
-        )
-      ].join("");
-
-      const correlacao = calcularCorrelacaoPearson(
-        registros.map(r => converterNumero(r[CONFIG.campoVelocidadeVento])),
-        registros.map(r => converterNumero(r[CONFIG.campoPoluente]))
-      );
-
-      const velocidadeMedia = calcularMedia(velocidades);
-
-      document.getElementById("listaCorrelacao").innerHTML = [
-        criarItemLista(
-          correlacao === null ? "SEM DADOS" : "ANÁLISE",
-          correlacao === null ? "info" : "ok",
-          correlacao === null
-            ? "São necessários pelo menos 10 pares válidos de velocidade e CO."
-            : `Velocidade do vento × CO: ${interpretarCorrelacao(correlacao)}`
-        ),
-        criarItemLista(
-          "MÉDIA",
-          "info",
-          velocidadeMedia !== null
-            ? `Velocidade média registrada: ${velocidadeMedia.toFixed(1)} km/h.`
-            : "Sem dados suficientes de velocidade."
-        )
-      ].join("");
-
-      const previsaoTemp = preverVariavel(registros, CONFIG.campoTemperatura, [1, 3, 6]);
-      const previsaoUmidade = preverVariavel(registros, CONFIG.campoUmidade, [1, 3, 6]);
-      const previsaoVento = preverVariavel(registros, CONFIG.campoVelocidadeVento, [1, 3, 6]);
-      const previsaoCO = preverVariavel(registros, CONFIG.campoPoluente, [1, 3, 6]);
-
-      document.getElementById("gridPrevisoes").innerHTML = [1, 3, 6].map(hora => {
-        const temp = previsaoTemp?.[hora];
-        const umidade = previsaoUmidade?.[hora];
-        const vento = previsaoVento?.[hora];
-        const co = previsaoCO?.[hora];
-
-        return `
-          <div class="previsao-item">
-            <div class="previsao-hora">Daqui a ${hora} hora${hora > 1 ? "s" : ""}</div>
-            <div class="previsao-valor">
-              ${temp !== undefined ? `${temp.toFixed(1)} °C` : "-- °C"}
-            </div>
-            <div class="previsao-detalhe">
-              Umidade: ${umidade !== undefined ? `${limitar(umidade, 0, 100).toFixed(1)}%` : "--"}<br>
-              Vento: ${vento !== undefined ? `${Math.max(0, vento).toFixed(1)} km/h` : "--"}<br>
-              CO: ${co !== undefined ? `${Math.max(0, co).toFixed(2)} ppm` : "--"}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      const risco = calcularIndiceRisco(
-        atuais.temperatura,
-        atuais.umidade,
-        atuais.poluente,
-        atuais.velocidade,
-        configPoluente
-      );
-
-      const classificacao = obterClasseRisco(risco.pontuacao);
-      const cardRisco = document.getElementById("cardRisco");
-      const nivelRisco = document.getElementById("nivelRisco");
-
-      cardRisco.className = `card risk-card ${classificacao.classe}`;
-      nivelRisco.className = `risk-level ${classificacao.classe}`;
-      nivelRisco.textContent = classificacao.nivel;
-
-      document.getElementById("descricaoRisco").textContent = classificacao.descricao;
-      document.getElementById("pontuacaoRisco").textContent =
-        `Pontuação: ${risco.pontuacao}/100` +
-        (risco.fatores.length ? ` | Fatores: ${risco.fatores.join(", ")}.` : "");
-
-      document.getElementById("listaTendencias").innerHTML = [
-        criarItemLista(
-          "MÉDIA",
-          "info",
-          `Temperatura média do período: ${calcularMedia(temperaturas)?.toFixed(1) ?? "--"} °C.`
-        ),
-        criarItemLista(
-          "MÉDIA",
-          "info",
-          `Umidade média do período: ${calcularMedia(umidades)?.toFixed(1) ?? "--"}%.`
-        ),
-        criarItemLista(
-          "CO",
-          "atencao",
-          `Concentração média de CO: ${calcularMedia(poluentes)?.toFixed(2) ?? "--"} ppm.`
-        )
-      ].join("");
-
-      const qualidade = avaliarQualidadeAr(mediaMovelPoluente, configPoluente);
-
-      document.getElementById("resumoIA").textContent =
-        `No momento, a temperatura é de ${
-          atuais.temperatura !== null ? `${atuais.temperatura.toFixed(1)} °C` : "sem leitura"
-        }, com umidade relativa de ${
-          atuais.umidade !== null ? `${atuais.umidade.toFixed(1)}%` : "sem leitura"
-        }. A velocidade do vento é de ${
-          atuais.velocidade !== null ? `${atuais.velocidade.toFixed(1)} km/h` : "sem leitura"
-        }, vindo de ${
-          atuais.direcao !== null ? obterDirecaoCardinal(atuais.direcao) : "direção não identificada"
-        }. A qualidade do ar para CO está classificada como ${
-          qualidade.nivel.toLowerCase()
-        }. O índice de risco climático é ${classificacao.nivel.toLowerCase()}.`;
-    }
-
-    function atualizarInterface(registros) {
-      const configPoluente = POLUENTES_CONAMA[CONFIG.poluenteField7];
-
-      const labels = registros.map(r => formatarData(r.created_at));
-      const temperaturas = registros.map(r => converterNumero(r[CONFIG.campoTemperatura]));
-      const umidades = registros.map(r => converterNumero(r[CONFIG.campoUmidade]));
-      const poluentes = registros.map(r => converterNumero(r[CONFIG.campoPoluente]));
-
-      const mediasMoveis = calcularMediaMovelTemporal(
-        registros,
-        CONFIG.campoPoluente,
-        configPoluente.janelaHoras
-      );
-
-      const temperaturaAtual = obterUltimoValorValido(registros, CONFIG.campoTemperatura);
-      const umidadeAtual = obterUltimoValorValido(registros, CONFIG.campoUmidade);
-
-      // DIREÇÃO ALTERADA PARA field6
-      const direcaoAtual = obterUltimoValorValido(
-        registros,
-        CONFIG.campoDirecaoVento,
-        true
-      );
-
-      const velocidadeAtual = obterUltimoValorValido(
-        registros,
-        CONFIG.campoVelocidadeVento
-      );
-
-      const poluenteAtual = obterUltimoValorValido(
-        registros,
-        CONFIG.campoPoluente
-      );
-
-      const ultimaMediaMovel = [...mediasMoveis]
-        .reverse()
-        .find(valor => valor !== null) ?? null;
-
-      const conforto = avaliarConforto(
-        temperaturaAtual.valor,
-        umidadeAtual.valor
-      );
-
-      const qualidade = avaliarQualidadeAr(
-        ultimaMediaMovel,
-        configPoluente
-      );
-
-      document.getElementById("tempAtual").textContent =
-        temperaturaAtual.valor !== null
-          ? `${temperaturaAtual.valor.toFixed(1)} °C`
-          : "-- °C";
-
-      document.getElementById("tempMedia").textContent =
-        calcularMedia(temperaturas) !== null
-          ? `Média do período: ${calcularMedia(temperaturas).toFixed(1)} °C`
-          : "Média: -- °C";
-
-      document.getElementById("umidadeAtual").textContent =
-        umidadeAtual.valor !== null
-          ? `${umidadeAtual.valor.toFixed(1)} %`
-          : "-- %";
-
-      document.getElementById("umidadeMedia").textContent =
-        calcularMedia(umidades) !== null
-          ? `Média do período: ${calcularMedia(umidades).toFixed(1)} %`
-          : "Média: -- %";
-
-      document.getElementById("confortoTermico").textContent = conforto.nivel;
-      document.getElementById("confortoDescricao").textContent = conforto.descricao;
-
-      document.getElementById("qualidadeAr").textContent = qualidade.nivel;
-      document.getElementById("qualidadeArDescricao").textContent = qualidade.descricao;
-
-      document.getElementById("ultimaAtualizacao").textContent =
-        formatarData(registros[registros.length - 1].created_at);
-
-      document.getElementById("velocidadeVento").textContent =
-        velocidadeAtual.valor !== null
-          ? `${velocidadeAtual.valor.toFixed(1)} km/h`
-          : "-- km/h";
-
-      atualizarBussola(direcaoAtual.valor);
-
-      atualizarGraficos(
-        labels,
-        temperaturas,
-        umidades,
-        poluentes,
-        mediasMoveis
-      );
-
-      atualizarAnalise(
-        registros,
-        {
-          temperatura: temperaturaAtual.valor,
-          umidade: umidadeAtual.valor,
-          direcao: direcaoAtual.valor,
-          velocidade: velocidadeAtual.valor,
-          poluente: poluenteAtual.valor
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        resizeDelay: 150,
+        plugins: {
+          legend: {
+            labels: {
+              color: "#29445b"
+            }
+          }
         },
-        ultimaMediaMovel
-      );
+        scales: {
+          x: {
+            ticks: {
+              color: "#526c80",
+              maxRotation: 45,
+              minRotation: 0
+            },
+            grid: {
+              color: "rgba(67, 107, 135, 0.10)"
+            }
+          },
+          y: {
+            beginAtZero,
+            ticks: {
+              color: "#526c80",
+              callback(value) {
+                return `${value} ${yUnit}`;
+              }
+            },
+            grid: {
+              color: "rgba(67, 107, 135, 0.15)"
+            }
+          }
+        }
+      };
     }
 
-    async function carregarDadosThingSpeak() {
-      if (requisicaoEmAndamento) {
+    function createTemperatureChart(history) {
+      const labels = history.map((month) => month.label);
+
+      const minimums = history.map((month) => {
+        const values = getValuesFromMonth(month, FIELDS.temperature);
+        return values.length ? Math.min(...values) : null;
+      });
+
+      const maximums = history.map((month) => {
+        const values = getValuesFromMonth(month, FIELDS.temperature);
+        return values.length ? Math.max(...values) : null;
+      });
+
+      destroyChart(temperatureChart);
+
+      temperatureChart = new Chart(document.getElementById("temperatureChart"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Temperatura mínima (°C)",
+              data: minimums,
+              backgroundColor: "rgba(7, 139, 184, 0.62)",
+              borderColor: "#078bb8",
+              borderWidth: 1,
+              borderRadius: 5
+            },
+            {
+              label: "Temperatura máxima (°C)",
+              data: maximums,
+              backgroundColor: "rgba(215, 74, 74, 0.65)",
+              borderColor: "#d74a4a",
+              borderWidth: 1,
+              borderRadius: 5
+            }
+          ]
+        },
+        options: {
+          ...chartBaseOptions("°C"),
+          plugins: {
+            legend: {
+              labels: {
+                color: "#29445b"
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return context.raw === null
+                    ? `${context.dataset.label}: sem registro`
+                    : `${context.dataset.label}: ${formatNumber(context.raw)} °C`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const allValues = [...minimums, ...maximums].filter((value) => value !== null);
+
+      document.getElementById("periodMinTemperature").textContent =
+        allValues.length ? formatNumber(Math.min(...allValues)) : "--";
+
+      document.getElementById("periodMaxTemperature").textContent =
+        allValues.length ? formatNumber(Math.max(...allValues)) : "--";
+    }
+
+    function createGustChart(history) {
+      const labels = history.map((month) => month.label);
+
+      const gusts = history.map((month) => {
+        const values = getValuesFromMonth(month, FIELDS.windSpeed);
+        return values.length ? Math.max(...values) : null;
+      });
+
+      destroyChart(gustChart);
+
+      gustChart = new Chart(document.getElementById("gustChart"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Maior rajada (m/s)",
+              data: gusts,
+              backgroundColor: "rgba(217, 146, 16, 0.66)",
+              borderColor: "#d99210",
+              borderWidth: 1,
+              borderRadius: 5
+            }
+          ]
+        },
+        options: {
+          ...chartBaseOptions("m/s", true),
+          plugins: {
+            legend: {
+              labels: {
+                color: "#29445b"
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return context.raw === null
+                    ? "Maior rajada: sem registro"
+                    : `Maior rajada: ${formatNumber(context.raw)} m/s`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const validGusts = gusts.filter((value) => value !== null);
+
+      document.getElementById("periodMaxGust").textContent =
+        validGusts.length ? formatNumber(Math.max(...validGusts)) : "--";
+    }
+
+    function calculateCOMovingAverage(feeds) {
+      const validFeeds = feeds
+        .map((feed) => ({
+          date: new Date(feed.created_at),
+          value: parseValue(feed[FIELDS.co])
+        }))
+        .filter((item) => item.value !== null && !Number.isNaN(item.date.getTime()))
+        .sort((a, b) => a.date - b.date);
+
+      return validFeeds.map((current, index) => {
+        const start = current.date.getTime() - 8 * 60 * 60 * 1000;
+
+        const windowValues = validFeeds
+          .slice(0, index + 1)
+          .filter((item) => item.date.getTime() >= start && item.date <= current.date)
+          .map((item) => item.value);
+
+        return {
+          date: current.date,
+          value: current.value,
+          average: windowValues.reduce((sum, value) => sum + value, 0) / windowValues.length
+        };
+      });
+    }
+
+    function updateCOStatus(movingAverage) {
+      const status = document.getElementById("coStatus");
+      const detail = document.getElementById("coStatusDetail");
+
+      if (movingAverage === null || !Number.isFinite(movingAverage)) {
+        status.innerHTML = "--";
+        detail.textContent = "Dados insuficientes para calcular a média móvel.";
         return;
       }
 
-      requisicaoEmAndamento = true;
-
-      const controller = new AbortController();
-      const timeout = setTimeout(
-        () => controller.abort(),
-        CONFIG.timeoutRequisicao
-      );
-
-      try {
-        if (typeof Chart === "undefined") {
-          throw new Error("Chart.js não foi carregado. Verifique sua conexão com a internet.");
-        }
-
-        atualizarStatus("Atualizando dados...");
-
-        const parametros = new URLSearchParams({
-          api_key: CONFIG.readApiKey,
-          results: String(CONFIG.totalRegistros)
-        });
-
-        const url =
-          `https://api.thingspeak.com/channels/${CONFIG.channelId}/feeds.json?${parametros}`;
-
-        const resposta = await fetch(url, {
-          signal: controller.signal,
-          cache: "no-store"
-        });
-
-        if (!resposta.ok) {
-          throw new Error(`Erro HTTP ${resposta.status}`);
-        }
-
-        const dados = await resposta.json();
-
-        if (!Array.isArray(dados.feeds) || dados.feeds.length === 0) {
-          throw new Error("Nenhum registro foi encontrado no canal.");
-        }
-
-        const registros = dados.feeds
-          .filter(registro => registro.created_at)
-          .sort((a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          );
-
-        if (!registros.length) {
-          throw new Error("Não há registros com data válida.");
-        }
-
-        atualizarInterface(registros);
-
-        atualizarStatus(
-          `Dados atualizados: ${registros.length} registros processados`,
-          "ok"
-        );
-      } catch (erro) {
-        console.error("Erro ThingSpeak:", erro);
-
-        const mensagem =
-          erro.name === "AbortError"
-            ? "Tempo limite excedido ao consultar o ThingSpeak."
-            : erro.message;
-
-        atualizarStatus(`Erro ao carregar dados: ${mensagem}`, "erro");
-      } finally {
-        clearTimeout(timeout);
-        requisicaoEmAndamento = false;
+      if (movingAverage < 7) {
+        status.innerHTML = '<span class="badge good">ADEQUADO</span>';
+        detail.textContent = "Média móvel de CO abaixo da referência de 9 ppm em 8 horas.";
+      } else if (movingAverage < 9) {
+        status.innerHTML = '<span class="badge attention">ATENÇÃO</span>';
+        detail.textContent = "Média móvel de CO próxima da referência de 9 ppm em 8 horas.";
+      } else {
+        status.innerHTML = '<span class="badge critical">ACIMA DA REFERÊNCIA</span>';
+        detail.textContent = "Média móvel de CO igual ou superior a 9 ppm em 8 horas.";
       }
     }
 
-    carregarDadosThingSpeak();
+    function createCOChart(feeds) {
+      const data = calculateCOMovingAverage(feeds).slice(-150);
 
-    setInterval(
-      carregarDadosThingSpeak,
-      CONFIG.intervaloAtualizacao
-    );
+      destroyChart(coChart);
+
+      coChart = new Chart(document.getElementById("coChart"), {
+        type: "line",
+        data: {
+          labels: data.map((item) => formatDate(item.date)),
+          datasets: [
+            {
+              label: "CO (ppm)",
+              data: data.map((item) => item.value),
+              borderColor: "#078bb8",
+              backgroundColor: "rgba(7, 139, 184, 0.12)",
+              fill: true,
+              tension: 0.25,
+              pointRadius: 1.5
+            },
+            {
+              label: "Média móvel de 8 h (ppm)",
+              data: data.map((item) => item.average),
+              borderColor: "#d99210",
+              backgroundColor: "transparent",
+              borderWidth: 2,
+              tension: 0.25,
+              pointRadius: 0
+            },
+            {
+              label: "Referência 8 h (9 ppm)",
+              data: data.map(() => 9),
+              borderColor: "#d74a4a",
+              borderDash: [7, 5],
+              borderWidth: 1.5,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          ...chartBaseOptions("ppm", true),
+          scales: {
+            x: {
+              ticks: {
+                color: "#526c80",
+                maxTicksLimit: 8
+              },
+              grid: {
+                color: "rgba(67, 107, 135, 0.10)"
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: "#526c80",
+                callback(value) {
+                  return `${value} ppm`;
+                }
+              },
+              grid: {
+                color: "rgba(67, 107, 135, 0.15)"
+              }
+            }
+          }
+        }
+      });
+
+      const lastAverage = data.length ? data[data.length - 1].average : null;
+
+      document.getElementById("coMovingAverage").textContent =
+        lastAverage !== null ? formatNumber(lastAverage, 2) : "--";
+
+      updateCOStatus(lastAverage);
+    }
+
+    function updateClimatePanel(feeds) {
+      const latest = getLastValidFeed(feeds, FIELDS.temperature);
+
+      document.getElementById("currentTemperature").textContent =
+        latest ? formatNumber(latest.value) : "--";
+
+      document.getElementById("temperatureDate").textContent =
+        latest
+          ? `Última leitura: ${formatDate(latest.feed.created_at, true)}`
+          : "Sem leitura disponível";
+    }
+
+    function updateWindPanel(feeds) {
+      const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
+      const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
+
+      document.getElementById("windSpeed").textContent =
+        latestWind ? formatNumber(latestWind.value) : "--";
+
+      const direction = latestDirection ? latestDirection.value : null;
+      const name = direction === null ? "--" : windDirectionName(direction);
+
+      document.getElementById("windDirectionValue").textContent =
+        direction === null ? "--" : formatNumber(direction, 0);
+
+      document.getElementById("windDirectionText").textContent = name;
+
+      document.getElementById("compassDirection").textContent =
+        direction === null ? "--" : `${name} (${formatNumber(direction, 0)}°)`;
+
+      if (direction !== null) {
+        document.getElementById("directionArrow").style.transform = `rotate(${direction}deg)`;
+      }
+    }
+
+    function updateGustTable(feeds) {
+      const strongestByHour = Array.from({ length: 24 }, () => null);
+
+      feeds.forEach((feed) => {
+        const gust = parseValue(feed[FIELDS.windSpeed]);
+
+        if (gust === null) {
+          return;
+        }
+
+        const hour = Number(getDatePartsSP(feed.created_at).hour);
+
+        if (!strongestByHour[hour] || gust > strongestByHour[hour].gust) {
+          strongestByHour[hour] = {
+            gust,
+            date: feed.created_at
+          };
+        }
+      });
+
+      document.getElementById("gustTableBody").innerHTML = strongestByHour
+        .map((item, hour) => {
+          if (!item) {
+            return `
+              <tr>
+                <td>${String(hour).padStart(2, "0")}:00</td>
+                <td>Sem registro</td>
+                <td>--</td>
+              </tr>
+            `;
+          }
+
+          return `
+            <tr>
+              <td>${String(hour).padStart(2, "0")}:00</td>
+              <td><strong>${formatNumber(item.gust)} m/s</strong></td>
+              <td>${formatDate(item.date, true)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function updateEnvironmentalPanel(feeds) {
+      const latestCO = getLastValidFeed(feeds, FIELDS.co);
+      const latestCO2 = getLastValidFeed(feeds, FIELDS.co2);
+
+      document.getElementById("coValue").textContent =
+        latestCO ? formatNumber(latestCO.value, 2) : "--";
+
+      document.getElementById("co2Value").textContent =
+        latestCO2 ? formatNumber(latestCO2.value, 0) : "--";
+
+      createCOChart(feeds);
+    }
+
+    function runClimaticoInteligente(feeds, history) {
+      const analysis = [];
+
+      const latestTemperature = getLastValidFeed(feeds, FIELDS.temperature);
+      const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
+      const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
+      const latestCO2 = getLastValidFeed(feeds, FIELDS.co2);
+
+      const coHistory = calculateCOMovingAverage(feeds);
+      const latestCOAverage = coHistory.length
+        ? coHistory[coHistory.length - 1].average
+        : null;
+
+      if (latestTemperature) {
+        analysis.push({
+          type: "normal",
+          text: `<strong>Condição térmica atual:</strong> temperatura de ${formatNumber(latestTemperature.value)} °C, registrada em ${formatDate(latestTemperature.feed.created_at, true)}.`
+        });
+      }
+
+      if (latestWind && latestDirection) {
+        const directionName = windDirectionName(latestDirection.value);
+
+        let text = "vento fraco, com baixa influência na dispersão atmosférica local";
+
+        if (latestWind.value >= 8) {
+          text = "vento intenso, exigindo atenção a rajadas e atividades externas";
+        } else if (latestWind.value >= 3) {
+          text = "vento moderado, favorecendo a renovação e dispersão do ar";
+        }
+
+        analysis.push({
+          type: latestWind.value >= 8 ? "warning" : "normal",
+          text: `<strong>Dinâmica eólica:</strong> velocidade/rajada atual de ${formatNumber(latestWind.value)} m/s, proveniente de ${directionName} (${formatNumber(latestDirection.value, 0)}°). Há ${text}.`
+        });
+      }
+
+      if (latestCOAverage !== null) {
+        const type = latestCOAverage >= 9 ? "danger" : latestCOAverage >= 7 ? "warning" : "normal";
+
+        analysis.push({
+          type,
+          text: `<strong>Qualidade do ar — CO:</strong> média móvel de 8 horas em ${formatNumber(latestCOAverage, 2)} ppm. A referência operacional do painel é 9 ppm.`
+        });
+      }
+
+      if (latestCO2) {
+        let description = "concentração compatível com boa renovação de ar em ambientes monitorados";
+
+        if (latestCO2.value >= 1200) {
+          description = "nível elevado para ambientes internos, sugerindo reforço da ventilação";
+        } else if (latestCO2.value >= 800) {
+          description = "nível moderado; recomenda-se observar a ventilação do ambiente";
+        }
+
+        analysis.push({
+          type: latestCO2.value >= 1200 ? "warning" : "normal",
+          text: `<strong>Indicador de CO₂:</strong> leitura atual de ${formatNumber(latestCO2.value, 0)} ppm; ${description}.`
+        });
+      }
+
+      const historicalWind = history.flatMap((month) =>
+        getValuesFromMonth(month, FIELDS.windSpeed)
+      );
+
+      if (historicalWind.length) {
+        analysis.push({
+          type: Math.max(...historicalWind) >= 12 ? "warning" : "normal",
+          text: `<strong>Histórico eólico anual:</strong> a maior rajada identificada nos últimos 12 meses foi de ${formatNumber(Math.max(...historicalWind))} m/s. O cálculo utiliza exclusivamente o <strong>field4</strong>.`
+        });
+      }
+
+      const historicalTemperature = history.flatMap((month) =>
+        getValuesFromMonth(month, FIELDS.temperature)
+      );
+
+      if (historicalTemperature.length) {
+        analysis.push({
+          type: "normal",
+          text: `<strong>Amplitude térmica anual:</strong> os registros disponíveis dos últimos 12 meses variaram entre ${formatNumber(Math.min(...historicalTemperature))} °C e ${formatNumber(Math.max(...historicalTemperature))} °C.`
+        });
+      }
+
+      if (!analysis.length) {
+        analysis.push({
+          type: "warning",
+          text: "Ainda não existem leituras válidas suficientes para a análise automática."
+        });
+      }
+
+      document.getElementById("smartAnalysis").innerHTML = analysis
+        .map((item) => `<div class="analysis-item ${item.type}">${item.text}</div>`)
+        .join("");
+    }
+
+    async function updateDashboard() {
+      if (isUpdating) {
+        return;
+      }
+
+      isUpdating = true;
+
+      const refreshButton = document.getElementById("refreshButton");
+      refreshButton.disabled = true;
+      refreshButton.textContent = "Atualizando...";
+
+      try {
+        setConnectionStatus("Atualizando dados...", "loading");
+
+        const [feeds, history] = await Promise.all([
+          fetchMainFeeds(),
+          fetchLast12MonthsHistory()
+        ]);
+
+        updateClimatePanel(feeds);
+        updateWindPanel(feeds);
+        updateGustTable(feeds);
+        updateEnvironmentalPanel(feeds);
+
+        createTemperatureChart(history);
+        createGustChart(history);
+
+        runClimaticoInteligente(feeds, history);
+
+        const updatedAt = new Intl.DateTimeFormat("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }).format(new Date());
+
+        setConnectionStatus(`Atualizado às ${updatedAt}`, "ok");
+      } catch (error) {
+        console.error(error);
+
+        setConnectionStatus("Erro ao atualizar dados", "error");
+
+        document.getElementById("smartAnalysis").innerHTML = `
+          <div class="error">
+            Não foi possível atualizar os dados do canal ThingSpeak no momento.
+            Verifique a conexão, a chave de leitura e a disponibilidade do canal.
+          </div>
+        `;
+      } finally {
+        isUpdating = false;
+        refreshButton.disabled = false;
+        refreshButton.textContent = "Atualizar agora";
+      }
+    }
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+
+        document.querySelectorAll(".tab-button").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        document.querySelectorAll(".tab-content").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    document.getElementById("refreshButton").addEventListener("click", updateDashboard);
+
+    updateHeaderTimestamp();
+    setInterval(updateHeaderTimestamp, 1000);
+
+    updateDashboard();
+
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
+
+    refreshTimer = setInterval(updateDashboard, AUTO_REFRESH_MS);
   </script>
 </body>
 </html>
