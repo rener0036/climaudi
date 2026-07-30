@@ -9,35 +9,52 @@
 
   <style>
     :root {
-      --bg: #f4f8fc;
-      --panel: #ffffff;
-      --panel-2: #edf5fb;
-      --line: #c9d9e6;
-      --text: #1e2e3d;
-      --muted: #62788b;
-      --primary: #078bb8;
-      --success: #21a45d;
-      --warning: #d99210;
-      --danger: #d74a4a;
-      --shadow: 0 8px 24px rgba(37, 70, 98, 0.12);
+      --bg: #08111f;
+      --panel: #0f1d31;
+      --panel-2: #132640;
+      --line: #29445f;
+      --text: #e9f3ff;
+      --muted: #9fb3c8;
+      --primary: #20b7d8;
+      --success: #35c879;
+      --warning: #f7b731;
+      --danger: #ef5b5b;
+      --comfort: #b56cff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .22);
+      --chart-grid: rgba(159, 179, 200, .13);
     }
 
-    * {
-      box-sizing: border-box;
+    body.light-theme {
+      --bg: #eef5fb;
+      --panel: #ffffff;
+      --panel-2: #e5f0fa;
+      --line: #b7cce0;
+      --text: #14253a;
+      --muted: #587087;
+      --primary: #008db2;
+      --success: #198754;
+      --warning: #b97900;
+      --danger: #c53030;
+      --comfort: #7a35be;
+      --shadow: 0 8px 22px rgba(50, 78, 102, .12);
+      --chart-grid: rgba(88, 112, 135, .18);
     }
+
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background:
-        radial-gradient(circle at top right, rgba(7, 139, 184, 0.1), transparent 30%),
+        radial-gradient(circle at top right, rgba(32, 183, 216, .12), transparent 30%),
         var(--bg);
       color: var(--text);
+      transition: .25s ease;
     }
 
     header {
       padding: 22px 24px;
-      background: rgba(255, 255, 255, 0.96);
+      background: color-mix(in srgb, var(--bg) 94%, transparent);
       border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
@@ -47,7 +64,7 @@
 
     .header-content {
       max-width: 1500px;
-      margin: 0 auto;
+      margin: auto;
       display: flex;
       gap: 18px;
       align-items: center;
@@ -56,18 +73,17 @@
     }
 
     h1 {
-      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
       margin: 0;
-      color: #17334a;
+      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
     }
 
     .subtitle {
-      margin: 5px 0 0;
       color: var(--muted);
-      font-size: 0.9rem;
+      margin: 5px 0 0;
+      font-size: .9rem;
     }
 
-    .header-actions {
+    .header-actions, .tabs {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -82,43 +98,15 @@
       padding: 10px 14px;
       cursor: pointer;
       font-weight: bold;
-      transition: 0.2s ease;
+      transition: .2s ease;
     }
 
     button:hover {
-      filter: brightness(1.08);
+      filter: brightness(1.12);
       transform: translateY(-1px);
     }
 
-    button:disabled {
-      opacity: 0.65;
-      cursor: wait;
-      transform: none;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      background: var(--success);
-      display: inline-block;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(33, 164, 93, 0.65);
-    }
-
-    main {
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 22px;
-    }
-
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
-    .tab-button {
+    .theme-button, .tab-button {
       background: var(--panel);
       color: var(--muted);
       border: 1px solid var(--line);
@@ -130,39 +118,44 @@
       border-color: var(--primary);
     }
 
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(53, 200, 121, .85);
+    }
+
+    main {
+      max-width: 1500px;
+      margin: auto;
+      padding: 22px;
+    }
+
+    .tabs { margin-bottom: 18px; }
+
     .tab-content {
       display: none;
-      animation: fadeIn 0.25s ease;
+      animation: fadeIn .25s ease;
     }
 
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content.active { display: block; }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .timestamp-panel {
       display: inline-flex;
-      align-items: center;
       gap: 10px;
+      align-items: center;
       padding: 10px 14px;
       margin-bottom: 18px;
       border: 1px solid var(--line);
-      border-radius: 9px;
       background: var(--panel);
-      color: #29445b;
-      font-size: 0.92rem;
-      box-shadow: 0 3px 10px rgba(37, 70, 98, 0.05);
+      border-radius: 9px;
     }
 
     .grid {
@@ -174,17 +167,13 @@
 
     .grid-2 {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
       gap: 18px;
       margin-bottom: 18px;
     }
 
-    .card,
-    .chart-card,
-    .table-card,
-    .analysis-card,
-    .compass-card {
-      background: var(--panel);
+    .card, .chart-card, .table-card, .analysis-card, .compass-card, .forecast-info {
+      background: linear-gradient(145deg, var(--panel-2), var(--panel));
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 18px;
@@ -193,51 +182,63 @@
 
     .metric-label {
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: .85rem;
       margin-bottom: 9px;
     }
 
     .metric-value {
+      color: var(--text);
       font-size: 1.8rem;
       font-weight: 700;
-      color: #17334a;
     }
 
     .metric-unit {
-      font-size: 0.9rem;
       color: var(--primary);
+      font-size: .9rem;
       margin-left: 4px;
     }
 
     .metric-detail {
-      font-size: 0.78rem;
-      margin-top: 10px;
       color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.4;
+      margin-top: 10px;
     }
 
-    .chart-card h2,
-    .table-card h2,
-    .analysis-card h2,
-    .compass-card h2 {
-      margin: 0 0 14px;
+    .comfort-card { border-top: 3px solid var(--comfort); }
+    .comfort-card .metric-unit { color: var(--comfort); }
+
+    .forecast-card { border-top: 3px solid var(--primary); }
+    .forecast-card.future-3 { border-top-color: var(--warning); }
+    .forecast-card.future-6 { border-top-color: var(--danger); }
+
+    .forecast-info {
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+
+    .chart-card h2, .table-card h2, .analysis-card h2, .compass-card h2 {
       font-size: 1.05rem;
-      color: #17334a;
+      margin: 0 0 14px;
     }
 
-    /* Altura fixa: impede o crescimento contínuo dos gráficos. */
     .chart-box {
       position: relative;
+      height: 390px;
       width: 100%;
-      height: 350px;
-      overflow: hidden;
     }
 
-    .chart-box canvas {
-      display: block;
-      width: 100% !important;
-      height: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
+    .formula {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.55;
     }
 
     .compass-card {
@@ -249,52 +250,25 @@
     .compass {
       width: 280px;
       height: 280px;
-      max-width: 90vw;
-      max-height: 90vw;
-      border: 5px solid #7693aa;
-      border-radius: 50%;
       position: relative;
+      border: 5px solid #5d7c99;
+      border-radius: 50%;
       background:
-        radial-gradient(circle, rgba(7, 139, 184, 0.13) 0 8%, transparent 8%),
-        repeating-conic-gradient(
-          from -1deg,
-          #6d91ad 0deg 1deg,
-          transparent 1deg 10deg
-        ),
-        #f7fbff;
-      box-shadow: inset 0 0 35px rgba(7, 139, 184, 0.1);
-    }
-
-    .compass::before,
-    .compass::after {
-      content: "";
-      position: absolute;
-      background: rgba(40, 83, 115, 0.3);
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .compass::before {
-      width: 2px;
-      height: 90%;
-    }
-
-    .compass::after {
-      width: 90%;
-      height: 2px;
+        radial-gradient(circle, rgba(32,183,216,.15) 0 8%, transparent 8%),
+        repeating-conic-gradient(from -1deg, #a6c8e5 0deg 1deg, transparent 1deg 10deg),
+        #0b1728;
     }
 
     .direction-arrow {
       position: absolute;
-      left: calc(50% - 4px);
       top: 25px;
+      left: calc(50% - 4px);
       width: 8px;
       height: 118px;
+      z-index: 4;
       transform-origin: 4px 115px;
       background: linear-gradient(to top, var(--danger) 0 75%, transparent 75%);
-      z-index: 4;
-      transition: transform 0.5s ease;
+      transition: transform .5s ease;
     }
 
     .direction-arrow::before {
@@ -311,67 +285,31 @@
       position: absolute;
       top: 50%;
       left: 50%;
+      z-index: 5;
       width: 22px;
       height: 22px;
-      background: #fff;
       border: 5px solid var(--primary);
       border-radius: 50%;
+      background: #fff;
       transform: translate(-50%, -50%);
-      z-index: 5;
     }
 
     .cardinal {
       position: absolute;
-      font-weight: bold;
-      color: #244a67;
       z-index: 6;
-      font-size: 0.87rem;
+      color: #fff;
+      font-size: .87rem;
+      font-weight: bold;
     }
 
-    .n {
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--danger);
-    }
-
-    .s {
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .e {
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .w {
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .ne {
-      top: 38px;
-      right: 36px;
-    }
-
-    .nw {
-      top: 38px;
-      left: 36px;
-    }
-
-    .se {
-      bottom: 38px;
-      right: 36px;
-    }
-
-    .sw {
-      bottom: 38px;
-      left: 36px;
-    }
+    .n { top: 8px; left: 50%; transform: translateX(-50%); color: var(--danger); }
+    .s { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .e { top: 50%; right: 10px; transform: translateY(-50%); }
+    .w { top: 50%; left: 10px; transform: translateY(-50%); }
+    .ne { top: 38px; right: 36px; }
+    .nw { top: 38px; left: 36px; }
+    .se { bottom: 38px; right: 36px; }
+    .sw { bottom: 38px; left: 36px; }
 
     .compass-readout {
       margin-top: 15px;
@@ -384,55 +322,24 @@
       font-size: 1.2rem;
     }
 
-    .table-wrap {
-      overflow-x: auto;
-    }
+    .table-wrap { overflow-x: auto; }
 
     table {
       width: 100%;
-      border-collapse: collapse;
       min-width: 520px;
+      border-collapse: collapse;
     }
 
-    th,
-    td {
+    th, td {
       padding: 11px;
       text-align: left;
-      border-bottom: 1px solid rgba(67, 107, 135, 0.15);
+      border-bottom: 1px solid var(--line);
     }
 
     th {
       color: var(--primary);
-      font-size: 0.82rem;
+      font-size: .82rem;
       text-transform: uppercase;
-    }
-
-    td {
-      color: #29445b;
-      font-size: 0.92rem;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-size: 0.77rem;
-      font-weight: bold;
-    }
-
-    .good {
-      background: rgba(33, 164, 93, 0.14);
-      color: #168045;
-    }
-
-    .attention {
-      background: rgba(217, 146, 16, 0.15);
-      color: #a86800;
-    }
-
-    .critical {
-      background: rgba(215, 74, 74, 0.14);
-      color: #b12f2f;
     }
 
     .analysis-list {
@@ -444,77 +351,49 @@
       padding: 14px;
       border-left: 4px solid var(--primary);
       border-radius: 6px;
-      background: #f5faff;
-      color: #29445b;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
       line-height: 1.5;
     }
 
-    .analysis-item.warning {
-      border-left-color: var(--warning);
+    .analysis-item.warning { border-left-color: var(--warning); }
+    .analysis-item.danger { border-left-color: var(--danger); }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: .77rem;
+      font-weight: bold;
     }
 
-    .analysis-item.danger {
-      border-left-color: var(--danger);
-    }
-
-    .formula {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #f7fafc;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.55;
-    }
+    .good { background: rgba(53,200,121,.17); color: #35c879; }
+    .attention { background: rgba(247,183,49,.18); color: #d99600; }
+    .critical { background: rgba(239,91,91,.18); color: #ef5b5b; }
 
     .loading {
+      padding: 20px;
       color: var(--muted);
       text-align: center;
-      padding: 20px;
     }
 
     .error {
-      color: #a72e2e;
-      background: rgba(215, 74, 74, 0.1);
       padding: 12px;
+      color: #ef5b5b;
+      border: 1px solid rgba(239,91,91,.28);
       border-radius: 8px;
-      border: 1px solid rgba(215, 74, 74, 0.25);
+      background: rgba(239,91,91,.12);
     }
 
     @media (max-width: 900px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-
-      .chart-box {
-        height: 300px;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
+      .chart-box { height: 320px; }
     }
 
     @media (max-width: 540px) {
-      main {
-        padding: 14px;
-      }
-
-      header {
-        padding: 16px 14px;
-      }
-
-      .chart-box {
-        height: 260px;
-      }
-
-      .compass {
-        width: 245px;
-        height: 245px;
-      }
-
-      .direction-arrow {
-        top: 22px;
-        height: 102px;
-        transform-origin: 4px 100px;
-      }
+      main { padding: 14px; }
+      header { padding: 16px 14px; }
+      .chart-box { height: 280px; }
+      .compass { width: 245px; height: 245px; }
     }
   </style>
 </head>
@@ -524,14 +403,13 @@
     <div class="header-content">
       <div>
         <h1>ClimaUdia - Soluções em sistemas climatológicos</h1>
-        <p class="subtitle">
-          Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental
-        </p>
+        <p class="subtitle">Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental</p>
       </div>
 
       <div class="header-actions">
         <span class="status-dot" id="statusDot"></span>
         <span id="connectionStatus">Aguardando leitura</span>
+        <button id="themeButton" class="theme-button" type="button">☀️ Tema claro</button>
         <button id="refreshButton" type="button">Atualizar agora</button>
       </div>
     </div>
@@ -553,34 +431,89 @@
 
       <div class="grid">
         <div class="card">
-          <div class="metric-label">Temperatura atual</div>
+          <div class="metric-label">Temperatura atual medida</div>
           <div class="metric-value">
-            <span id="currentTemperature">--</span><span class="metric-unit">°C</span>
+            <span id="currentTemperature">--</span>
+            <span class="metric-unit">°C</span>
           </div>
           <div class="metric-detail" id="temperatureDate">Sem leitura disponível</div>
+        </div>
+
+        <div class="card comfort-card">
+          <div class="metric-label">Conforto térmico</div>
+          <div class="metric-value">
+            <span>26,50</span>
+            <span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail">Referência indicada pela linha tracejada roxa no gráfico.</div>
+        </div>
+
+        <div class="card forecast-card">
+          <div class="metric-label">Predição para agora</div>
+          <div class="metric-value">
+            <span id="forecastNow">--</span>
+            <span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail" id="forecastNowDetail">Aguardando dados históricos.</div>
+        </div>
+
+        <div class="card forecast-card future-3">
+          <div class="metric-label">Predição para +3 horas</div>
+          <div class="metric-value">
+            <span id="forecast3h">--</span>
+            <span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail" id="forecast3hDetail">Aguardando dados históricos.</div>
+        </div>
+
+        <div class="card forecast-card future-6">
+          <div class="metric-label">Predição para +6 horas</div>
+          <div class="metric-value">
+            <span id="forecast6h">--</span>
+            <span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-detail" id="forecast6hDetail">Aguardando dados históricos.</div>
         </div>
 
         <div class="card">
           <div class="metric-label">Temperatura mínima no período</div>
           <div class="metric-value">
-            <span id="periodMinTemperature">--</span><span class="metric-unit">°C</span>
+            <span id="periodMinTemperature">--</span>
+            <span class="metric-unit">°C</span>
           </div>
-          <div class="metric-detail">Considerando os últimos 12 meses</div>
+          <div class="metric-detail">Considerando as leituras recebidas do canal.</div>
         </div>
 
         <div class="card">
           <div class="metric-label">Temperatura máxima no período</div>
           <div class="metric-value">
-            <span id="periodMaxTemperature">--</span><span class="metric-unit">°C</span>
+            <span id="periodMaxTemperature">--</span>
+            <span class="metric-unit">°C</span>
           </div>
-          <div class="metric-detail">Considerando os últimos 12 meses</div>
+          <div class="metric-detail">Considerando as leituras recebidas do canal.</div>
         </div>
       </div>
 
+      <div class="forecast-info">
+        <strong>Temperatura nas últimas 24 horas e projeção:</strong>
+        a linha azul apresenta todas as leituras válidas do <strong>field1</strong>
+        nas últimas 24 horas. A linha roxa tracejada representa o conforto térmico
+        de <strong>26,50 °C</strong>. A linha tracejada clara representa a previsão
+        de temperatura para agora, 3 horas e 6 horas.
+      </div>
+
       <div class="chart-card">
-        <h2>Temperatura mínima e máxima — últimos 12 meses</h2>
+        <h2>Temperatura — últimas 24 horas e previsão</h2>
+
         <div class="chart-box">
           <canvas id="temperatureChart"></canvas>
+        </div>
+
+        <div class="formula">
+          <strong>Metodologia preditiva:</strong> regressão linear local ponderada.
+          As leituras mais recentes recebem maior peso, tornando a projeção mais
+          adequada para horizontes curtos de 3 e 6 horas. Em caso de poucas leituras,
+          o sistema utiliza a última temperatura válida como referência.
         </div>
       </div>
     </section>
@@ -590,15 +523,17 @@
         <div class="card">
           <div class="metric-label">Velocidade / rajada atual</div>
           <div class="metric-value">
-            <span id="windSpeed">--</span><span class="metric-unit">m/s</span>
+            <span id="windSpeed">--</span>
+            <span class="metric-unit">km/h</span>
           </div>
-          <div class="metric-detail">Leitura do <strong>field4</strong></div>
+          <div class="metric-detail">Leitura direta do <strong>field4</strong></div>
         </div>
 
         <div class="card">
           <div class="metric-label">Direção atual do vento</div>
           <div class="metric-value">
-            <span id="windDirectionValue">--</span><span class="metric-unit">°</span>
+            <span id="windDirectionValue">--</span>
+            <span class="metric-unit">°</span>
           </div>
           <div class="metric-detail">
             <span id="windDirectionText">--</span> · Leitura do <strong>field6</strong>
@@ -608,9 +543,10 @@
         <div class="card">
           <div class="metric-label">Maior rajada no período</div>
           <div class="metric-value">
-            <span id="periodMaxGust">--</span><span class="metric-unit">m/s</span>
+            <span id="periodMaxGust">--</span>
+            <span class="metric-unit">km/h</span>
           </div>
-          <div class="metric-detail">Últimos 12 meses</div>
+          <div class="metric-detail">Últimos seis meses disponíveis.</div>
         </div>
       </div>
 
@@ -621,7 +557,6 @@
           <div class="compass">
             <div id="directionArrow" class="direction-arrow"></div>
             <div class="compass-center"></div>
-
             <span class="cardinal n">N</span>
             <span class="cardinal ne">NE</span>
             <span class="cardinal e">L</span>
@@ -638,10 +573,8 @@
         </div>
 
         <div class="chart-card">
-          <h2>Rajadas máximas — últimos 12 meses</h2>
-          <div class="chart-box">
-            <canvas id="gustChart"></canvas>
-          </div>
+          <h2>Rajadas máximas — últimos 6 meses</h2>
+          <div class="chart-box"><canvas id="gustChart"></canvas></div>
         </div>
       </div>
 
@@ -657,9 +590,7 @@
               </tr>
             </thead>
             <tbody id="gustTableBody">
-              <tr>
-                <td colspan="3" class="loading">Carregando dados de rajada...</td>
-              </tr>
+              <tr><td colspan="3" class="loading">Carregando dados de rajada...</td></tr>
             </tbody>
           </table>
         </div>
@@ -671,7 +602,8 @@
         <div class="card">
           <div class="metric-label">Monóxido de carbono — CO</div>
           <div class="metric-value">
-            <span id="coValue">--</span><span class="metric-unit">ppm</span>
+            <span id="coValue">--</span>
+            <span class="metric-unit">ppm</span>
           </div>
           <div class="metric-detail">Leitura do <strong>field7</strong></div>
         </div>
@@ -679,7 +611,8 @@
         <div class="card">
           <div class="metric-label">Dióxido de carbono — CO₂</div>
           <div class="metric-value">
-            <span id="co2Value">--</span><span class="metric-unit">ppm</span>
+            <span id="co2Value">--</span>
+            <span class="metric-unit">ppm</span>
           </div>
           <div class="metric-detail">Leitura do <strong>field8</strong></div>
         </div>
@@ -687,11 +620,10 @@
         <div class="card">
           <div class="metric-label">CO — média móvel de 8 horas</div>
           <div class="metric-value">
-            <span id="coMovingAverage">--</span><span class="metric-unit">ppm</span>
+            <span id="coMovingAverage">--</span>
+            <span class="metric-unit">ppm</span>
           </div>
-          <div class="metric-detail">
-            Referência operacional: padrão de 8 horas da Resolução CONAMA nº 506/2024
-          </div>
+          <div class="metric-detail">Média calculada com as leituras das últimas 8 horas.</div>
         </div>
 
         <div class="card">
@@ -703,17 +635,12 @@
 
       <div class="chart-card">
         <h2>CO — série recente e média móvel de 8 horas</h2>
-        <div class="chart-box">
-          <canvas id="coChart"></canvas>
-        </div>
+        <div class="chart-box"><canvas id="coChart"></canvas></div>
+      </div>
 
-        <div class="formula">
-          Para o acompanhamento do CO, a média móvel é calculada usando as leituras disponíveis dentro da janela de 8 horas:
-          <br /><br />
-          <strong>Média móvel de CO = soma das leituras de CO nas últimas 8 h ÷ quantidade de leituras válidas</strong>
-          <br /><br />
-          O limite de referência apresentado no painel é <strong>9 ppm para 8 horas</strong>.
-        </div>
+      <div class="chart-card">
+        <h2>CO₂ — série recente</h2>
+        <div class="chart-box"><canvas id="co2Chart"></canvas></div>
       </div>
     </section>
 
@@ -728,15 +655,6 @@
   </main>
 
   <script>
-    /*
-      MAPEAMENTO DEFINITIVO DOS CAMPOS:
-      field1 = Temperatura
-      field4 = Velocidade do vento / rajadas / dinâmica eólica
-      field6 = Direção do vento
-      field7 = CO
-      field8 = CO₂
-    */
-
     const CHANNEL_ID = "321770";
     const READ_API_KEY = "0EPAIXIM4UL9LIW";
     const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`;
@@ -749,33 +667,27 @@
       co2: "field8"
     };
 
-    const MAIN_RECORD_LIMIT = 1000;
-    const HISTORY_RECORD_LIMIT = 1000;
+    const COMFORT_TEMPERATURE = 26.5;
+    const MAIN_RECORD_LIMIT = 8000;
     const AUTO_REFRESH_MS = 5 * 60 * 1000;
+    const FORECAST_HISTORY_HOURS = 24;
+    const FORECAST_HALF_LIFE_HOURS = 6;
 
     let temperatureChart = null;
     let gustChart = null;
     let coChart = null;
-    let refreshTimer = null;
-    let isUpdating = false;
+    let co2Chart = null;
 
     function parseValue(value) {
-      if (value === null || value === undefined || value === "") {
-        return null;
-      }
-
+      if (value === null || value === undefined || value === "") return null;
       const parsed = Number(String(value).replace(",", "."));
       return Number.isFinite(parsed) ? parsed : null;
     }
 
     function formatNumber(value, decimals = 1) {
-      const number = Number(value);
+      if (!Number.isFinite(Number(value))) return "--";
 
-      if (!Number.isFinite(number)) {
-        return "--";
-      }
-
-      return number.toLocaleString("pt-BR", {
+      return Number(value).toLocaleString("pt-BR", {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
       });
@@ -783,10 +695,7 @@
 
     function formatDate(value, withSeconds = false) {
       const date = new Date(value);
-
-      if (Number.isNaN(date.getTime())) {
-        return "--";
-      }
+      if (Number.isNaN(date.getTime())) return "--";
 
       return new Intl.DateTimeFormat("pt-BR", {
         dateStyle: "short",
@@ -795,9 +704,15 @@
       }).format(date);
     }
 
-    function getDatePartsSP(value) {
-      const date = new Date(value);
+    function formatHour(value) {
+      return new Intl.DateTimeFormat("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "America/Sao_Paulo"
+      }).format(new Date(value));
+    }
 
+    function getDatePartsSP(value) {
       const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: "America/Sao_Paulo",
         year: "numeric",
@@ -805,418 +720,448 @@
         day: "2-digit",
         hour: "2-digit",
         hourCycle: "h23"
-      }).formatToParts(date);
+      }).formatToParts(new Date(value));
 
-      const result = {};
-
-      parts.forEach((part) => {
-        if (part.type !== "literal") {
-          result[part.type] = part.value;
-        }
-      });
-
-      return result;
-    }
-
-    function getDashboardNowSP() {
-      const parts = getDatePartsSP(new Date());
-
-      return {
-        year: Number(parts.year),
-        month: Number(parts.month) - 1
-      };
-    }
-
-    function updateHeaderTimestamp() {
-      const timestamp = new Intl.DateTimeFormat("pt-BR", {
-        timeZone: "America/Sao_Paulo",
-        weekday: "long",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      }).format(new Date());
-
-      document.getElementById("dashboardTimestamp").textContent = timestamp;
-    }
-
-    function setConnectionStatus(text, type = "ok") {
-      const status = document.getElementById("connectionStatus");
-      const dot = document.getElementById("statusDot");
-
-      const colors = {
-        ok: "#21a45d",
-        loading: "#d99210",
-        error: "#d74a4a"
-      };
-
-      const color = colors[type] || colors.ok;
-
-      status.textContent = text;
-      dot.style.background = color;
-      dot.style.boxShadow = `0 0 10px ${color}`;
+      return parts.reduce((result, item) => {
+        if (item.type !== "literal") result[item.type] = item.value;
+        return result;
+      }, {});
     }
 
     function getLastValidFeed(feeds, fieldName) {
       for (let index = feeds.length - 1; index >= 0; index--) {
         const value = parseValue(feeds[index][fieldName]);
-
-        if (value !== null) {
-          return {
-            feed: feeds[index],
-            value
-          };
-        }
+        if (value !== null) return { feed: feeds[index], value };
       }
-
       return null;
     }
 
     function windDirectionName(degrees) {
       const directions = [
-        "N", "NNE", "NE", "ENE",
-        "L", "LSE", "SE", "SSE",
-        "S", "SSO", "SO", "OSO",
-        "O", "ONO", "NO", "NNO"
+        "N", "NNE", "NE", "ENE", "L", "LSE", "SE", "SSE",
+        "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"
       ];
 
-      const normalized = ((degrees % 360) + 360) % 360;
-      const index = Math.round(normalized / 22.5) % 16;
-
+      const index = Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16;
       return directions[index];
     }
 
-    function getMonthLabel(year, monthIndex) {
-      const label = new Intl.DateTimeFormat("pt-BR", {
-        month: "short",
-        year: "numeric",
-        timeZone: "America/Sao_Paulo"
-      }).format(new Date(Date.UTC(year, monthIndex, 1)));
+    function getChartColors() {
+      const light = document.body.classList.contains("light-theme");
 
-      return label
-        .replace(".", "")
-        .replace(" de ", "/");
+      return {
+        text: light ? "#14253a" : "#dcecff",
+        muted: light ? "#587087" : "#b7cce0",
+        grid: light ? "rgba(88,112,135,.18)" : "rgba(159,179,200,.13)"
+      };
     }
 
-    /*
-      Gera rigorosamente os últimos 12 meses, incluindo o mês atual.
-      Exemplo em julho/2026:
-      ago/2025, set/2025, ..., jun/2026, jul/2026.
-    */
-    function getPrevious12Months() {
-      const current = getDashboardNowSP();
-      const months = [];
+    function setConnectionStatus(text, type = "ok") {
+      const colors = {
+        ok: "#35c879",
+        loading: "#f7b731",
+        error: "#ef5b5b"
+      };
 
-      for (let i = 11; i >= 0; i--) {
-        const date = new Date(current.year, current.month - i, 1);
-
-        months.push({
-          year: date.getFullYear(),
-          month: date.getMonth(),
-          label: getMonthLabel(date.getFullYear(), date.getMonth())
-        });
-      }
-
-      return months;
+      const color = colors[type] || colors.ok;
+      document.getElementById("connectionStatus").textContent = text;
+      document.getElementById("statusDot").style.background = color;
+      document.getElementById("statusDot").style.boxShadow = `0 0 10px ${color}`;
     }
 
-    function buildUtcDate(year, monthIndex, day, hour, minute, second) {
-      return new Date(Date.UTC(year, monthIndex, day, hour, minute, second)).toISOString();
+    function updateHeaderTimestamp() {
+      document.getElementById("dashboardTimestamp").textContent =
+        new Intl.DateTimeFormat("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }).format(new Date());
     }
 
-    async function fetchFeeds(params = {}) {
+    async function fetchFeeds() {
       const url = new URL(THINGSPEAK_URL);
-
       url.searchParams.set("api_key", READ_API_KEY);
-      url.searchParams.set("_", Date.now().toString());
+      url.searchParams.set("results", MAIN_RECORD_LIMIT);
 
-      Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.set(key, value);
-      });
-
-      const response = await fetch(url.toString(), {
-        cache: "no-store"
-      });
+      const response = await fetch(url.toString(), { cache: "no-store" });
 
       if (!response.ok) {
-        throw new Error(`ThingSpeak retornou o código ${response.status}.`);
+        throw new Error(`Erro ThingSpeak: ${response.status}`);
       }
 
       const data = await response.json();
       return data.feeds || [];
     }
 
-    /*
-      Leitura operacional: sempre os últimos 1000 registros.
-    */
-    async function fetchMainFeeds() {
-      return fetchFeeds({
-        results: MAIN_RECORD_LIMIT
-      });
-    }
-
-    /*
-      Leitura histórica: uma consulta independente para cada mês.
-      Isso impede que os 1000 registros mais recentes, concentrados
-      em julho, eliminem os demais meses do gráfico anual.
-    */
-    async function fetchMonthFeeds(year, monthIndex) {
-      const start = buildUtcDate(year, monthIndex, 1, 0, 0, 0);
-      const end = buildUtcDate(year, monthIndex + 1, 1, 0, 0, 0);
-
-      return fetchFeeds({
-        start,
-        end,
-        results: HISTORY_RECORD_LIMIT
-      });
-    }
-
-    async function fetchLast12MonthsHistory() {
-      const months = getPrevious12Months();
-
-      const requests = months.map(async (month) => {
-        try {
-          const feeds = await fetchMonthFeeds(month.year, month.month);
-
-          return {
-            ...month,
-            feeds
-          };
-        } catch (error) {
-          console.warn(`Falha ao consultar ${month.label}:`, error);
-
-          return {
-            ...month,
-            feeds: []
-          };
-        }
-      });
-
-      return Promise.all(requests);
-    }
-
     function destroyChart(chart) {
-      if (chart) {
-        chart.destroy();
+      if (chart) chart.destroy();
+    }
+
+    /*
+      Regressão linear local ponderada:
+      - Considera as últimas 24 horas.
+      - Leituras recentes têm peso exponencialmente maior.
+      - O resultado é mais adequado para previsão térmica de curto prazo.
+    */
+    function calculateTemperatureForecast(feeds) {
+      const now = new Date();
+      const start = now.getTime() - FORECAST_HISTORY_HOURS * 60 * 60 * 1000;
+
+      const data = feeds
+        .map(feed => ({
+          date: new Date(feed.created_at),
+          value: parseValue(feed[FIELDS.temperature])
+        }))
+        .filter(item =>
+          item.value !== null &&
+          !Number.isNaN(item.date.getTime()) &&
+          item.date.getTime() >= start
+        )
+        .sort((a, b) => a.date - b.date);
+
+      if (!data.length) {
+        return {
+          valid: false,
+          now: null,
+          h3: null,
+          h6: null,
+          slope: null,
+          r2: null,
+          points: 0,
+          method: "Sem dados suficientes"
+        };
       }
-    }
 
-    function getValuesFromMonth(month, field) {
-      return month.feeds
-        .map((feed) => parseValue(feed[field]))
-        .filter((value) => value !== null);
-    }
+      const lastValue = data[data.length - 1].value;
 
-    function chartBaseOptions(yUnit, beginAtZero = false) {
+      if (data.length < 4) {
+        return {
+          valid: true,
+          now: lastValue,
+          h3: lastValue,
+          h6: lastValue,
+          slope: 0,
+          r2: null,
+          points: data.length,
+          method: "Persistência da última leitura"
+        };
+      }
+
+      let sumW = 0;
+      let sumWX = 0;
+      let sumWY = 0;
+      let sumWXX = 0;
+      let sumWXY = 0;
+
+      const prepared = data.map(item => {
+        const x = (item.date.getTime() - now.getTime()) / 3600000;
+        const weight = Math.exp(x / FORECAST_HALF_LIFE_HOURS);
+
+        sumW += weight;
+        sumWX += weight * x;
+        sumWY += weight * item.value;
+        sumWXX += weight * x * x;
+        sumWXY += weight * x * item.value;
+
+        return { ...item, x, weight };
+      });
+
+      const denominator = sumW * sumWXX - sumWX * sumWX;
+
+      if (Math.abs(denominator) < 0.000001) {
+        return {
+          valid: true,
+          now: lastValue,
+          h3: lastValue,
+          h6: lastValue,
+          slope: 0,
+          r2: null,
+          points: data.length,
+          method: "Persistência da última leitura"
+        };
+      }
+
+      let slope = (sumW * sumWXY - sumWX * sumWY) / denominator;
+      const intercept = (sumWY - slope * sumWX) / sumW;
+
+      /* Limite de segurança contra picos anormais no sensor. */
+      slope = Math.max(-5, Math.min(5, slope));
+
+      const weightedMean = sumWY / sumW;
+      let totalVariance = 0;
+      let residualVariance = 0;
+
+      prepared.forEach(item => {
+        const predicted = intercept + slope * item.x;
+        totalVariance += item.weight * Math.pow(item.value - weightedMean, 2);
+        residualVariance += item.weight * Math.pow(item.value - predicted, 2);
+      });
+
+      const r2 = totalVariance > 0
+        ? Math.max(0, 1 - residualVariance / totalVariance)
+        : null;
+
       return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        resizeDelay: 150,
-        plugins: {
-          legend: {
-            labels: {
-              color: "#29445b"
-            }
-          }
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: "#526c80",
-              maxRotation: 45,
-              minRotation: 0
-            },
-            grid: {
-              color: "rgba(67, 107, 135, 0.10)"
-            }
-          },
-          y: {
-            beginAtZero,
-            ticks: {
-              color: "#526c80",
-              callback(value) {
-                return `${value} ${yUnit}`;
-              }
-            },
-            grid: {
-              color: "rgba(67, 107, 135, 0.15)"
-            }
-          }
-        }
+        valid: true,
+        now: intercept,
+        h3: intercept + slope * 3,
+        h6: intercept + slope * 6,
+        slope,
+        r2,
+        points: data.length,
+        method: "Regressão linear local ponderada"
       };
     }
 
-    function createTemperatureChart(history) {
-      const labels = history.map((month) => month.label);
+    function updateForecastCards(forecast) {
+      const detail = forecast.valid
+        ? `${forecast.method} · ${forecast.points} leituras analisadas`
+        : "Não existem leituras válidas suficientes.";
 
-      const minimums = history.map((month) => {
-        const values = getValuesFromMonth(month, FIELDS.temperature);
-        return values.length ? Math.min(...values) : null;
-      });
+      document.getElementById("forecastNow").textContent =
+        forecast.valid ? formatNumber(forecast.now, 2) : "--";
 
-      const maximums = history.map((month) => {
-        const values = getValuesFromMonth(month, FIELDS.temperature);
-        return values.length ? Math.max(...values) : null;
-      });
+      document.getElementById("forecast3h").textContent =
+        forecast.valid ? formatNumber(forecast.h3, 2) : "--";
+
+      document.getElementById("forecast6h").textContent =
+        forecast.valid ? formatNumber(forecast.h6, 2) : "--";
+
+      document.getElementById("forecastNowDetail").textContent = detail;
+
+      document.getElementById("forecast3hDetail").textContent =
+        forecast.valid
+          ? `Projeção para ${formatHour(new Date(Date.now() + 3 * 3600000))}.`
+          : detail;
+
+      document.getElementById("forecast6hDetail").textContent =
+        forecast.valid
+          ? `Projeção para ${formatHour(new Date(Date.now() + 6 * 3600000))}.`
+          : detail;
+    }
+
+    function createTemperatureChart(feeds, forecast) {
+      const colors = getChartColors();
+      const limitDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      const data24h = feeds
+        .map(feed => ({
+          date: new Date(feed.created_at),
+          value: parseValue(feed[FIELDS.temperature])
+        }))
+        .filter(item =>
+          item.value !== null &&
+          !Number.isNaN(item.date.getTime()) &&
+          item.date >= limitDate
+        )
+        .sort((a, b) => a.date - b.date);
+
+      const allTemperatures = feeds
+        .map(feed => parseValue(feed[FIELDS.temperature]))
+        .filter(value => value !== null);
+
+      document.getElementById("periodMinTemperature").textContent =
+        allTemperatures.length ? formatNumber(Math.min(...allTemperatures)) : "--";
+
+      document.getElementById("periodMaxTemperature").textContent =
+        allTemperatures.length ? formatNumber(Math.max(...allTemperatures)) : "--";
+
+      const labels = [
+        ...data24h.map(item => formatHour(item.date)),
+        "Agora (pred.)",
+        "+3 h",
+        "+6 h"
+      ];
+
+      const observedData = [
+        ...data24h.map(item => item.value),
+        null,
+        null,
+        null
+      ];
+
+      const forecastData = [
+        ...Array(data24h.length).fill(null),
+        forecast.valid ? forecast.now : null,
+        forecast.valid ? forecast.h3 : null,
+        forecast.valid ? forecast.h6 : null
+      ];
+
+      const comfortData = labels.map(() => COMFORT_TEMPERATURE);
 
       destroyChart(temperatureChart);
 
       temperatureChart = new Chart(document.getElementById("temperatureChart"), {
-        type: "bar",
+        type: "line",
         data: {
           labels,
           datasets: [
             {
-              label: "Temperatura mínima (°C)",
-              data: minimums,
-              backgroundColor: "rgba(7, 139, 184, 0.62)",
-              borderColor: "#078bb8",
-              borderWidth: 1,
-              borderRadius: 5
+              label: "Temperatura registrada (°C)",
+              data: observedData,
+              borderColor: "#20b7d8",
+              backgroundColor: "rgba(32,183,216,.14)",
+              fill: true,
+              tension: .25,
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              borderWidth: 2.5
             },
             {
-              label: "Temperatura máxima (°C)",
-              data: maximums,
-              backgroundColor: "rgba(215, 74, 74, 0.65)",
-              borderColor: "#d74a4a",
-              borderWidth: 1,
-              borderRadius: 5
+              label: "Conforto térmico — 26,50 °C",
+              data: comfortData,
+              borderColor: "#b56cff",
+              borderDash: [10, 7],
+              borderWidth: 2.5,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              tension: 0
+            },
+            {
+              label: "Predição térmica",
+              data: forecastData,
+              borderColor: "#f7b731",
+              backgroundColor: "rgba(247,183,49,.15)",
+              borderDash: [6, 5],
+              borderWidth: 3,
+              pointBackgroundColor: "#f7b731",
+              pointBorderColor: "#fff",
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              tension: .2,
+              spanGaps: false
             }
           ]
         },
         options: {
-          ...chartBaseOptions("°C"),
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          interaction: { intersect: false, mode: "index" },
           plugins: {
-            legend: {
-              labels: {
-                color: "#29445b"
-              }
-            },
+            legend: { labels: { color: colors.text } },
             tooltip: {
               callbacks: {
                 label(context) {
-                  return context.raw === null
-                    ? `${context.dataset.label}: sem registro`
-                    : `${context.dataset.label}: ${formatNumber(context.raw)} °C`;
+                  if (context.raw === null) return "";
+                  return `${context.dataset.label}: ${formatNumber(context.raw, 2)} °C`;
                 }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: colors.muted, maxTicksLimit: 14 },
+              grid: { color: colors.grid },
+              title: {
+                display: true,
+                text: "Horário das leituras e projeções",
+                color: colors.muted
+              }
+            },
+            y: {
+              ticks: {
+                color: colors.muted,
+                callback: value => `${value} °C`
+              },
+              grid: { color: colors.grid },
+              title: {
+                display: true,
+                text: "Temperatura (°C)",
+                color: colors.muted
               }
             }
           }
         }
       });
-
-      const allValues = [...minimums, ...maximums].filter((value) => value !== null);
-
-      document.getElementById("periodMinTemperature").textContent =
-        allValues.length ? formatNumber(Math.min(...allValues)) : "--";
-
-      document.getElementById("periodMaxTemperature").textContent =
-        allValues.length ? formatNumber(Math.max(...allValues)) : "--";
     }
 
-    function createGustChart(history) {
-      const labels = history.map((month) => month.label);
+    function createGustChart(feeds) {
+      const colors = getChartColors();
+      const monthlyData = {};
 
-      const gusts = history.map((month) => {
-        const values = getValuesFromMonth(month, FIELDS.windSpeed);
-        return values.length ? Math.max(...values) : null;
+      feeds.forEach(feed => {
+        const gust = parseValue(feed[FIELDS.windSpeed]);
+        if (gust === null) return;
+
+        const date = new Date(feed.created_at);
+        const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+
+        if (!monthlyData[key] || gust > monthlyData[key]) {
+          monthlyData[key] = gust;
+        }
       });
+
+      const entries = Object.entries(monthlyData).slice(-6);
+      const values = entries.map(item => item[1]);
+
+      document.getElementById("periodMaxGust").textContent =
+        values.length ? formatNumber(Math.max(...values)) : "--";
 
       destroyChart(gustChart);
 
       gustChart = new Chart(document.getElementById("gustChart"), {
         type: "bar",
         data: {
-          labels,
-          datasets: [
-            {
-              label: "Maior rajada (m/s)",
-              data: gusts,
-              backgroundColor: "rgba(217, 146, 16, 0.66)",
-              borderColor: "#d99210",
-              borderWidth: 1,
-              borderRadius: 5
-            }
-          ]
+          labels: entries.map(([key]) => key),
+          datasets: [{
+            label: "Maior rajada (km/h)",
+            data: values,
+            backgroundColor: "rgba(247,183,49,.7)",
+            borderColor: "#f7b731",
+            borderWidth: 1,
+            borderRadius: 5
+          }]
         },
         options: {
-          ...chartBaseOptions("m/s", true),
-          plugins: {
-            legend: {
-              labels: {
-                color: "#29445b"
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  return context.raw === null
-                    ? "Maior rajada: sem registro"
-                    : `Maior rajada: ${formatNumber(context.raw)} m/s`;
-                }
-              }
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: { legend: { labels: { color: colors.text } } },
+          scales: {
+            x: { ticks: { color: colors.muted }, grid: { color: colors.grid } },
+            y: {
+              beginAtZero: true,
+              ticks: { color: colors.muted, callback: value => `${value} km/h` },
+              grid: { color: colors.grid }
             }
           }
         }
       });
-
-      const validGusts = gusts.filter((value) => value !== null);
-
-      document.getElementById("periodMaxGust").textContent =
-        validGusts.length ? formatNumber(Math.max(...validGusts)) : "--";
     }
 
     function calculateCOMovingAverage(feeds) {
-      const validFeeds = feeds
-        .map((feed) => ({
+      const valid = feeds
+        .map(feed => ({
           date: new Date(feed.created_at),
           value: parseValue(feed[FIELDS.co])
         }))
-        .filter((item) => item.value !== null && !Number.isNaN(item.date.getTime()))
+        .filter(item => item.value !== null && !Number.isNaN(item.date.getTime()))
         .sort((a, b) => a.date - b.date);
 
-      return validFeeds.map((current, index) => {
-        const start = current.date.getTime() - 8 * 60 * 60 * 1000;
+      return valid.map((current, index) => {
+        const windowStart = current.date.getTime() - 8 * 3600000;
 
-        const windowValues = validFeeds
+        const values = valid
           .slice(0, index + 1)
-          .filter((item) => item.date.getTime() >= start && item.date <= current.date)
-          .map((item) => item.value);
+          .filter(item => item.date.getTime() >= windowStart)
+          .map(item => item.value);
 
         return {
           date: current.date,
           value: current.value,
-          average: windowValues.reduce((sum, value) => sum + value, 0) / windowValues.length
+          average: values.reduce((sum, value) => sum + value, 0) / values.length
         };
       });
     }
 
-    function updateCOStatus(movingAverage) {
-      const status = document.getElementById("coStatus");
-      const detail = document.getElementById("coStatusDetail");
-
-      if (movingAverage === null || !Number.isFinite(movingAverage)) {
-        status.innerHTML = "--";
-        detail.textContent = "Dados insuficientes para calcular a média móvel.";
-        return;
-      }
-
-      if (movingAverage < 7) {
-        status.innerHTML = '<span class="badge good">ADEQUADO</span>';
-        detail.textContent = "Média móvel de CO abaixo da referência de 9 ppm em 8 horas.";
-      } else if (movingAverage < 9) {
-        status.innerHTML = '<span class="badge attention">ATENÇÃO</span>';
-        detail.textContent = "Média móvel de CO próxima da referência de 9 ppm em 8 horas.";
-      } else {
-        status.innerHTML = '<span class="badge critical">ACIMA DA REFERÊNCIA</span>';
-        detail.textContent = "Média móvel de CO igual ou superior a 9 ppm em 8 horas.";
-      }
-    }
-
     function createCOChart(feeds) {
+      const colors = getChartColors();
       const data = calculateCOMovingAverage(feeds).slice(-150);
 
       destroyChart(coChart);
@@ -1224,74 +1169,124 @@
       coChart = new Chart(document.getElementById("coChart"), {
         type: "line",
         data: {
-          labels: data.map((item) => formatDate(item.date)),
+          labels: data.map(item => formatDate(item.date)),
           datasets: [
             {
               label: "CO (ppm)",
-              data: data.map((item) => item.value),
-              borderColor: "#078bb8",
-              backgroundColor: "rgba(7, 139, 184, 0.12)",
+              data: data.map(item => item.value),
+              borderColor: "#20b7d8",
+              backgroundColor: "rgba(32,183,216,.13)",
               fill: true,
-              tension: 0.25,
+              tension: .25,
               pointRadius: 1.5
             },
             {
-              label: "Média móvel de 8 h (ppm)",
-              data: data.map((item) => item.average),
-              borderColor: "#d99210",
-              backgroundColor: "transparent",
+              label: "Média móvel de 8 h",
+              data: data.map(item => item.average),
+              borderColor: "#f7b731",
               borderWidth: 2,
-              tension: 0.25,
+              tension: .25,
               pointRadius: 0
             },
             {
               label: "Referência 8 h (9 ppm)",
               data: data.map(() => 9),
-              borderColor: "#d74a4a",
+              borderColor: "#ef5b5b",
               borderDash: [7, 5],
-              borderWidth: 1.5,
               pointRadius: 0
             }
           ]
         },
         options: {
-          ...chartBaseOptions("ppm", true),
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: { legend: { labels: { color: colors.text } } },
           scales: {
-            x: {
-              ticks: {
-                color: "#526c80",
-                maxTicksLimit: 8
-              },
-              grid: {
-                color: "rgba(67, 107, 135, 0.10)"
-              }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: "#526c80",
-                callback(value) {
-                  return `${value} ppm`;
-                }
-              },
-              grid: {
-                color: "rgba(67, 107, 135, 0.15)"
-              }
-            }
+            x: { ticks: { color: colors.muted, maxTicksLimit: 8 }, grid: { color: colors.grid } },
+            y: { beginAtZero: true, ticks: { color: colors.muted }, grid: { color: colors.grid } }
           }
         }
       });
 
       const lastAverage = data.length ? data[data.length - 1].average : null;
-
       document.getElementById("coMovingAverage").textContent =
         lastAverage !== null ? formatNumber(lastAverage, 2) : "--";
 
       updateCOStatus(lastAverage);
     }
 
+    function createCO2Chart(feeds) {
+      const colors = getChartColors();
+
+      const data = feeds
+        .map(feed => ({
+          date: new Date(feed.created_at),
+          value: parseValue(feed[FIELDS.co2])
+        }))
+        .filter(item => item.value !== null && !Number.isNaN(item.date.getTime()))
+        .slice(-150);
+
+      destroyChart(co2Chart);
+
+      co2Chart = new Chart(document.getElementById("co2Chart"), {
+        type: "line",
+        data: {
+          labels: data.map(item => formatDate(item.date)),
+          datasets: [
+            {
+              label: "CO₂ (ppm)",
+              data: data.map(item => item.value),
+              borderColor: "#35c879",
+              backgroundColor: "rgba(53,200,121,.12)",
+              fill: true,
+              tension: .25,
+              pointRadius: 1.5
+            },
+            {
+              label: "Referência de ventilação (1.000 ppm)",
+              data: data.map(() => 1000),
+              borderColor: "#f7b731",
+              borderDash: [7, 5],
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: { legend: { labels: { color: colors.text } } },
+          scales: {
+            x: { ticks: { color: colors.muted, maxTicksLimit: 8 }, grid: { color: colors.grid } },
+            y: { beginAtZero: true, ticks: { color: colors.muted }, grid: { color: colors.grid } }
+          }
+        }
+      });
+    }
+
+    function updateCOStatus(movingAverage) {
+      const status = document.getElementById("coStatus");
+      const detail = document.getElementById("coStatusDetail");
+
+      if (!Number.isFinite(movingAverage)) {
+        status.textContent = "--";
+        detail.textContent = "Dados insuficientes para calcular a média móvel.";
+      } else if (movingAverage < 7) {
+        status.innerHTML = '<span class="badge good">ADEQUADO</span>';
+        detail.textContent = "Média móvel abaixo da referência de 9 ppm em 8 horas.";
+      } else if (movingAverage < 9) {
+        status.innerHTML = '<span class="badge attention">ATENÇÃO</span>';
+        detail.textContent = "Média móvel próxima da referência de 9 ppm em 8 horas.";
+      } else {
+        status.innerHTML = '<span class="badge critical">ACIMA DA REFERÊNCIA</span>';
+        detail.textContent = "Média móvel igual ou superior a 9 ppm em 8 horas.";
+      }
+    }
+
     function updateClimatePanel(feeds) {
       const latest = getLastValidFeed(feeds, FIELDS.temperature);
+      const forecast = calculateTemperatureForecast(feeds);
 
       document.getElementById("currentTemperature").textContent =
         latest ? formatNumber(latest.value) : "--";
@@ -1300,6 +1295,11 @@
         latest
           ? `Última leitura: ${formatDate(latest.feed.created_at, true)}`
           : "Sem leitura disponível";
+
+      updateForecastCards(forecast);
+      createTemperatureChart(feeds, forecast);
+
+      return forecast;
     }
 
     function updateWindPanel(feeds) {
@@ -1310,15 +1310,15 @@
         latestWind ? formatNumber(latestWind.value) : "--";
 
       const direction = latestDirection ? latestDirection.value : null;
-      const name = direction === null ? "--" : windDirectionName(direction);
+      const directionName = direction !== null ? windDirectionName(direction) : "--";
 
       document.getElementById("windDirectionValue").textContent =
-        direction === null ? "--" : formatNumber(direction, 0);
+        direction !== null ? formatNumber(direction, 0) : "--";
 
-      document.getElementById("windDirectionText").textContent = name;
+      document.getElementById("windDirectionText").textContent = directionName;
 
       document.getElementById("compassDirection").textContent =
-        direction === null ? "--" : `${name} (${formatNumber(direction, 0)}°)`;
+        direction !== null ? `${directionName} (${formatNumber(direction, 0)}°)` : "--";
 
       if (direction !== null) {
         document.getElementById("directionArrow").style.transform = `rotate(${direction}deg)`;
@@ -1328,44 +1328,33 @@
     function updateGustTable(feeds) {
       const strongestByHour = Array.from({ length: 24 }, () => null);
 
-      feeds.forEach((feed) => {
+      feeds.forEach(feed => {
         const gust = parseValue(feed[FIELDS.windSpeed]);
-
-        if (gust === null) {
-          return;
-        }
+        if (gust === null) return;
 
         const hour = Number(getDatePartsSP(feed.created_at).hour);
 
         if (!strongestByHour[hour] || gust > strongestByHour[hour].gust) {
-          strongestByHour[hour] = {
-            gust,
-            date: feed.created_at
-          };
+          strongestByHour[hour] = { gust, date: feed.created_at };
         }
       });
 
-      document.getElementById("gustTableBody").innerHTML = strongestByHour
-        .map((item, hour) => {
+      document.getElementById("gustTableBody").innerHTML =
+        strongestByHour.map((item, hour) => {
           if (!item) {
-            return `
-              <tr>
-                <td>${String(hour).padStart(2, "0")}:00</td>
-                <td>Sem registro</td>
-                <td>--</td>
-              </tr>
-            `;
+            return `<tr>
+              <td>${String(hour).padStart(2, "0")}:00</td>
+              <td>Sem registro</td>
+              <td>--</td>
+            </tr>`;
           }
 
-          return `
-            <tr>
-              <td>${String(hour).padStart(2, "0")}:00</td>
-              <td><strong>${formatNumber(item.gust)} m/s</strong></td>
-              <td>${formatDate(item.date, true)}</td>
-            </tr>
-          `;
-        })
-        .join("");
+          return `<tr>
+            <td>${String(hour).padStart(2, "0")}:00</td>
+            <td><strong>${formatNumber(item.gust)} km/h</strong></td>
+            <td>${formatDate(item.date, true)}</td>
+          </tr>`;
+        }).join("");
     }
 
     function updateEnvironmentalPanel(feeds) {
@@ -1379,88 +1368,73 @@
         latestCO2 ? formatNumber(latestCO2.value, 0) : "--";
 
       createCOChart(feeds);
+      createCO2Chart(feeds);
     }
 
-    function runClimaticoInteligente(feeds, history) {
+    function runClimaticoInteligente(feeds, forecast) {
       const analysis = [];
-
       const latestTemperature = getLastValidFeed(feeds, FIELDS.temperature);
       const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
       const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
       const latestCO2 = getLastValidFeed(feeds, FIELDS.co2);
 
-      const coHistory = calculateCOMovingAverage(feeds);
-      const latestCOAverage = coHistory.length
-        ? coHistory[coHistory.length - 1].average
-        : null;
+      const coData = calculateCOMovingAverage(feeds);
+      const movingCO = coData.length ? coData[coData.length - 1].average : null;
 
       if (latestTemperature) {
+        const difference = latestTemperature.value - COMFORT_TEMPERATURE;
+        const relation =
+          Math.abs(difference) < .5
+            ? "muito próxima da referência de conforto térmico"
+            : difference > 0
+              ? "acima da referência de conforto térmico"
+              : "abaixo da referência de conforto térmico";
+
         analysis.push({
           type: "normal",
-          text: `<strong>Condição térmica atual:</strong> temperatura de ${formatNumber(latestTemperature.value)} °C, registrada em ${formatDate(latestTemperature.feed.created_at, true)}.`
+          text: `<strong>Condição térmica atual:</strong> temperatura de
+            ${formatNumber(latestTemperature.value)} °C, ${relation} de 26,50 °C.`
+        });
+      }
+
+      if (forecast.valid) {
+        const trend =
+          forecast.slope > .05 ? "tendência de elevação" :
+          forecast.slope < -.05 ? "tendência de redução" :
+          "tendência de estabilidade";
+
+        analysis.push({
+          type: Math.abs(forecast.h6 - COMFORT_TEMPERATURE) > 3 ? "warning" : "normal",
+          text: `<strong>Projeção térmica:</strong> ${trend}. A previsão para 3 horas é
+            ${formatNumber(forecast.h3, 2)} °C e para 6 horas é
+            ${formatNumber(forecast.h6, 2)} °C.`
         });
       }
 
       if (latestWind && latestDirection) {
         const directionName = windDirectionName(latestDirection.value);
 
-        let text = "vento fraco, com baixa influência na dispersão atmosférica local";
-
-        if (latestWind.value >= 8) {
-          text = "vento intenso, exigindo atenção a rajadas e atividades externas";
-        } else if (latestWind.value >= 3) {
-          text = "vento moderado, favorecendo a renovação e dispersão do ar";
-        }
-
         analysis.push({
-          type: latestWind.value >= 8 ? "warning" : "normal",
-          text: `<strong>Dinâmica eólica:</strong> velocidade/rajada atual de ${formatNumber(latestWind.value)} m/s, proveniente de ${directionName} (${formatNumber(latestDirection.value, 0)}°). Há ${text}.`
+          type: latestWind.value >= 30 ? "warning" : "normal",
+          text: `<strong>Dinâmica eólica:</strong> velocidade/rajada atual de
+            ${formatNumber(latestWind.value)} km/h, proveniente de ${directionName}
+            (${formatNumber(latestDirection.value, 0)}°).`
         });
       }
 
-      if (latestCOAverage !== null) {
-        const type = latestCOAverage >= 9 ? "danger" : latestCOAverage >= 7 ? "warning" : "normal";
-
+      if (movingCO !== null) {
         analysis.push({
-          type,
-          text: `<strong>Qualidade do ar — CO:</strong> média móvel de 8 horas em ${formatNumber(latestCOAverage, 2)} ppm. A referência operacional do painel é 9 ppm.`
+          type: movingCO >= 9 ? "danger" : movingCO >= 7 ? "warning" : "normal",
+          text: `<strong>Qualidade do ar — CO:</strong> média móvel de 8 horas em
+            ${formatNumber(movingCO, 2)} ppm.`
         });
       }
 
       if (latestCO2) {
-        let description = "concentração compatível com boa renovação de ar em ambientes monitorados";
-
-        if (latestCO2.value >= 1200) {
-          description = "nível elevado para ambientes internos, sugerindo reforço da ventilação";
-        } else if (latestCO2.value >= 800) {
-          description = "nível moderado; recomenda-se observar a ventilação do ambiente";
-        }
-
         analysis.push({
           type: latestCO2.value >= 1200 ? "warning" : "normal",
-          text: `<strong>Indicador de CO₂:</strong> leitura atual de ${formatNumber(latestCO2.value, 0)} ppm; ${description}.`
-        });
-      }
-
-      const historicalWind = history.flatMap((month) =>
-        getValuesFromMonth(month, FIELDS.windSpeed)
-      );
-
-      if (historicalWind.length) {
-        analysis.push({
-          type: Math.max(...historicalWind) >= 12 ? "warning" : "normal",
-          text: `<strong>Histórico eólico anual:</strong> a maior rajada identificada nos últimos 12 meses foi de ${formatNumber(Math.max(...historicalWind))} m/s. O cálculo utiliza exclusivamente o <strong>field4</strong>.`
-        });
-      }
-
-      const historicalTemperature = history.flatMap((month) =>
-        getValuesFromMonth(month, FIELDS.temperature)
-      );
-
-      if (historicalTemperature.length) {
-        analysis.push({
-          type: "normal",
-          text: `<strong>Amplitude térmica anual:</strong> os registros disponíveis dos últimos 12 meses variaram entre ${formatNumber(Math.min(...historicalTemperature))} °C e ${formatNumber(Math.max(...historicalTemperature))} °C.`
+          text: `<strong>Indicador de CO₂:</strong> leitura atual de
+            ${formatNumber(latestCO2.value, 0)} ppm.`
         });
       }
 
@@ -1472,50 +1446,33 @@
       }
 
       document.getElementById("smartAnalysis").innerHTML = analysis
-        .map((item) => `<div class="analysis-item ${item.type}">${item.text}</div>`)
+        .map(item => `<div class="analysis-item ${item.type}">${item.text}</div>`)
         .join("");
     }
 
     async function updateDashboard() {
-      if (isUpdating) {
-        return;
-      }
-
-      isUpdating = true;
-
-      const refreshButton = document.getElementById("refreshButton");
-      refreshButton.disabled = true;
-      refreshButton.textContent = "Atualizando...";
-
       try {
         setConnectionStatus("Atualizando dados...", "loading");
 
-        const [feeds, history] = await Promise.all([
-          fetchMainFeeds(),
-          fetchLast12MonthsHistory()
-        ]);
+        const feeds = await fetchFeeds();
+        const forecast = updateClimatePanel(feeds);
 
-        updateClimatePanel(feeds);
         updateWindPanel(feeds);
         updateGustTable(feeds);
         updateEnvironmentalPanel(feeds);
+        createGustChart(feeds);
+        runClimaticoInteligente(feeds, forecast);
 
-        createTemperatureChart(history);
-        createGustChart(history);
-
-        runClimaticoInteligente(feeds, history);
-
-        const updatedAt = new Intl.DateTimeFormat("pt-BR", {
+        const updateTime = new Intl.DateTimeFormat("pt-BR", {
           timeZone: "America/Sao_Paulo",
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit"
         }).format(new Date());
 
-        setConnectionStatus(`Atualizado às ${updatedAt}`, "ok");
+        setConnectionStatus(`Atualizado às ${updateTime}`, "ok");
       } catch (error) {
         console.error(error);
-
         setConnectionStatus("Erro ao atualizar dados", "error");
 
         document.getElementById("smartAnalysis").innerHTML = `
@@ -1524,42 +1481,63 @@
             Verifique a conexão, a chave de leitura e a disponibilidade do canal.
           </div>
         `;
-      } finally {
-        isUpdating = false;
-        refreshButton.disabled = false;
-        refreshButton.textContent = "Atualizar agora";
       }
     }
 
-    document.querySelectorAll(".tab-button").forEach((button) => {
-      button.addEventListener("click", () => {
-        const target = button.dataset.tab;
+    function updateThemeButton() {
+      document.getElementById("themeButton").textContent =
+        document.body.classList.contains("light-theme")
+          ? "🌙 Tema escuro"
+          : "☀️ Tema claro";
+    }
 
-        document.querySelectorAll(".tab-button").forEach((item) => {
+    function toggleTheme() {
+      document.body.classList.toggle("light-theme");
+
+      localStorage.setItem(
+        "climaUdiaTheme",
+        document.body.classList.contains("light-theme") ? "light" : "dark"
+      );
+
+      updateThemeButton();
+      updateDashboard();
+    }
+
+    function loadSavedTheme() {
+      if (localStorage.getItem("climaUdiaTheme") === "light") {
+        document.body.classList.add("light-theme");
+      }
+
+      updateThemeButton();
+    }
+
+    document.querySelectorAll(".tab-button").forEach(button => {
+      button.addEventListener("click", () => {
+        const targetTab = button.dataset.tab;
+
+        document.querySelectorAll(".tab-button").forEach(item => {
           item.classList.remove("active");
         });
 
-        document.querySelectorAll(".tab-content").forEach((item) => {
+        document.querySelectorAll(".tab-content").forEach(item => {
           item.classList.remove("active");
         });
 
         button.classList.add("active");
-        document.getElementById(target).classList.add("active");
+        document.getElementById(targetTab).classList.add("active");
       });
     });
 
     document.getElementById("refreshButton").addEventListener("click", updateDashboard);
+    document.getElementById("themeButton").addEventListener("click", toggleTheme);
 
+    loadSavedTheme();
     updateHeaderTimestamp();
+
     setInterval(updateHeaderTimestamp, 1000);
 
     updateDashboard();
-
-    if (refreshTimer) {
-      clearInterval(refreshTimer);
-    }
-
-    refreshTimer = setInterval(updateDashboard, AUTO_REFRESH_MS);
+    setInterval(updateDashboard, AUTO_REFRESH_MS);
   </script>
 </body>
 </html>
