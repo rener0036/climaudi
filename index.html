@@ -40,7 +40,9 @@
       --chart-grid: rgba(88, 112, 135, .18);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -83,7 +85,8 @@
       font-size: .9rem;
     }
 
-    .header-actions, .tabs {
+    .header-actions,
+    .tabs {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -106,7 +109,8 @@
       transform: translateY(-1px);
     }
 
-    .theme-button, .tab-button {
+    .theme-button,
+    .tab-button {
       background: var(--panel);
       color: var(--muted);
       border: 1px solid var(--line);
@@ -133,18 +137,29 @@
       padding: 22px;
     }
 
-    .tabs { margin-bottom: 18px; }
+    .tabs {
+      margin-bottom: 18px;
+    }
 
     .tab-content {
       display: none;
       animation: fadeIn .25s ease;
     }
 
-    .tab-content.active { display: block; }
+    .tab-content.active {
+      display: block;
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .timestamp-panel {
@@ -172,7 +187,12 @@
       margin-bottom: 18px;
     }
 
-    .card, .chart-card, .table-card, .analysis-card, .compass-card, .forecast-info {
+    .card,
+    .chart-card,
+    .table-card,
+    .analysis-card,
+    .compass-card,
+    .forecast-info {
       background: linear-gradient(145deg, var(--panel-2), var(--panel));
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -205,12 +225,25 @@
       margin-top: 10px;
     }
 
-    .comfort-card { border-top: 3px solid var(--comfort); }
-    .comfort-card .metric-unit { color: var(--comfort); }
+    .comfort-card {
+      border-top: 3px solid var(--comfort);
+    }
 
-    .forecast-card { border-top: 3px solid var(--primary); }
-    .forecast-card.future-3 { border-top-color: var(--warning); }
-    .forecast-card.future-6 { border-top-color: var(--danger); }
+    .comfort-card .metric-unit {
+      color: var(--comfort);
+    }
+
+    .forecast-card {
+      border-top: 3px solid var(--primary);
+    }
+
+    .forecast-card.future-3 {
+      border-top-color: var(--warning);
+    }
+
+    .forecast-card.future-6 {
+      border-top-color: var(--danger);
+    }
 
     .forecast-info {
       color: var(--muted);
@@ -219,7 +252,10 @@
       margin-bottom: 18px;
     }
 
-    .chart-card h2, .table-card h2, .analysis-card h2, .compass-card h2 {
+    .chart-card h2,
+    .table-card h2,
+    .analysis-card h2,
+    .compass-card h2 {
       font-size: 1.05rem;
       margin: 0 0 14px;
     }
@@ -247,72 +283,256 @@
       align-items: center;
     }
 
+    /* ==========================================================
+       ROSA DOS VENTOS ESTILIZADA
+       ========================================================== */
+
     .compass {
-      width: 280px;
-      height: 280px;
+      width: 330px;
+      height: 330px;
       position: relative;
-      border: 5px solid #5d7c99;
       border-radius: 50%;
+      overflow: visible;
+      isolation: isolate;
       background:
-        radial-gradient(circle, rgba(32,183,216,.15) 0 8%, transparent 8%),
-        repeating-conic-gradient(from -1deg, #a6c8e5 0deg 1deg, transparent 1deg 10deg),
-        #0b1728;
+        radial-gradient(circle at center, rgba(32, 183, 216, .25) 0 5%, transparent 5.5%),
+        radial-gradient(circle at center, transparent 0 25%, rgba(32, 183, 216, .10) 25.4% 25.8%, transparent 26.2%),
+        radial-gradient(circle at center, transparent 0 43%, rgba(159, 211, 237, .18) 43.4% 43.8%, transparent 44.2%),
+        radial-gradient(circle at center, transparent 0 48%, rgba(159, 211, 237, .12) 48.4% 48.7%, transparent 49%),
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(174, 219, 241, .75) 0deg 1deg,
+          transparent 1deg 5deg,
+          rgba(174, 219, 241, .35) 5deg 5.6deg,
+          transparent 5.6deg 10deg
+        ),
+        radial-gradient(circle, #183653 0%, #10253c 62%, #08111f 100%);
+      border: 5px solid #6d9cbe;
+      box-shadow:
+        inset 0 0 35px rgba(32, 183, 216, .18),
+        0 15px 32px rgba(0, 0, 0, .28);
     }
 
+    body.light-theme .compass {
+      background:
+        radial-gradient(circle at center, rgba(0, 141, 178, .20) 0 5%, transparent 5.5%),
+        radial-gradient(circle at center, transparent 0 25%, rgba(0, 141, 178, .12) 25.4% 25.8%, transparent 26.2%),
+        radial-gradient(circle at center, transparent 0 43%, rgba(0, 141, 178, .16) 43.4% 43.8%, transparent 44.2%),
+        radial-gradient(circle at center, transparent 0 48%, rgba(0, 141, 178, .10) 48.4% 48.7%, transparent 49%),
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(20, 79, 120, .65) 0deg 1deg,
+          transparent 1deg 5deg,
+          rgba(20, 79, 120, .28) 5deg 5.6deg,
+          transparent 5.6deg 10deg
+        ),
+        radial-gradient(circle, #f8fcff 0%, #dcecf8 70%, #c2d9eb 100%);
+      border-color: #5a86a7;
+    }
+
+    .compass::before,
+    .compass::after {
+      content: "";
+      position: absolute;
+      inset: 15%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .compass::before {
+      background:
+        linear-gradient(
+          to bottom,
+          transparent 49.5%,
+          rgba(177, 223, 244, .65) 49.8%,
+          rgba(177, 223, 244, .65) 50.2%,
+          transparent 50.5%
+        ),
+        linear-gradient(
+          to right,
+          transparent 49.5%,
+          rgba(177, 223, 244, .65) 49.8%,
+          rgba(177, 223, 244, .65) 50.2%,
+          transparent 50.5%
+        );
+    }
+
+    .compass::after {
+      transform: rotate(45deg);
+      background:
+        linear-gradient(
+          to bottom,
+          transparent 49.6%,
+          rgba(177, 223, 244, .38) 49.8%,
+          rgba(177, 223, 244, .38) 50.2%,
+          transparent 50.4%
+        ),
+        linear-gradient(
+          to right,
+          transparent 49.6%,
+          rgba(177, 223, 244, .38) 49.8%,
+          rgba(177, 223, 244, .38) 50.2%,
+          transparent 50.4%
+        );
+    }
+
+    .compass-star {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 3;
+      width: 175px;
+      height: 175px;
+      transform: translate(-50%, -50%);
+      opacity: .85;
+      pointer-events: none;
+    }
+
+    .compass-star::before,
+    .compass-star::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(
+        50% 0%,
+        57% 41%,
+        100% 50%,
+        57% 59%,
+        50% 100%,
+        43% 59%,
+        0% 50%,
+        43% 41%
+      );
+    }
+
+    .compass-star::before {
+      background: linear-gradient(135deg, rgba(32, 183, 216, .9), rgba(255, 255, 255, .05));
+    }
+
+    .compass-star::after {
+      transform: rotate(45deg) scale(.9);
+      background: linear-gradient(135deg, rgba(255, 255, 255, .22), rgba(32, 183, 216, .05));
+    }
+
+    /*
+      CORREÇÃO DO PONTEIRO:
+      O ponteiro é posicionado a partir do centro da rosa.
+      A origem de rotação está na base; portanto, 0° aponta para Norte.
+    */
     .direction-arrow {
       position: absolute;
-      top: 25px;
-      left: calc(50% - 4px);
-      width: 8px;
-      height: 118px;
-      z-index: 4;
-      transform-origin: 4px 115px;
-      background: linear-gradient(to top, var(--danger) 0 75%, transparent 75%);
-      transition: transform .5s ease;
+      top: calc(50% - 132px);
+      left: calc(50% - 13px);
+      z-index: 20;
+      width: 26px;
+      height: 132px;
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform-origin: 50% 100%;
+      transform: rotate(0deg);
+      transition: transform .55s cubic-bezier(.2, .8, .2, 1);
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .55));
+      pointer-events: none;
     }
 
     .direction-arrow::before {
       content: "";
       position: absolute;
-      top: -13px;
-      left: -10px;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-bottom: 25px solid var(--danger);
+      top: 0;
+      left: 0;
+      width: 26px;
+      height: 112px;
+      background: linear-gradient(
+        to top,
+        rgba(239, 91, 91, .65) 0%,
+        #ff7777 33%,
+        #fff2f2 34%,
+        #ef5b5b 35%,
+        #c92f3d 100%
+      );
+      clip-path: polygon(50% 0%, 100% 78%, 64% 78%, 64% 100%, 36% 100%, 36% 78%, 0% 78%);
+      border-radius: 2px;
+    }
+
+    .direction-arrow::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 7px;
+      width: 12px;
+      height: 30px;
+      background: linear-gradient(to bottom, #dae9f4, #54768f);
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+      opacity: .95;
     }
 
     .compass-center {
       position: absolute;
       top: 50%;
       left: 50%;
-      z-index: 5;
-      width: 22px;
-      height: 22px;
-      border: 5px solid var(--primary);
+      z-index: 25;
+      width: 28px;
+      height: 28px;
+      border: 6px solid var(--primary);
       border-radius: 50%;
       background: #fff;
+      box-shadow: 0 0 0 4px rgba(32, 183, 216, .18), 0 2px 8px rgba(0, 0, 0, .45);
       transform: translate(-50%, -50%);
     }
 
-    .cardinal {
+    .compass-label {
       position: absolute;
-      z-index: 6;
-      color: #fff;
-      font-size: .87rem;
-      font-weight: bold;
+      z-index: 10;
+      min-width: 26px;
+      color: #eaf8ff;
+      font-size: .74rem;
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
 
-    .n { top: 8px; left: 50%; transform: translateX(-50%); color: var(--danger); }
-    .s { bottom: 8px; left: 50%; transform: translateX(-50%); }
-    .e { top: 50%; right: 10px; transform: translateY(-50%); }
-    .w { top: 50%; left: 10px; transform: translateY(-50%); }
-    .ne { top: 38px; right: 36px; }
-    .nw { top: 38px; left: 36px; }
-    .se { bottom: 38px; right: 36px; }
-    .sw { bottom: 38px; left: 36px; }
+    body.light-theme .compass-label {
+      color: #163b59;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, .75);
+    }
+
+    .compass-label.major {
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    body.light-theme .compass-label.major {
+      color: #09243b;
+    }
+
+    .compass-label.north {
+      color: #ff7b7b;
+      font-size: 1.1rem;
+    }
+
+    .dir-n   { top: 7%; left: 50%; }
+    .dir-nne { top: 11%; left: 68%; }
+    .dir-ne  { top: 20%; left: 80%; }
+    .dir-ene { top: 34%; left: 89%; }
+    .dir-e   { top: 50%; left: 93%; }
+    .dir-ese { top: 66%; left: 89%; }
+    .dir-se  { top: 80%; left: 80%; }
+    .dir-sse { top: 89%; left: 68%; }
+    .dir-s   { top: 93%; left: 50%; }
+    .dir-sso { top: 89%; left: 32%; }
+    .dir-so  { top: 80%; left: 20%; }
+    .dir-oso { top: 66%; left: 11%; }
+    .dir-o   { top: 50%; left: 7%; }
+    .dir-ono { top: 34%; left: 11%; }
+    .dir-no  { top: 20%; left: 20%; }
+    .dir-nno { top: 11%; left: 32%; }
 
     .compass-readout {
-      margin-top: 15px;
+      margin-top: 18px;
       color: var(--muted);
       text-align: center;
     }
@@ -322,7 +542,9 @@
       font-size: 1.2rem;
     }
 
-    .table-wrap { overflow-x: auto; }
+    .table-wrap {
+      overflow-x: auto;
+    }
 
     table {
       width: 100%;
@@ -330,7 +552,8 @@
       border-collapse: collapse;
     }
 
-    th, td {
+    th,
+    td {
       padding: 11px;
       text-align: left;
       border-bottom: 1px solid var(--line);
@@ -355,8 +578,13 @@
       line-height: 1.5;
     }
 
-    .analysis-item.warning { border-left-color: var(--warning); }
-    .analysis-item.danger { border-left-color: var(--danger); }
+    .analysis-item.warning {
+      border-left-color: var(--warning);
+    }
+
+    .analysis-item.danger {
+      border-left-color: var(--danger);
+    }
 
     .badge {
       display: inline-block;
@@ -366,9 +594,20 @@
       font-weight: bold;
     }
 
-    .good { background: rgba(53,200,121,.17); color: #35c879; }
-    .attention { background: rgba(247,183,49,.18); color: #d99600; }
-    .critical { background: rgba(239,91,91,.18); color: #ef5b5b; }
+    .good {
+      background: rgba(53, 200, 121, .17);
+      color: #35c879;
+    }
+
+    .attention {
+      background: rgba(247, 183, 49, .18);
+      color: #d99600;
+    }
+
+    .critical {
+      background: rgba(239, 91, 91, .18);
+      color: #ef5b5b;
+    }
 
     .loading {
       padding: 20px;
@@ -379,21 +618,73 @@
     .error {
       padding: 12px;
       color: #ef5b5b;
-      border: 1px solid rgba(239,91,91,.28);
+      border: 1px solid rgba(239, 91, 91, .28);
       border-radius: 8px;
-      background: rgba(239,91,91,.12);
+      background: rgba(239, 91, 91, .12);
     }
 
     @media (max-width: 900px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .chart-box { height: 320px; }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-box {
+        height: 320px;
+      }
     }
 
     @media (max-width: 540px) {
-      main { padding: 14px; }
-      header { padding: 16px 14px; }
-      .chart-box { height: 280px; }
-      .compass { width: 245px; height: 245px; }
+      main {
+        padding: 14px;
+      }
+
+      header {
+        padding: 16px 14px;
+      }
+
+      .chart-box {
+        height: 280px;
+      }
+
+      .compass {
+        width: 275px;
+        height: 275px;
+      }
+
+      .direction-arrow {
+        top: calc(50% - 110px);
+        left: calc(50% - 11px);
+        width: 22px;
+        height: 110px;
+      }
+
+      .direction-arrow::before {
+        width: 22px;
+        height: 94px;
+      }
+
+      .direction-arrow::after {
+        left: 6px;
+        width: 10px;
+        height: 24px;
+      }
+
+      .compass-star {
+        width: 145px;
+        height: 145px;
+      }
+
+      .compass-label {
+        font-size: .63rem;
+      }
+
+      .compass-label.major {
+        font-size: .86rem;
+      }
+
+      .compass-label.north {
+        font-size: .95rem;
+      }
     }
   </style>
 </head>
@@ -403,7 +694,9 @@
     <div class="header-content">
       <div>
         <h1>ClimaUdia - Soluções em sistemas climatológicos</h1>
-        <p class="subtitle">Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental</p>
+        <p class="subtitle">
+          Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental
+        </p>
       </div>
 
       <div class="header-actions">
@@ -481,7 +774,7 @@
             <span id="periodMinTemperature">--</span>
             <span class="metric-unit">°C</span>
           </div>
-          <div class="metric-detail">Considerando as leituras recebidas do canal.</div>
+          <div class="metric-detail">Considerando as leituras recuperadas do canal.</div>
         </div>
 
         <div class="card">
@@ -490,16 +783,15 @@
             <span id="periodMaxTemperature">--</span>
             <span class="metric-unit">°C</span>
           </div>
-          <div class="metric-detail">Considerando as leituras recebidas do canal.</div>
+          <div class="metric-detail">Considerando as leituras recuperadas do canal.</div>
         </div>
       </div>
 
       <div class="forecast-info">
         <strong>Temperatura nas últimas 24 horas e projeção:</strong>
-        a linha azul apresenta todas as leituras válidas do <strong>field1</strong>
-        nas últimas 24 horas. A linha roxa tracejada representa o conforto térmico
-        de <strong>26,50 °C</strong>. A linha tracejada clara representa a previsão
-        de temperatura para agora, 3 horas e 6 horas.
+        a linha azul apresenta todas as leituras válidas do <strong>field1</strong>.
+        A linha roxa tracejada representa o conforto térmico de <strong>26,50 °C</strong>.
+        A linha amarela tracejada apresenta as projeções para agora, 3 horas e 6 horas.
       </div>
 
       <div class="chart-card">
@@ -511,9 +803,9 @@
 
         <div class="formula">
           <strong>Metodologia preditiva:</strong> regressão linear local ponderada.
-          As leituras mais recentes recebem maior peso, tornando a projeção mais
-          adequada para horizontes curtos de 3 e 6 horas. Em caso de poucas leituras,
-          o sistema utiliza a última temperatura válida como referência.
+          As leituras recentes recebem maior peso exponencial, tornando a projeção
+          mais adequada para horizontes curtos. Quando há poucas leituras, o sistema
+          aplica persistência, mantendo a última temperatura válida como referência.
         </div>
       </div>
     </section>
@@ -546,40 +838,88 @@
             <span id="periodMaxGust">--</span>
             <span class="metric-unit">km/h</span>
           </div>
-          <div class="metric-detail">Últimos seis meses disponíveis.</div>
+          <div class="metric-detail">Maior valor disponível nos últimos seis meses.</div>
+        </div>
+
+        <div class="card forecast-card future-3">
+          <div class="metric-label">Previsão de vento para +3 h</div>
+          <div class="metric-value">
+            <span id="windForecast3h">--</span>
+            <span class="metric-unit">km/h</span>
+          </div>
+          <div class="metric-detail" id="windForecast3hDetail">Aguardando histórico.</div>
+        </div>
+
+        <div class="card forecast-card future-6">
+          <div class="metric-label">Previsão de vento para +6 h</div>
+          <div class="metric-value">
+            <span id="windForecast6h">--</span>
+            <span class="metric-unit">km/h</span>
+          </div>
+          <div class="metric-detail" id="windForecast6hDetail">Aguardando histórico.</div>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="compass-card">
-          <h2>Bússola graduada — direção do vento</h2>
+          <h2>Rosa dos ventos — direção do vento</h2>
 
           <div class="compass">
-            <div id="directionArrow" class="direction-arrow"></div>
+            <div class="compass-star"></div>
+            <div id="directionArrow" class="direction-arrow" aria-label="Ponteiro da direção do vento"></div>
             <div class="compass-center"></div>
-            <span class="cardinal n">N</span>
-            <span class="cardinal ne">NE</span>
-            <span class="cardinal e">L</span>
-            <span class="cardinal se">SE</span>
-            <span class="cardinal s">S</span>
-            <span class="cardinal sw">SO</span>
-            <span class="cardinal w">O</span>
-            <span class="cardinal nw">NO</span>
+
+            <span class="compass-label major north dir-n">N</span>
+            <span class="compass-label dir-nne">NNE</span>
+            <span class="compass-label major dir-ne">NE</span>
+            <span class="compass-label dir-ene">ENE</span>
+
+            <span class="compass-label major dir-e">L</span>
+            <span class="compass-label dir-ese">LSE</span>
+            <span class="compass-label major dir-se">SE</span>
+            <span class="compass-label dir-sse">SSE</span>
+
+            <span class="compass-label major dir-s">S</span>
+            <span class="compass-label dir-sso">SSO</span>
+            <span class="compass-label major dir-so">SO</span>
+            <span class="compass-label dir-oso">OSO</span>
+
+            <span class="compass-label major dir-o">O</span>
+            <span class="compass-label dir-ono">ONO</span>
+            <span class="compass-label major dir-no">NO</span>
+            <span class="compass-label dir-nno">NNO</span>
           </div>
 
           <div class="compass-readout">
-            Direção identificada: <strong id="compassDirection">--</strong>
+            Direção identificada:
+            <strong id="compassDirection">--</strong>
           </div>
         </div>
 
         <div class="chart-card">
           <h2>Rajadas máximas — últimos 6 meses</h2>
-          <div class="chart-box"><canvas id="gustChart"></canvas></div>
+          <div class="chart-box">
+            <canvas id="gustChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom: 18px;">
+        <h2>Velocidade do vento — últimas 48 horas e projeções</h2>
+        <div class="chart-box">
+          <canvas id="windChart"></canvas>
+        </div>
+
+        <div class="formula">
+          <strong>Metodologia eólica:</strong> regressão local ponderada aplicada à série do
+          <strong>field4</strong>. A projeção inclui uma faixa indicativa de incerteza baseada
+          no erro histórico do modelo.
         </div>
       </div>
 
       <div class="table-card">
         <h2>Rajadas mais fortes por hora do dia</h2>
+
         <div class="table-wrap">
           <table>
             <thead>
@@ -590,7 +930,9 @@
               </tr>
             </thead>
             <tbody id="gustTableBody">
-              <tr><td colspan="3" class="loading">Carregando dados de rajada...</td></tr>
+              <tr>
+                <td colspan="3" class="loading">Carregando dados de rajada...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -633,20 +975,25 @@
         </div>
       </div>
 
-      <div class="chart-card">
+      <div class="chart-card" style="margin-bottom: 18px;">
         <h2>CO — série recente e média móvel de 8 horas</h2>
-        <div class="chart-box"><canvas id="coChart"></canvas></div>
+        <div class="chart-box">
+          <canvas id="coChart"></canvas>
+        </div>
       </div>
 
       <div class="chart-card">
         <h2>CO₂ — série recente</h2>
-        <div class="chart-box"><canvas id="co2Chart"></canvas></div>
+        <div class="chart-box">
+          <canvas id="co2Chart"></canvas>
+        </div>
       </div>
     </section>
 
     <section id="inteligente" class="tab-content">
       <div class="analysis-card">
         <h2>Climático Inteligente — análise automática</h2>
+
         <div id="smartAnalysis" class="analysis-list">
           <div class="loading">Processando os dados meteorológicos e ambientais...</div>
         </div>
@@ -668,18 +1015,22 @@
     };
 
     const COMFORT_TEMPERATURE = 26.5;
-    const MAIN_RECORD_LIMIT = 8000;
     const AUTO_REFRESH_MS = 5 * 60 * 1000;
     const FORECAST_HISTORY_HOURS = 24;
+    const WIND_FORECAST_HISTORY_HOURS = 48;
     const FORECAST_HALF_LIFE_HOURS = 6;
+    const THINGSPEAK_PAGE_SIZE = 8000;
+    const HISTORY_MONTHS = 6;
 
     let temperatureChart = null;
     let gustChart = null;
+    let windChart = null;
     let coChart = null;
     let co2Chart = null;
 
     function parseValue(value) {
       if (value === null || value === undefined || value === "") return null;
+
       const parsed = Number(String(value).replace(",", "."));
       return Number.isFinite(parsed) ? parsed : null;
     }
@@ -695,6 +1046,7 @@
 
     function formatDate(value, withSeconds = false) {
       const date = new Date(value);
+
       if (Number.isNaN(date.getTime())) return "--";
 
       return new Intl.DateTimeFormat("pt-BR", {
@@ -728,21 +1080,37 @@
       }, {});
     }
 
+    function getMonthKeySP(value) {
+      const parts = getDatePartsSP(value);
+      return `${parts.year}-${parts.month}`;
+    }
+
     function getLastValidFeed(feeds, fieldName) {
       for (let index = feeds.length - 1; index >= 0; index--) {
         const value = parseValue(feeds[index][fieldName]);
-        if (value !== null) return { feed: feeds[index], value };
+
+        if (value !== null) {
+          return {
+            feed: feeds[index],
+            value
+          };
+        }
       }
+
       return null;
     }
 
     function windDirectionName(degrees) {
       const directions = [
-        "N", "NNE", "NE", "ENE", "L", "LSE", "SE", "SSE",
-        "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"
+        "N", "NNE", "NE", "ENE",
+        "L", "LSE", "SE", "SSE",
+        "S", "SSO", "SO", "OSO",
+        "O", "ONO", "NO", "NNO"
       ];
 
-      const index = Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16;
+      const normalized = ((degrees % 360) + 360) % 360;
+      const index = Math.round(normalized / 22.5) % 16;
+
       return directions[index];
     }
 
@@ -764,6 +1132,7 @@
       };
 
       const color = colors[type] || colors.ok;
+
       document.getElementById("connectionStatus").textContent = text;
       document.getElementById("statusDot").style.background = color;
       document.getElementById("statusDot").style.boxShadow = `0 0 10px ${color}`;
@@ -783,39 +1152,46 @@
         }).format(new Date());
     }
 
-    async function fetchFeeds() {
-      const url = new URL(THINGSPEAK_URL);
-      url.searchParams.set("api_key", READ_API_KEY);
-      url.searchParams.set("results", MAIN_RECORD_LIMIT);
+    function destroyChart(chart) {
+      if (chart) chart.destroy();
+    }
 
-      const response = await fetch(url.toString(), { cache: "no-store" });
+    async function fetchFeeds() {
+      const endDate = new Date();
+      const startDate = new Date();
+
+      startDate.setMonth(startDate.getMonth() - HISTORY_MONTHS);
+
+      const url = new URL(THINGSPEAK_URL);
+
+      url.searchParams.set("api_key", READ_API_KEY);
+      url.searchParams.set("start", startDate.toISOString());
+      url.searchParams.set("end", endDate.toISOString());
+      url.searchParams.set("results", THINGSPEAK_PAGE_SIZE);
+
+      const response = await fetch(url.toString(), {
+        cache: "no-store"
+      });
 
       if (!response.ok) {
         throw new Error(`Erro ThingSpeak: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.feeds || [];
+
+      return (data.feeds || [])
+        .filter(feed => feed && feed.created_at)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
 
-    function destroyChart(chart) {
-      if (chart) chart.destroy();
-    }
-
-    /*
-      Regressão linear local ponderada:
-      - Considera as últimas 24 horas.
-      - Leituras recentes têm peso exponencialmente maior.
-      - O resultado é mais adequado para previsão térmica de curto prazo.
-    */
-    function calculateTemperatureForecast(feeds) {
+    function calculateWeightedForecast(feeds, fieldName, historyHours) {
       const now = new Date();
-      const start = now.getTime() - FORECAST_HISTORY_HOURS * 60 * 60 * 1000;
+      const start = now.getTime() - historyHours * 60 * 60 * 1000;
 
       const data = feeds
         .map(feed => ({
           date: new Date(feed.created_at),
-          value: parseValue(feed[FIELDS.temperature])
+          value: parseValue(feed[fieldName])
         }))
         .filter(item =>
           item.value !== null &&
@@ -830,8 +1206,13 @@
           now: null,
           h3: null,
           h6: null,
+          lower3: null,
+          upper3: null,
+          lower6: null,
+          upper6: null,
           slope: null,
           r2: null,
+          rmse: null,
           points: 0,
           method: "Sem dados suficientes"
         };
@@ -845,8 +1226,13 @@
           now: lastValue,
           h3: lastValue,
           h6: lastValue,
+          lower3: Math.max(0, lastValue - 1),
+          upper3: lastValue + 1,
+          lower6: Math.max(0, lastValue - 1.5),
+          upper6: lastValue + 1.5,
           slope: 0,
           r2: null,
+          rmse: null,
           points: data.length,
           method: "Persistência da última leitura"
         };
@@ -868,7 +1254,11 @@
         sumWXX += weight * x * x;
         sumWXY += weight * x * item.value;
 
-        return { ...item, x, weight };
+        return {
+          ...item,
+          x,
+          weight
+        };
       });
 
       const denominator = sumW * sumWXX - sumWX * sumWX;
@@ -879,8 +1269,13 @@
           now: lastValue,
           h3: lastValue,
           h6: lastValue,
+          lower3: Math.max(0, lastValue - 1),
+          upper3: lastValue + 1,
+          lower6: Math.max(0, lastValue - 1.5),
+          upper6: lastValue + 1.5,
           slope: 0,
           r2: null,
+          rmse: null,
           points: data.length,
           method: "Persistência da última leitura"
         };
@@ -889,33 +1284,61 @@
       let slope = (sumW * sumWXY - sumWX * sumWY) / denominator;
       const intercept = (sumWY - slope * sumWX) / sumW;
 
-      /* Limite de segurança contra picos anormais no sensor. */
       slope = Math.max(-5, Math.min(5, slope));
 
       const weightedMean = sumWY / sumW;
       let totalVariance = 0;
       let residualVariance = 0;
+      let weightedSquaredError = 0;
 
       prepared.forEach(item => {
         const predicted = intercept + slope * item.x;
+        const residual = item.value - predicted;
+
         totalVariance += item.weight * Math.pow(item.value - weightedMean, 2);
-        residualVariance += item.weight * Math.pow(item.value - predicted, 2);
+        residualVariance += item.weight * Math.pow(residual, 2);
+        weightedSquaredError += item.weight * Math.pow(residual, 2);
       });
 
       const r2 = totalVariance > 0
         ? Math.max(0, 1 - residualVariance / totalVariance)
         : null;
 
+      const rmse = Math.sqrt(weightedSquaredError / sumW);
+      const uncertainty3 = Math.max(.5, rmse || .5) * 1.35;
+      const uncertainty6 = Math.max(.5, rmse || .5) * 1.7;
+
       return {
         valid: true,
         now: intercept,
         h3: intercept + slope * 3,
         h6: intercept + slope * 6,
+        lower3: Math.max(0, intercept + slope * 3 - 1.96 * uncertainty3),
+        upper3: intercept + slope * 3 + 1.96 * uncertainty3,
+        lower6: Math.max(0, intercept + slope * 6 - 1.96 * uncertainty6),
+        upper6: intercept + slope * 6 + 1.96 * uncertainty6,
         slope,
         r2,
+        rmse,
         points: data.length,
         method: "Regressão linear local ponderada"
       };
+    }
+
+    function calculateTemperatureForecast(feeds) {
+      return calculateWeightedForecast(
+        feeds,
+        FIELDS.temperature,
+        FORECAST_HISTORY_HOURS
+      );
+    }
+
+    function calculateWindForecast(feeds) {
+      return calculateWeightedForecast(
+        feeds,
+        FIELDS.windSpeed,
+        WIND_FORECAST_HISTORY_HOURS
+      );
     }
 
     function updateForecastCards(forecast) {
@@ -943,6 +1366,24 @@
         forecast.valid
           ? `Projeção para ${formatHour(new Date(Date.now() + 6 * 3600000))}.`
           : detail;
+    }
+
+    function updateWindForecastCards(forecast) {
+      document.getElementById("windForecast3h").textContent =
+        forecast.valid ? formatNumber(forecast.h3, 1) : "--";
+
+      document.getElementById("windForecast6h").textContent =
+        forecast.valid ? formatNumber(forecast.h6, 1) : "--";
+
+      document.getElementById("windForecast3hDetail").textContent =
+        forecast.valid
+          ? `Faixa estimada: ${formatNumber(forecast.lower3, 1)} a ${formatNumber(forecast.upper3, 1)} km/h.`
+          : "Dados insuficientes para projeção.";
+
+      document.getElementById("windForecast6hDetail").textContent =
+        forecast.valid
+          ? `Faixa estimada: ${formatNumber(forecast.lower6, 1)} a ${formatNumber(forecast.upper6, 1)} km/h.`
+          : "Dados insuficientes para projeção.";
     }
 
     function createTemperatureChart(feeds, forecast) {
@@ -973,7 +1414,7 @@
 
       const labels = [
         ...data24h.map(item => formatHour(item.date)),
-        "Agora (pred.)",
+        "Agora",
         "+3 h",
         "+6 h"
       ];
@@ -985,8 +1426,11 @@
         null
       ];
 
+      const lastObserved = data24h.length ? data24h[data24h.length - 1].value : null;
+
       const forecastData = [
-        ...Array(data24h.length).fill(null),
+        ...Array(Math.max(0, data24h.length - 1)).fill(null),
+        lastObserved,
         forecast.valid ? forecast.now : null,
         forecast.valid ? forecast.h3 : null,
         forecast.valid ? forecast.h6 : null
@@ -1034,7 +1478,7 @@
               pointRadius: 5,
               pointHoverRadius: 7,
               tension: .2,
-              spanGaps: false
+              spanGaps: true
             }
           ]
         },
@@ -1042,9 +1486,16 @@
           responsive: true,
           maintainAspectRatio: false,
           animation: false,
-          interaction: { intersect: false, mode: "index" },
+          interaction: {
+            intersect: false,
+            mode: "index"
+          },
           plugins: {
-            legend: { labels: { color: colors.text } },
+            legend: {
+              labels: {
+                color: colors.text
+              }
+            },
             tooltip: {
               callbacks: {
                 label(context) {
@@ -1056,8 +1507,13 @@
           },
           scales: {
             x: {
-              ticks: { color: colors.muted, maxTicksLimit: 14 },
-              grid: { color: colors.grid },
+              ticks: {
+                color: colors.muted,
+                maxTicksLimit: 14
+              },
+              grid: {
+                color: colors.grid
+              },
               title: {
                 display: true,
                 text: "Horário das leituras e projeções",
@@ -1069,7 +1525,9 @@
                 color: colors.muted,
                 callback: value => `${value} °C`
               },
-              grid: { color: colors.grid },
+              grid: {
+                color: colors.grid
+              },
               title: {
                 display: true,
                 text: "Temperatura (°C)",
@@ -1087,17 +1545,20 @@
 
       feeds.forEach(feed => {
         const gust = parseValue(feed[FIELDS.windSpeed]);
+
         if (gust === null) return;
 
-        const date = new Date(feed.created_at);
-        const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+        const key = getMonthKeySP(feed.created_at);
 
         if (!monthlyData[key] || gust > monthlyData[key]) {
           monthlyData[key] = gust;
         }
       });
 
-      const entries = Object.entries(monthlyData).slice(-6);
+      const entries = Object.entries(monthlyData)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-6);
+
       const values = entries.map(item => item[1]);
 
       document.getElementById("periodMaxGust").textContent =
@@ -1108,7 +1569,10 @@
       gustChart = new Chart(document.getElementById("gustChart"), {
         type: "bar",
         data: {
-          labels: entries.map(([key]) => key),
+          labels: entries.map(([key]) => {
+            const [year, month] = key.split("-");
+            return `${month}/${year}`;
+          }),
           datasets: [{
             label: "Maior rajada (km/h)",
             data: values,
@@ -1122,13 +1586,150 @@
           responsive: true,
           maintainAspectRatio: false,
           animation: false,
-          plugins: { legend: { labels: { color: colors.text } } },
+          plugins: {
+            legend: {
+              labels: {
+                color: colors.text
+              }
+            }
+          },
           scales: {
-            x: { ticks: { color: colors.muted }, grid: { color: colors.grid } },
+            x: {
+              ticks: {
+                color: colors.muted
+              },
+              grid: {
+                color: colors.grid
+              }
+            },
             y: {
               beginAtZero: true,
-              ticks: { color: colors.muted, callback: value => `${value} km/h` },
-              grid: { color: colors.grid }
+              ticks: {
+                color: colors.muted,
+                callback: value => `${value} km/h`
+              },
+              grid: {
+                color: colors.grid
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createWindChart(feeds, forecast) {
+      const colors = getChartColors();
+      const limitDate = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+      const data48h = feeds
+        .map(feed => ({
+          date: new Date(feed.created_at),
+          value: parseValue(feed[FIELDS.windSpeed])
+        }))
+        .filter(item =>
+          item.value !== null &&
+          !Number.isNaN(item.date.getTime()) &&
+          item.date >= limitDate
+        )
+        .sort((a, b) => a.date - b.date);
+
+      const labels = [
+        ...data48h.map(item => formatHour(item.date)),
+        "Agora",
+        "+3 h",
+        "+6 h"
+      ];
+
+      const observedData = [
+        ...data48h.map(item => item.value),
+        null,
+        null,
+        null
+      ];
+
+      const lastObserved = data48h.length ? data48h[data48h.length - 1].value : null;
+
+      const forecastData = [
+        ...Array(Math.max(0, data48h.length - 1)).fill(null),
+        lastObserved,
+        forecast.valid ? forecast.now : null,
+        forecast.valid ? forecast.h3 : null,
+        forecast.valid ? forecast.h6 : null
+      ];
+
+      destroyChart(windChart);
+
+      windChart = new Chart(document.getElementById("windChart"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Velocidade / rajada observada (km/h)",
+              data: observedData,
+              borderColor: "#20b7d8",
+              backgroundColor: "rgba(32,183,216,.12)",
+              fill: true,
+              borderWidth: 2.5,
+              tension: .25,
+              pointRadius: 1.5
+            },
+            {
+              label: "Projeção eólica",
+              data: forecastData,
+              borderColor: "#f7b731",
+              borderDash: [6, 5],
+              borderWidth: 3,
+              pointRadius: 4,
+              pointBackgroundColor: "#f7b731",
+              pointBorderColor: "#fff",
+              tension: .2,
+              spanGaps: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          interaction: {
+            intersect: false,
+            mode: "index"
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: colors.text
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  if (context.raw === null) return "";
+                  return `${context.dataset.label}: ${formatNumber(context.raw, 1)} km/h`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: colors.muted,
+                maxTicksLimit: 14
+              },
+              grid: {
+                color: colors.grid
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted,
+                callback: value => `${value} km/h`
+              },
+              grid: {
+                color: colors.grid
+              }
             }
           }
         }
@@ -1201,15 +1802,38 @@
           responsive: true,
           maintainAspectRatio: false,
           animation: false,
-          plugins: { legend: { labels: { color: colors.text } } },
+          plugins: {
+            legend: {
+              labels: {
+                color: colors.text
+              }
+            }
+          },
           scales: {
-            x: { ticks: { color: colors.muted, maxTicksLimit: 8 }, grid: { color: colors.grid } },
-            y: { beginAtZero: true, ticks: { color: colors.muted }, grid: { color: colors.grid } }
+            x: {
+              ticks: {
+                color: colors.muted,
+                maxTicksLimit: 8
+              },
+              grid: {
+                color: colors.grid
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted
+              },
+              grid: {
+                color: colors.grid
+              }
+            }
           }
         }
       });
 
       const lastAverage = data.length ? data[data.length - 1].average : null;
+
       document.getElementById("coMovingAverage").textContent =
         lastAverage !== null ? formatNumber(lastAverage, 2) : "--";
 
@@ -1256,10 +1880,32 @@
           responsive: true,
           maintainAspectRatio: false,
           animation: false,
-          plugins: { legend: { labels: { color: colors.text } } },
+          plugins: {
+            legend: {
+              labels: {
+                color: colors.text
+              }
+            }
+          },
           scales: {
-            x: { ticks: { color: colors.muted, maxTicksLimit: 8 }, grid: { color: colors.grid } },
-            y: { beginAtZero: true, ticks: { color: colors.muted }, grid: { color: colors.grid } }
+            x: {
+              ticks: {
+                color: colors.muted,
+                maxTicksLimit: 8
+              },
+              grid: {
+                color: colors.grid
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: colors.muted
+              },
+              grid: {
+                color: colors.grid
+              }
+            }
           }
         }
       });
@@ -1305,6 +1951,7 @@
     function updateWindPanel(feeds) {
       const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
       const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
+      const windForecast = calculateWindForecast(feeds);
 
       document.getElementById("windSpeed").textContent =
         latestWind ? formatNumber(latestWind.value) : "--";
@@ -1318,11 +1965,32 @@
       document.getElementById("windDirectionText").textContent = directionName;
 
       document.getElementById("compassDirection").textContent =
-        direction !== null ? `${directionName} (${formatNumber(direction, 0)}°)` : "--";
+        direction !== null
+          ? `${directionName} (${formatNumber(direction, 0)}°)`
+          : "--";
 
-      if (direction !== null) {
-        document.getElementById("directionArrow").style.transform = `rotate(${direction}deg)`;
+      const pointer = document.getElementById("directionArrow");
+
+      if (direction !== null && Number.isFinite(direction)) {
+        const normalizedDirection = ((direction % 360) + 360) % 360;
+
+        /*
+          0° = Norte.
+          A seta possui origem no centro da rosa e gira no sentido horário.
+        */
+        pointer.style.transform = `rotate(${normalizedDirection}deg)`;
+        pointer.style.opacity = "1";
+        pointer.style.visibility = "visible";
+      } else {
+        pointer.style.transform = "rotate(0deg)";
+        pointer.style.opacity = ".45";
+        pointer.style.visibility = "visible";
       }
+
+      updateWindForecastCards(windForecast);
+      createWindChart(feeds, windForecast);
+
+      return windForecast;
     }
 
     function updateGustTable(feeds) {
@@ -1330,30 +1998,38 @@
 
       feeds.forEach(feed => {
         const gust = parseValue(feed[FIELDS.windSpeed]);
+
         if (gust === null) return;
 
         const hour = Number(getDatePartsSP(feed.created_at).hour);
 
         if (!strongestByHour[hour] || gust > strongestByHour[hour].gust) {
-          strongestByHour[hour] = { gust, date: feed.created_at };
+          strongestByHour[hour] = {
+            gust,
+            date: feed.created_at
+          };
         }
       });
 
       document.getElementById("gustTableBody").innerHTML =
         strongestByHour.map((item, hour) => {
           if (!item) {
-            return `<tr>
-              <td>${String(hour).padStart(2, "0")}:00</td>
-              <td>Sem registro</td>
-              <td>--</td>
-            </tr>`;
+            return `
+              <tr>
+                <td>${String(hour).padStart(2, "0")}:00</td>
+                <td>Sem registro</td>
+                <td>--</td>
+              </tr>
+            `;
           }
 
-          return `<tr>
-            <td>${String(hour).padStart(2, "0")}:00</td>
-            <td><strong>${formatNumber(item.gust)} km/h</strong></td>
-            <td>${formatDate(item.date, true)}</td>
-          </tr>`;
+          return `
+            <tr>
+              <td>${String(hour).padStart(2, "0")}:00</td>
+              <td><strong>${formatNumber(item.gust)} km/h</strong></td>
+              <td>${formatDate(item.date, true)}</td>
+            </tr>
+          `;
         }).join("");
     }
 
@@ -1371,8 +2047,9 @@
       createCO2Chart(feeds);
     }
 
-    function runClimaticoInteligente(feeds, forecast) {
+    function runClimaticoInteligente(feeds, temperatureForecast, windForecast) {
       const analysis = [];
+
       const latestTemperature = getLastValidFeed(feeds, FIELDS.temperature);
       const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
       const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
@@ -1383,6 +2060,7 @@
 
       if (latestTemperature) {
         const difference = latestTemperature.value - COMFORT_TEMPERATURE;
+
         const relation =
           Math.abs(difference) < .5
             ? "muito próxima da referência de conforto térmico"
@@ -1397,17 +2075,21 @@
         });
       }
 
-      if (forecast.valid) {
+      if (temperatureForecast.valid) {
         const trend =
-          forecast.slope > .05 ? "tendência de elevação" :
-          forecast.slope < -.05 ? "tendência de redução" :
-          "tendência de estabilidade";
+          temperatureForecast.slope > .05
+            ? "tendência de elevação"
+            : temperatureForecast.slope < -.05
+              ? "tendência de redução"
+              : "tendência de estabilidade";
 
         analysis.push({
-          type: Math.abs(forecast.h6 - COMFORT_TEMPERATURE) > 3 ? "warning" : "normal",
+          type: Math.abs(temperatureForecast.h6 - COMFORT_TEMPERATURE) > 3
+            ? "warning"
+            : "normal",
           text: `<strong>Projeção térmica:</strong> ${trend}. A previsão para 3 horas é
-            ${formatNumber(forecast.h3, 2)} °C e para 6 horas é
-            ${formatNumber(forecast.h6, 2)} °C.`
+            ${formatNumber(temperatureForecast.h3, 2)} °C e para 6 horas é
+            ${formatNumber(temperatureForecast.h6, 2)} °C.`
         });
       }
 
@@ -1422,9 +2104,24 @@
         });
       }
 
+      if (windForecast.valid) {
+        analysis.push({
+          type: windForecast.h6 >= 30 ? "warning" : "normal",
+          text: `<strong>Projeção eólica:</strong> previsão de
+            ${formatNumber(windForecast.h3, 1)} km/h para +3 horas e
+            ${formatNumber(windForecast.h6, 1)} km/h para +6 horas.
+            Faixa estimada em +6h: ${formatNumber(windForecast.lower6, 1)} a
+            ${formatNumber(windForecast.upper6, 1)} km/h.`
+        });
+      }
+
       if (movingCO !== null) {
         analysis.push({
-          type: movingCO >= 9 ? "danger" : movingCO >= 7 ? "warning" : "normal",
+          type: movingCO >= 9
+            ? "danger"
+            : movingCO >= 7
+              ? "warning"
+              : "normal",
           text: `<strong>Qualidade do ar — CO:</strong> média móvel de 8 horas em
             ${formatNumber(movingCO, 2)} ppm.`
         });
@@ -1455,13 +2152,23 @@
         setConnectionStatus("Atualizando dados...", "loading");
 
         const feeds = await fetchFeeds();
-        const forecast = updateClimatePanel(feeds);
 
-        updateWindPanel(feeds);
+        if (!feeds.length) {
+          throw new Error("Nenhuma leitura retornada pelo canal.");
+        }
+
+        const temperatureForecast = updateClimatePanel(feeds);
+        const windForecast = updateWindPanel(feeds);
+
         updateGustTable(feeds);
         updateEnvironmentalPanel(feeds);
         createGustChart(feeds);
-        runClimaticoInteligente(feeds, forecast);
+
+        runClimaticoInteligente(
+          feeds,
+          temperatureForecast,
+          windForecast
+        );
 
         const updateTime = new Intl.DateTimeFormat("pt-BR", {
           timeZone: "America/Sao_Paulo",
@@ -1473,6 +2180,7 @@
         setConnectionStatus(`Atualizado às ${updateTime}`, "ok");
       } catch (error) {
         console.error(error);
+
         setConnectionStatus("Erro ao atualizar dados", "error");
 
         document.getElementById("smartAnalysis").innerHTML = `
@@ -1528,8 +2236,15 @@
       });
     });
 
-    document.getElementById("refreshButton").addEventListener("click", updateDashboard);
-    document.getElementById("themeButton").addEventListener("click", toggleTheme);
+    document.getElementById("refreshButton").addEventListener(
+      "click",
+      updateDashboard
+    );
+
+    document.getElementById("themeButton").addEventListener(
+      "click",
+      toggleTheme
+    );
 
     loadSavedTheme();
     updateHeaderTimestamp();
