@@ -3,41 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ClimaUdia - Soluções em sistemas climatológicos</title>
+  <title>ClimaUdia | Dashboard Climático Inteligente</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
   <style>
     :root {
-      --bg: #08111f;
-      --panel: #0f1d31;
-      --panel-2: #132640;
-      --line: #29445f;
-      --text: #e9f3ff;
-      --muted: #9fb3c8;
-      --primary: #20b7d8;
-      --success: #35c879;
-      --warning: #f7b731;
-      --danger: #ef5b5b;
-      --comfort: #b56cff;
-      --shadow: 0 10px 30px rgba(0, 0, 0, .22);
-      --chart-grid: rgba(159, 179, 200, .13);
+      --bg: #07111f;
+      --panel: #0d1d31;
+      --panel-2: #132943;
+      --line: #294964;
+      --text: #eef7ff;
+      --muted: #9cb4c9;
+      --primary: #21badc;
+      --success: #36cc7c;
+      --warning: #f6b93b;
+      --danger: #f05d5e;
+      --purple: #ad72ff;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
     }
 
     body.light-theme {
-      --bg: #eef5fb;
+      --bg: #edf5fc;
       --panel: #ffffff;
       --panel-2: #e5f0fa;
-      --line: #b7cce0;
-      --text: #14253a;
-      --muted: #587087;
-      --primary: #008db2;
-      --success: #198754;
-      --warning: #b97900;
-      --danger: #c53030;
-      --comfort: #7a35be;
-      --shadow: 0 8px 22px rgba(50, 78, 102, .12);
-      --chart-grid: rgba(88, 112, 135, .18);
+      --line: #b8cfe3;
+      --text: #13263c;
+      --muted: #5b7389;
+      --primary: #008eaf;
+      --success: #16824d;
+      --warning: #af7000;
+      --danger: #c33439;
+      --purple: #7035b6;
+      --shadow: 0 10px 24px rgba(48, 74, 98, 0.13);
     }
 
     * {
@@ -46,62 +44,69 @@
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(32, 183, 216, .12), transparent 30%),
-        var(--bg);
       color: var(--text);
-      transition: .25s ease;
+      background:
+        radial-gradient(circle at top right, rgba(33, 186, 220, 0.13), transparent 31%),
+        var(--bg);
+      transition: 0.25s ease;
     }
 
     header {
-      padding: 22px 24px;
-      background: color-mix(in srgb, var(--bg) 94%, transparent);
-      border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
-      z-index: 20;
-      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 17, 31, 0.88);
+      backdrop-filter: blur(12px);
+    }
+
+    body.light-theme header {
+      background: rgba(237, 245, 252, 0.88);
     }
 
     .header-content {
       max-width: 1500px;
       margin: auto;
       display: flex;
+      justify-content: space-between;
       gap: 18px;
       align-items: center;
-      justify-content: space-between;
       flex-wrap: wrap;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+      font-size: clamp(1.2rem, 2.3vw, 1.85rem);
     }
 
     .subtitle {
+      margin: 6px 0 0;
       color: var(--muted);
-      margin: 5px 0 0;
-      font-size: .9rem;
+      font-size: 0.88rem;
     }
 
     .header-actions,
-    .tabs {
+    .controls,
+    .kpi-navigation,
+    .date-filter-fields {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       flex-wrap: wrap;
     }
 
     button {
-      border: 0;
-      color: #fff;
-      background: var(--primary);
+      border: 1px solid transparent;
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 10px 13px;
       cursor: pointer;
-      font-weight: bold;
-      transition: .2s ease;
+      color: #ffffff;
+      background: var(--primary);
+      font-weight: 700;
+      transition: 0.2s ease;
     }
 
     button:hover {
@@ -109,17 +114,19 @@
       transform: translateY(-1px);
     }
 
-    .theme-button,
-    .tab-button {
-      background: var(--panel);
+    button.secondary,
+    .kpi-button,
+    .interval-button {
       color: var(--muted);
-      border: 1px solid var(--line);
+      background: var(--panel);
+      border-color: var(--line);
     }
 
-    .tab-button.active {
-      background: var(--primary);
-      color: #fff;
+    .kpi-button.active,
+    .interval-button.active {
+      color: #ffffff;
       border-color: var(--primary);
+      background: var(--primary);
     }
 
     .status-dot {
@@ -127,8 +134,8 @@
       height: 10px;
       display: inline-block;
       border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 10px rgba(53, 200, 121, .85);
+      background: var(--warning);
+      box-shadow: 0 0 10px var(--warning);
     }
 
     main {
@@ -137,40 +144,93 @@
       padding: 22px;
     }
 
-    .tabs {
+    .timestamp-panel,
+    .controls-panel,
+    .notice,
+    .date-filter-panel {
       margin-bottom: 18px;
-    }
-
-    .tab-content {
-      display: none;
-      animation: fadeIn .25s ease;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
 
     .timestamp-panel {
-      display: inline-flex;
-      gap: 10px;
+      display: flex;
       align-items: center;
-      padding: 10px 14px;
-      margin-bottom: 18px;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .timestamp-panel strong {
+      color: var(--text);
+    }
+
+    .controls-panel {
+      display: grid;
+      gap: 13px;
+    }
+
+    .controls-panel-title {
+      color: var(--muted);
+      font-size: 0.83rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .kpi-navigation {
+      margin-bottom: 6px;
+    }
+
+    .date-filter-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .date-filter-panel h2 {
+      margin: 0;
+      font-size: 1.02rem;
+    }
+
+    .date-filter-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .date-filter-fields label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .date-filter-fields input {
+      width: 155px;
+      padding: 10px;
       border: 1px solid var(--line);
-      background: var(--panel);
-      border-radius: 9px;
+      border-radius: 8px;
+      outline: none;
+      color: var(--text);
+      background: var(--panel-2);
+      font-size: 0.92rem;
+    }
+
+    .date-filter-fields input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(33, 186, 220, 0.14);
+    }
+
+    .date-filter-error {
+      min-height: 18px;
+      color: #ff8585;
+      font-size: 0.82rem;
+      font-weight: 700;
     }
 
     .grid {
@@ -182,99 +242,119 @@
 
     .grid-2 {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
       gap: 18px;
       margin-bottom: 18px;
     }
 
     .card,
     .chart-card,
-    .table-card,
-    .analysis-card,
     .compass-card,
-    .forecast-info {
-      background: linear-gradient(145deg, var(--panel-2), var(--panel));
+    .details-card {
+      padding: 18px;
       border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 18px;
+      background: linear-gradient(145deg, var(--panel-2), var(--panel));
       box-shadow: var(--shadow);
     }
 
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 150px;
+      border-top: 3px solid var(--primary);
+    }
+
+    .card.humidity { border-top-color: #4bc1ff; }
+    .card.pressure { border-top-color: var(--purple); }
+    .card.wind { border-top-color: var(--warning); }
+    .card.rain { border-top-color: #4d90fe; }
+    .card.co { border-top-color: var(--danger); }
+    .card.co2 { border-top-color: var(--success); }
+
     .metric-label {
       color: var(--muted);
-      font-size: .85rem;
-      margin-bottom: 9px;
+      font-size: 0.84rem;
+      margin-bottom: 10px;
     }
 
     .metric-value {
       color: var(--text);
-      font-size: 1.8rem;
-      font-weight: 700;
+      font-size: 1.9rem;
+      font-weight: 800;
     }
 
     .metric-unit {
       color: var(--primary);
-      font-size: .9rem;
       margin-left: 4px;
+      font-size: 0.9rem;
     }
 
     .metric-detail {
+      margin-top: 12px;
       color: var(--muted);
-      font-size: .78rem;
-      line-height: 1.4;
-      margin-top: 10px;
+      font-size: 0.78rem;
+      line-height: 1.45;
     }
 
-    .comfort-card {
-      border-top: 3px solid var(--comfort);
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
     }
 
-    .comfort-card .metric-unit {
-      color: var(--comfort);
+    .badge.good {
+      color: #42d98b;
+      background: rgba(54, 204, 124, 0.16);
     }
 
-    .forecast-card {
-      border-top: 3px solid var(--primary);
+    .badge.warning {
+      color: #ffc54c;
+      background: rgba(246, 185, 59, 0.16);
     }
 
-    .forecast-card.future-3 {
-      border-top-color: var(--warning);
-    }
-
-    .forecast-card.future-6 {
-      border-top-color: var(--danger);
-    }
-
-    .forecast-info {
-      color: var(--muted);
-      font-size: .88rem;
-      line-height: 1.55;
-      margin-bottom: 18px;
+    .badge.danger {
+      color: #ff7979;
+      background: rgba(240, 93, 94, 0.16);
     }
 
     .chart-card h2,
-    .table-card h2,
-    .analysis-card h2,
-    .compass-card h2 {
-      font-size: 1.05rem;
+    .compass-card h2,
+    .details-card h2 {
       margin: 0 0 14px;
+      font-size: 1.05rem;
     }
 
     .chart-box {
       position: relative;
-      height: 390px;
-      width: 100%;
+      height: 400px;
     }
 
-    .formula {
-      margin-top: 16px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: color-mix(in srgb, var(--panel) 70%, transparent);
+    .details-card {
+      line-height: 1.6;
       color: var(--muted);
-      font-size: .88rem;
+      font-size: 0.9rem;
+    }
+
+    .details-card strong {
+      color: var(--text);
+    }
+
+    .notice {
+      color: var(--muted);
+      font-size: 0.87rem;
       line-height: 1.55;
+    }
+
+    .notice strong {
+      color: var(--text);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .compass-card {
@@ -283,407 +363,123 @@
       align-items: center;
     }
 
-    /* ==========================================================
-       ROSA DOS VENTOS ESTILIZADA
-       ========================================================== */
-
     .compass {
-      width: 330px;
-      height: 330px;
       position: relative;
+      width: 340px;
+      height: 340px;
+      border: 5px solid #6696b8;
       border-radius: 50%;
-      overflow: visible;
-      isolation: isolate;
       background:
-        radial-gradient(circle at center, rgba(32, 183, 216, .25) 0 5%, transparent 5.5%),
-        radial-gradient(circle at center, transparent 0 25%, rgba(32, 183, 216, .10) 25.4% 25.8%, transparent 26.2%),
-        radial-gradient(circle at center, transparent 0 43%, rgba(159, 211, 237, .18) 43.4% 43.8%, transparent 44.2%),
-        radial-gradient(circle at center, transparent 0 48%, rgba(159, 211, 237, .12) 48.4% 48.7%, transparent 49%),
+        radial-gradient(circle at center, rgba(33, 186, 220, 0.35) 0 5%, transparent 5.5%),
         repeating-conic-gradient(
           from 0deg,
-          rgba(174, 219, 241, .75) 0deg 1deg,
+          rgba(216, 244, 255, 0.7) 0deg 1deg,
           transparent 1deg 5deg,
-          rgba(174, 219, 241, .35) 5deg 5.6deg,
+          rgba(216, 244, 255, 0.32) 5deg 5.6deg,
           transparent 5.6deg 10deg
         ),
-        radial-gradient(circle, #183653 0%, #10253c 62%, #08111f 100%);
-      border: 5px solid #6d9cbe;
+        radial-gradient(circle, #183b59 0%, #0d2135 64%, #07111f 100%);
       box-shadow:
-        inset 0 0 35px rgba(32, 183, 216, .18),
-        0 15px 32px rgba(0, 0, 0, .28);
+        inset 0 0 35px rgba(33, 186, 220, 0.2),
+        0 16px 30px rgba(0, 0, 0, 0.28);
     }
 
-    body.light-theme .compass {
-      background:
-        radial-gradient(circle at center, rgba(0, 141, 178, .20) 0 5%, transparent 5.5%),
-        radial-gradient(circle at center, transparent 0 25%, rgba(0, 141, 178, .12) 25.4% 25.8%, transparent 26.2%),
-        radial-gradient(circle at center, transparent 0 43%, rgba(0, 141, 178, .16) 43.4% 43.8%, transparent 44.2%),
-        radial-gradient(circle at center, transparent 0 48%, rgba(0, 141, 178, .10) 48.4% 48.7%, transparent 49%),
-        repeating-conic-gradient(
-          from 0deg,
-          rgba(20, 79, 120, .65) 0deg 1deg,
-          transparent 1deg 5deg,
-          rgba(20, 79, 120, .28) 5deg 5.6deg,
-          transparent 5.6deg 10deg
-        ),
-        radial-gradient(circle, #f8fcff 0%, #dcecf8 70%, #c2d9eb 100%);
-      border-color: #5a86a7;
-    }
-
-    .compass::before,
-    .compass::after {
-      content: "";
-      position: absolute;
-      inset: 15%;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .compass::before {
-      background:
-        linear-gradient(
-          to bottom,
-          transparent 49.5%,
-          rgba(177, 223, 244, .65) 49.8%,
-          rgba(177, 223, 244, .65) 50.2%,
-          transparent 50.5%
-        ),
-        linear-gradient(
-          to right,
-          transparent 49.5%,
-          rgba(177, 223, 244, .65) 49.8%,
-          rgba(177, 223, 244, .65) 50.2%,
-          transparent 50.5%
-        );
-    }
-
-    .compass::after {
-      transform: rotate(45deg);
-      background:
-        linear-gradient(
-          to bottom,
-          transparent 49.6%,
-          rgba(177, 223, 244, .38) 49.8%,
-          rgba(177, 223, 244, .38) 50.2%,
-          transparent 50.4%
-        ),
-        linear-gradient(
-          to right,
-          transparent 49.6%,
-          rgba(177, 223, 244, .38) 49.8%,
-          rgba(177, 223, 244, .38) 50.2%,
-          transparent 50.4%
-        );
-    }
-
-    .compass-star {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      z-index: 3;
-      width: 175px;
-      height: 175px;
-      transform: translate(-50%, -50%);
-      opacity: .85;
-      pointer-events: none;
-    }
-
-    .compass-star::before,
-    .compass-star::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      clip-path: polygon(
-        50% 0%,
-        57% 41%,
-        100% 50%,
-        57% 59%,
-        50% 100%,
-        43% 59%,
-        0% 50%,
-        43% 41%
-      );
-    }
-
-    .compass-star::before {
-      background: linear-gradient(135deg, rgba(32, 183, 216, .9), rgba(255, 255, 255, .05));
-    }
-
-    .compass-star::after {
-      transform: rotate(45deg) scale(.9);
-      background: linear-gradient(135deg, rgba(255, 255, 255, .22), rgba(32, 183, 216, .05));
-    }
-
-    /*
-      CORREÇÃO DO PONTEIRO:
-      O ponteiro é posicionado a partir do centro da rosa.
-      A origem de rotação está na base; portanto, 0° aponta para Norte.
-    */
     .direction-arrow {
       position: absolute;
       top: calc(50% - 132px);
-      left: calc(50% - 13px);
-      z-index: 20;
-      width: 26px;
+      left: calc(50% - 14px);
+      z-index: 15;
+      width: 28px;
       height: 132px;
-      display: block;
-      opacity: 1;
-      visibility: visible;
       transform-origin: 50% 100%;
       transform: rotate(0deg);
-      transition: transform .55s cubic-bezier(.2, .8, .2, 1);
-      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .55));
-      pointer-events: none;
+      transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .direction-arrow::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 26px;
+      width: 28px;
       height: 112px;
-      background: linear-gradient(
-        to top,
-        rgba(239, 91, 91, .65) 0%,
-        #ff7777 33%,
-        #fff2f2 34%,
-        #ef5b5b 35%,
-        #c92f3d 100%
-      );
-      clip-path: polygon(50% 0%, 100% 78%, 64% 78%, 64% 100%, 36% 100%, 36% 78%, 0% 78%);
-      border-radius: 2px;
+      background: linear-gradient(to top, #b82836, #ef5d5e 65%, #fff1f1 66%, #ef5d5e 70%);
+      clip-path: polygon(50% 0%, 100% 76%, 65% 76%, 65% 100%, 35% 100%, 35% 76%, 0% 76%);
     }
 
     .direction-arrow::after {
       content: "";
       position: absolute;
       bottom: 0;
-      left: 7px;
+      left: 8px;
       width: 12px;
-      height: 30px;
-      background: linear-gradient(to bottom, #dae9f4, #54768f);
+      height: 29px;
+      background: linear-gradient(to bottom, #e9f7ff, #53758e);
       clip-path: polygon(50% 100%, 0 0, 100% 0);
-      opacity: .95;
     }
 
     .compass-center {
       position: absolute;
+      z-index: 20;
       top: 50%;
       left: 50%;
-      z-index: 25;
-      width: 28px;
-      height: 28px;
+      width: 29px;
+      height: 29px;
       border: 6px solid var(--primary);
       border-radius: 50%;
       background: #fff;
-      box-shadow: 0 0 0 4px rgba(32, 183, 216, .18), 0 2px 8px rgba(0, 0, 0, .45);
       transform: translate(-50%, -50%);
     }
 
     .compass-label {
       position: absolute;
       z-index: 10;
-      min-width: 26px;
-      color: #eaf8ff;
-      font-size: .74rem;
-      font-weight: 700;
-      text-align: center;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    body.light-theme .compass-label {
-      color: #163b59;
-      text-shadow: 0 1px 1px rgba(255, 255, 255, .75);
-    }
-
-    .compass-label.major {
-      color: #ffffff;
-      font-size: 1rem;
+      color: #e8f8ff;
+      font-size: 0.82rem;
       font-weight: 800;
+      transform: translate(-50%, -50%);
     }
 
-    body.light-theme .compass-label.major {
-      color: #09243b;
-    }
-
-    .compass-label.north {
-      color: #ff7b7b;
-      font-size: 1.1rem;
-    }
-
-    .dir-n   { top: 7%; left: 50%; }
-    .dir-nne { top: 11%; left: 68%; }
-    .dir-ne  { top: 20%; left: 80%; }
-    .dir-ene { top: 34%; left: 89%; }
-    .dir-e   { top: 50%; left: 93%; }
-    .dir-ese { top: 66%; left: 89%; }
-    .dir-se  { top: 80%; left: 80%; }
-    .dir-sse { top: 89%; left: 68%; }
-    .dir-s   { top: 93%; left: 50%; }
-    .dir-sso { top: 89%; left: 32%; }
-    .dir-so  { top: 80%; left: 20%; }
-    .dir-oso { top: 66%; left: 11%; }
-    .dir-o   { top: 50%; left: 7%; }
-    .dir-ono { top: 34%; left: 11%; }
-    .dir-no  { top: 20%; left: 20%; }
-    .dir-nno { top: 11%; left: 32%; }
+    .dir-n { top: 6%; left: 50%; color: #ff7c7c; font-size: 1.08rem; }
+    .dir-ne { top: 19%; left: 81%; }
+    .dir-e { top: 50%; left: 94%; }
+    .dir-se { top: 81%; left: 81%; }
+    .dir-s { top: 94%; left: 50%; }
+    .dir-sw { top: 81%; left: 19%; }
+    .dir-w { top: 50%; left: 6%; }
+    .dir-nw { top: 19%; left: 19%; }
 
     .compass-readout {
-      margin-top: 18px;
+      margin-top: 16px;
       color: var(--muted);
       text-align: center;
     }
 
     .compass-readout strong {
       color: var(--primary);
-      font-size: 1.2rem;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      min-width: 520px;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 11px;
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-    }
-
-    th {
-      color: var(--primary);
-      font-size: .82rem;
-      text-transform: uppercase;
-    }
-
-    .analysis-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .analysis-item {
-      padding: 14px;
-      border-left: 4px solid var(--primary);
-      border-radius: 6px;
-      background: color-mix(in srgb, var(--panel) 70%, transparent);
-      line-height: 1.5;
-    }
-
-    .analysis-item.warning {
-      border-left-color: var(--warning);
-    }
-
-    .analysis-item.danger {
-      border-left-color: var(--danger);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-size: .77rem;
-      font-weight: bold;
-    }
-
-    .good {
-      background: rgba(53, 200, 121, .17);
-      color: #35c879;
-    }
-
-    .attention {
-      background: rgba(247, 183, 49, .18);
-      color: #d99600;
-    }
-
-    .critical {
-      background: rgba(239, 91, 91, .18);
-      color: #ef5b5b;
-    }
-
-    .loading {
-      padding: 20px;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .error {
-      padding: 12px;
-      color: #ef5b5b;
-      border: 1px solid rgba(239, 91, 91, .28);
-      border-radius: 8px;
-      background: rgba(239, 91, 91, .12);
+      font-size: 1.15rem;
     }
 
     @media (max-width: 900px) {
       .grid-2 {
         grid-template-columns: 1fr;
       }
-
-      .chart-box {
-        height: 320px;
-      }
     }
 
-    @media (max-width: 540px) {
+    @media (max-width: 560px) {
       main {
         padding: 14px;
       }
 
       header {
-        padding: 16px 14px;
-      }
-
-      .chart-box {
-        height: 280px;
+        padding: 15px 14px;
       }
 
       .compass {
-        width: 275px;
-        height: 275px;
+        width: 280px;
+        height: 280px;
       }
 
-      .direction-arrow {
-        top: calc(50% - 110px);
-        left: calc(50% - 11px);
-        width: 22px;
-        height: 110px;
-      }
-
-      .direction-arrow::before {
-        width: 22px;
-        height: 94px;
-      }
-
-      .direction-arrow::after {
-        left: 6px;
-        width: 10px;
-        height: 24px;
-      }
-
-      .compass-star {
-        width: 145px;
-        height: 145px;
-      }
-
-      .compass-label {
-        font-size: .63rem;
-      }
-
-      .compass-label.major {
-        font-size: .86rem;
-      }
-
-      .compass-label.north {
-        font-size: .95rem;
+      .chart-box {
+        height: 300px;
       }
     }
   </style>
@@ -693,1566 +489,1259 @@
   <header>
     <div class="header-content">
       <div>
-        <h1>ClimaUdia - Soluções em sistemas climatológicos</h1>
-        <p class="subtitle">
-          Canal ThingSpeak 321770 · Monitoramento climatológico, eólico e ambiental
-        </p>
+        <h1>ClimaUdia — Dashboard Climático Inteligente</h1>
+        <p class="subtitle">Canal ThingSpeak 321770 · Monitoramento meteorológico e ambiental</p>
       </div>
 
       <div class="header-actions">
         <span class="status-dot" id="statusDot"></span>
         <span id="connectionStatus">Aguardando leitura</span>
-        <button id="themeButton" class="theme-button" type="button">☀️ Tema claro</button>
-        <button id="refreshButton" type="button">Atualizar agora</button>
+        <button id="themeButton" class="secondary" type="button">☀️ Tema claro</button>
+        <button id="manualRefreshButton" type="button">Atualizar agora</button>
       </div>
     </div>
   </header>
 
   <main>
-    <div class="tabs">
-      <button class="tab-button active" data-tab="clima">Dados climatológicos</button>
-      <button class="tab-button" data-tab="vento">Termodinâmica eólica</button>
-      <button class="tab-button" data-tab="ambiental">Dados ambientais</button>
-      <button class="tab-button" data-tab="inteligente">Climático Inteligente</button>
+    <div class="timestamp-panel">
+      <span>🕒</span>
+      <strong id="dashboardTimestamp">Carregando data e hora...</strong>
     </div>
 
-    <section id="clima" class="tab-content active">
-      <div class="timestamp-panel">
-        <span>🕒</span>
-        <strong id="dashboardTimestamp">Carregando data e hora...</strong>
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <div class="metric-label">Temperatura atual medida</div>
-          <div class="metric-value">
-            <span id="currentTemperature">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail" id="temperatureDate">Sem leitura disponível</div>
-        </div>
-
-        <div class="card comfort-card">
-          <div class="metric-label">Conforto térmico</div>
-          <div class="metric-value">
-            <span>26,50</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail">Referência indicada pela linha tracejada roxa no gráfico.</div>
-        </div>
-
-        <div class="card forecast-card">
-          <div class="metric-label">Predição para agora</div>
-          <div class="metric-value">
-            <span id="forecastNow">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail" id="forecastNowDetail">Aguardando dados históricos.</div>
-        </div>
-
-        <div class="card forecast-card future-3">
-          <div class="metric-label">Predição para +3 horas</div>
-          <div class="metric-value">
-            <span id="forecast3h">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail" id="forecast3hDetail">Aguardando dados históricos.</div>
-        </div>
-
-        <div class="card forecast-card future-6">
-          <div class="metric-label">Predição para +6 horas</div>
-          <div class="metric-value">
-            <span id="forecast6h">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail" id="forecast6hDetail">Aguardando dados históricos.</div>
-        </div>
-
-        <div class="card">
-          <div class="metric-label">Temperatura mínima no período</div>
-          <div class="metric-value">
-            <span id="periodMinTemperature">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail">Considerando as leituras recuperadas do canal.</div>
-        </div>
-
-        <div class="card">
-          <div class="metric-label">Temperatura máxima no período</div>
-          <div class="metric-value">
-            <span id="periodMaxTemperature">--</span>
-            <span class="metric-unit">°C</span>
-          </div>
-          <div class="metric-detail">Considerando as leituras recuperadas do canal.</div>
+    <section class="controls-panel">
+      <div>
+        <div class="controls-panel-title">Periodicidade de atualização</div>
+        <div class="controls">
+          <button class="interval-button" data-interval="60000" type="button">1 minuto</button>
+          <button class="interval-button active" data-interval="300000" type="button">5 minutos</button>
+          <button class="interval-button" data-interval="900000" type="button">15 minutos</button>
+          <button class="interval-button" data-interval="1800000" type="button">30 minutos</button>
+          <button class="interval-button" data-interval="0" type="button">Somente manual</button>
         </div>
       </div>
 
-      <div class="forecast-info">
-        <strong>Temperatura nas últimas 24 horas e projeção:</strong>
-        a linha azul apresenta todas as leituras válidas do <strong>field1</strong>.
-        A linha roxa tracejada representa o conforto térmico de <strong>26,50 °C</strong>.
-        A linha amarela tracejada apresenta as projeções para agora, 3 horas e 6 horas.
-      </div>
+      <div>
+        <div class="controls-panel-title">Indicadores KPI</div>
 
-      <div class="chart-card">
-        <h2>Temperatura — últimas 24 horas e previsão</h2>
-
-        <div class="chart-box">
-          <canvas id="temperatureChart"></canvas>
-        </div>
-
-        <div class="formula">
-          <strong>Metodologia preditiva:</strong> regressão linear local ponderada.
-          As leituras recentes recebem maior peso exponencial, tornando a projeção
-          mais adequada para horizontes curtos. Quando há poucas leituras, o sistema
-          aplica persistência, mantendo a última temperatura válida como referência.
+        <div class="kpi-navigation">
+          <button class="kpi-button active" data-kpi="temperature" type="button">Temperatura</button>
+          <button class="kpi-button" data-kpi="temperatureAnnual" type="button">Temperatura anual</button>
+          <button class="kpi-button" data-kpi="humidity" type="button">Umidade</button>
+          <button class="kpi-button" data-kpi="pressure" type="button">Pressão</button>
+          <button class="kpi-button" data-kpi="wind" type="button">Vento</button>
+          <button class="kpi-button" data-kpi="rain" type="button">Previsão de chuva</button>
+          <button class="kpi-button" data-kpi="co" type="button">CO</button>
+          <button class="kpi-button" data-kpi="co2" type="button">CO₂</button>
         </div>
       </div>
     </section>
 
-    <section id="vento" class="tab-content">
-      <div class="grid">
-        <div class="card">
-          <div class="metric-label">Velocidade / rajada atual</div>
-          <div class="metric-value">
-            <span id="windSpeed">--</span>
-            <span class="metric-unit">km/h</span>
-          </div>
-          <div class="metric-detail">Leitura direta do <strong>field4</strong></div>
-        </div>
+    <section id="temperatureDateFilter" class="date-filter-panel hidden">
+      <h2>Consulta mensal da temperatura no período selecionado</h2>
 
-        <div class="card">
-          <div class="metric-label">Direção atual do vento</div>
-          <div class="metric-value">
-            <span id="windDirectionValue">--</span>
-            <span class="metric-unit">°</span>
-          </div>
-          <div class="metric-detail">
-            <span id="windDirectionText">--</span> · Leitura do <strong>field6</strong>
-          </div>
-        </div>
+      <p>
+        Informe a data inicial e final no formato <strong>DD/MM/AAAA</strong>.
+        O gráfico exibirá, separadamente por mês, a temperatura mínima, média,
+        mediana, moda e máxima.
+      </p>
 
-        <div class="card">
-          <div class="metric-label">Maior rajada no período</div>
-          <div class="metric-value">
-            <span id="periodMaxGust">--</span>
-            <span class="metric-unit">km/h</span>
-          </div>
-          <div class="metric-detail">Maior valor disponível nos últimos seis meses.</div>
-        </div>
+      <div class="date-filter-fields">
+        <label>
+          Data inicial
+          <input id="temperatureStartDate" type="text" inputmode="numeric" placeholder="DD/MM/AAAA" autocomplete="off" />
+        </label>
 
-        <div class="card forecast-card future-3">
-          <div class="metric-label">Previsão de vento para +3 h</div>
-          <div class="metric-value">
-            <span id="windForecast3h">--</span>
-            <span class="metric-unit">km/h</span>
-          </div>
-          <div class="metric-detail" id="windForecast3hDetail">Aguardando histórico.</div>
-        </div>
+        <label>
+          Data final
+          <input id="temperatureEndDate" type="text" inputmode="numeric" placeholder="DD/MM/AAAA" autocomplete="off" />
+        </label>
 
-        <div class="card forecast-card future-6">
-          <div class="metric-label">Previsão de vento para +6 h</div>
-          <div class="metric-value">
-            <span id="windForecast6h">--</span>
-            <span class="metric-unit">km/h</span>
-          </div>
-          <div class="metric-detail" id="windForecast6hDetail">Aguardando histórico.</div>
-        </div>
+        <button id="applyTemperaturePeriodButton" type="button">Aplicar período</button>
       </div>
 
-      <div class="grid-2">
-        <div class="compass-card">
-          <h2>Rosa dos ventos — direção do vento</h2>
-
-          <div class="compass">
-            <div class="compass-star"></div>
-            <div id="directionArrow" class="direction-arrow" aria-label="Ponteiro da direção do vento"></div>
-            <div class="compass-center"></div>
-
-            <span class="compass-label major north dir-n">N</span>
-            <span class="compass-label dir-nne">NNE</span>
-            <span class="compass-label major dir-ne">NE</span>
-            <span class="compass-label dir-ene">ENE</span>
-
-            <span class="compass-label major dir-e">L</span>
-            <span class="compass-label dir-ese">LSE</span>
-            <span class="compass-label major dir-se">SE</span>
-            <span class="compass-label dir-sse">SSE</span>
-
-            <span class="compass-label major dir-s">S</span>
-            <span class="compass-label dir-sso">SSO</span>
-            <span class="compass-label major dir-so">SO</span>
-            <span class="compass-label dir-oso">OSO</span>
-
-            <span class="compass-label major dir-o">O</span>
-            <span class="compass-label dir-ono">ONO</span>
-            <span class="compass-label major dir-no">NO</span>
-            <span class="compass-label dir-nno">NNO</span>
-          </div>
-
-          <div class="compass-readout">
-            Direção identificada:
-            <strong id="compassDirection">--</strong>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Rajadas máximas — últimos 6 meses</h2>
-          <div class="chart-box">
-            <canvas id="gustChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-card" style="margin-bottom: 18px;">
-        <h2>Velocidade do vento — últimas 48 horas e projeções</h2>
-        <div class="chart-box">
-          <canvas id="windChart"></canvas>
-        </div>
-
-        <div class="formula">
-          <strong>Metodologia eólica:</strong> regressão local ponderada aplicada à série do
-          <strong>field4</strong>. A projeção inclui uma faixa indicativa de incerteza baseada
-          no erro histórico do modelo.
-        </div>
-      </div>
-
-      <div class="table-card">
-        <h2>Rajadas mais fortes por hora do dia</h2>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Rajada máxima</th>
-                <th>Data e hora do registro</th>
-              </tr>
-            </thead>
-            <tbody id="gustTableBody">
-              <tr>
-                <td colspan="3" class="loading">Carregando dados de rajada...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div id="temperatureDateError" class="date-filter-error"></div>
     </section>
 
-    <section id="ambiental" class="tab-content">
+    <div class="notice">
+      <strong>Campos utilizados no canal:</strong>
+      Temperatura: field1 · Umidade: field2 · Pressão: field3 · Vento: field4 ·
+      Direção do vento: field6 · CO: field7 · CO₂: field8.
+      <br />
+      <strong>Chuva:</strong> como não há campo de precipitação, a probabilidade é calculada
+      por um índice meteorológico baseado em temperatura, umidade e tendência de pressão.
+    </div>
+
+    <section id="overviewSection">
       <div class="grid">
-        <div class="card">
-          <div class="metric-label">Monóxido de carbono — CO</div>
-          <div class="metric-value">
-            <span id="coValue">--</span>
-            <span class="metric-unit">ppm</span>
-          </div>
-          <div class="metric-detail">Leitura do <strong>field7</strong></div>
-        </div>
+        <article class="card" data-card="temperature">
+          <div class="metric-label">Temperatura atual</div>
+          <div class="metric-value"><span id="temperatureValue">--</span><span class="metric-unit">°C</span></div>
+          <div id="temperatureDetail" class="metric-detail">Aguardando leitura.</div>
+        </article>
 
-        <div class="card">
-          <div class="metric-label">Dióxido de carbono — CO₂</div>
-          <div class="metric-value">
-            <span id="co2Value">--</span>
-            <span class="metric-unit">ppm</span>
-          </div>
-          <div class="metric-detail">Leitura do <strong>field8</strong></div>
-        </div>
+        <article class="card humidity" data-card="humidity">
+          <div class="metric-label">Umidade relativa do ar</div>
+          <div class="metric-value"><span id="humidityValue">--</span><span class="metric-unit">%</span></div>
+          <div id="humidityDetail" class="metric-detail">Aguardando leitura.</div>
+        </article>
 
-        <div class="card">
+        <article class="card pressure" data-card="pressure">
+          <div class="metric-label">Pressão atmosférica</div>
+          <div class="metric-value"><span id="pressureValue">--</span><span class="metric-unit">hPa</span></div>
+          <div id="pressureDetail" class="metric-detail">Aguardando leitura.</div>
+        </article>
+
+        <article class="card wind" data-card="wind">
+          <div class="metric-label">Vento atual</div>
+          <div class="metric-value"><span id="windValue">--</span><span class="metric-unit">km/h</span></div>
+          <div id="windDetail" class="metric-detail">Aguardando leitura.</div>
+        </article>
+
+        <article class="card rain" data-card="rain">
+          <div class="metric-label">Probabilidade estimada de chuva</div>
+          <div class="metric-value"><span id="rainProbabilityValue">--</span><span class="metric-unit">%</span></div>
+          <div id="rainDetail" class="metric-detail">Cálculo meteorológico pendente.</div>
+          <span id="rainBadge" class="badge">--</span>
+        </article>
+
+        <article class="card co" data-card="co">
           <div class="metric-label">CO — média móvel de 8 horas</div>
-          <div class="metric-value">
-            <span id="coMovingAverage">--</span>
-            <span class="metric-unit">ppm</span>
-          </div>
-          <div class="metric-detail">Média calculada com as leituras das últimas 8 horas.</div>
-        </div>
+          <div class="metric-value"><span id="coAverageValue">--</span><span class="metric-unit">ppm</span></div>
+          <div id="coDetail" class="metric-detail">Calculando média móvel.</div>
+          <span id="coBadge" class="badge">--</span>
+        </article>
 
-        <div class="card">
-          <div class="metric-label">Classificação indicativa do CO</div>
-          <div class="metric-value" id="coStatus">--</div>
-          <div class="metric-detail" id="coStatusDetail">Aguardando leitura</div>
-        </div>
-      </div>
-
-      <div class="chart-card" style="margin-bottom: 18px;">
-        <h2>CO — série recente e média móvel de 8 horas</h2>
-        <div class="chart-box">
-          <canvas id="coChart"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h2>CO₂ — série recente</h2>
-        <div class="chart-box">
-          <canvas id="co2Chart"></canvas>
-        </div>
+        <article class="card co2" data-card="co2">
+          <div class="metric-label">CO₂ atual</div>
+          <div class="metric-value"><span id="co2Value">--</span><span class="metric-unit">ppm</span></div>
+          <div id="co2Detail" class="metric-detail">Aguardando leitura.</div>
+        </article>
       </div>
     </section>
 
-    <section id="inteligente" class="tab-content">
-      <div class="analysis-card">
-        <h2>Climático Inteligente — análise automática</h2>
+    <section id="windSection" class="grid-2">
+      <article class="compass-card">
+        <h2>Rosa dos ventos — direção automática</h2>
 
-        <div id="smartAnalysis" class="analysis-list">
-          <div class="loading">Processando os dados meteorológicos e ambientais...</div>
+        <div class="compass">
+          <div id="directionArrow" class="direction-arrow"></div>
+          <div class="compass-center"></div>
+
+          <span class="compass-label dir-n">N</span>
+          <span class="compass-label dir-ne">NE</span>
+          <span class="compass-label dir-e">L</span>
+          <span class="compass-label dir-se">SE</span>
+          <span class="compass-label dir-s">S</span>
+          <span class="compass-label dir-sw">SO</span>
+          <span class="compass-label dir-w">O</span>
+          <span class="compass-label dir-nw">NO</span>
         </div>
+
+        <div class="compass-readout">
+          Direção identificada:
+          <strong id="windDirectionReadout">--</strong>
+        </div>
+      </article>
+
+      <article class="details-card">
+        <h2>Detalhamento do indicador</h2>
+        <div id="detailsContent">Selecione um botão de KPI para analisar o indicador em detalhes.</div>
+      </article>
+    </section>
+
+    <section class="chart-card">
+      <h2 id="chartTitle">Séries históricas — últimas leituras</h2>
+
+      <div class="chart-box">
+        <canvas id="mainChart"></canvas>
       </div>
     </section>
   </main>
 
   <script>
-    const CHANNEL_ID = "321770";
-    const READ_API_KEY = "0EPAIXIM4UL9LIW";
-    const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`;
+    document.addEventListener("DOMContentLoaded", () => {
+      const CHANNEL_ID = "321770";
+      const READ_API_KEY = "0EPAIXIM4UL9LIW9";
+      const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`;
 
-    const FIELDS = {
-      temperature: "field1",
-      windSpeed: "field4",
-      windDirection: "field6",
-      co: "field7",
-      co2: "field8"
-    };
+      const FIELDS = {
+        temperature: "field1",
+        humidity: "field2",
+        pressure: "field3",
+        wind: "field4",
+        windDirection: "field6",
+        co: "field7",
+        co2: "field8"
+      };
 
-    const COMFORT_TEMPERATURE = 26.5;
-    const AUTO_REFRESH_MS = 5 * 60 * 1000;
-    const FORECAST_HISTORY_HOURS = 24;
-    const WIND_FORECAST_HISTORY_HOURS = 48;
-    const FORECAST_HALF_LIFE_HOURS = 6;
-    const THINGSPEAK_PAGE_SIZE = 8000;
-    const HISTORY_MONTHS = 6;
+      const CO_8H_REFERENCE_PPM = 9;
+      const DEFAULT_REFRESH_MS = 5 * 60 * 1000;
+      const RESULTS_LIMIT = 8000;
 
-    let temperatureChart = null;
-    let gustChart = null;
-    let windChart = null;
-    let coChart = null;
-    let co2Chart = null;
+      let selectedKPI = "temperature";
+      let refreshInterval = DEFAULT_REFRESH_MS;
+      let refreshTimer = null;
+      let mainChart = null;
+      let cachedFeeds = [];
+      let selectedTemperatureStartDate = null;
+      let selectedTemperatureEndDate = null;
 
-    function parseValue(value) {
-      if (value === null || value === undefined || value === "") return null;
+      function parseValue(value) {
+        if (value === null || value === undefined || value === "") return null;
 
-      const parsed = Number(String(value).replace(",", "."));
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-
-    function formatNumber(value, decimals = 1) {
-      if (!Number.isFinite(Number(value))) return "--";
-
-      return Number(value).toLocaleString("pt-BR", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-      });
-    }
-
-    function formatDate(value, withSeconds = false) {
-      const date = new Date(value);
-
-      if (Number.isNaN(date.getTime())) return "--";
-
-      return new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-        timeStyle: withSeconds ? "medium" : "short",
-        timeZone: "America/Sao_Paulo"
-      }).format(date);
-    }
-
-    function formatHour(value) {
-      return new Intl.DateTimeFormat("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "America/Sao_Paulo"
-      }).format(new Date(value));
-    }
-
-    function getDatePartsSP(value) {
-      const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Sao_Paulo",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        hourCycle: "h23"
-      }).formatToParts(new Date(value));
-
-      return parts.reduce((result, item) => {
-        if (item.type !== "literal") result[item.type] = item.value;
-        return result;
-      }, {});
-    }
-
-    function getMonthKeySP(value) {
-      const parts = getDatePartsSP(value);
-      return `${parts.year}-${parts.month}`;
-    }
-
-    function getLastValidFeed(feeds, fieldName) {
-      for (let index = feeds.length - 1; index >= 0; index--) {
-        const value = parseValue(feeds[index][fieldName]);
-
-        if (value !== null) {
-          return {
-            feed: feeds[index],
-            value
-          };
-        }
+        const parsed = Number(String(value).replace(",", "."));
+        return Number.isFinite(parsed) ? parsed : null;
       }
 
-      return null;
-    }
+      function formatNumber(value, decimals = 1) {
+        if (!Number.isFinite(Number(value))) return "--";
 
-    function windDirectionName(degrees) {
-      const directions = [
-        "N", "NNE", "NE", "ENE",
-        "L", "LSE", "SE", "SSE",
-        "S", "SSO", "SO", "OSO",
-        "O", "ONO", "NO", "NNO"
-      ];
+        return Number(value).toLocaleString("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        });
+      }
 
-      const normalized = ((degrees % 360) + 360) % 360;
-      const index = Math.round(normalized / 22.5) % 16;
+      function formatDate(value, seconds = false) {
+        const date = new Date(value);
 
-      return directions[index];
-    }
+        if (Number.isNaN(date.getTime())) return "--";
 
-    function getChartColors() {
-      const light = document.body.classList.contains("light-theme");
-
-      return {
-        text: light ? "#14253a" : "#dcecff",
-        muted: light ? "#587087" : "#b7cce0",
-        grid: light ? "rgba(88,112,135,.18)" : "rgba(159,179,200,.13)"
-      };
-    }
-
-    function setConnectionStatus(text, type = "ok") {
-      const colors = {
-        ok: "#35c879",
-        loading: "#f7b731",
-        error: "#ef5b5b"
-      };
-
-      const color = colors[type] || colors.ok;
-
-      document.getElementById("connectionStatus").textContent = text;
-      document.getElementById("statusDot").style.background = color;
-      document.getElementById("statusDot").style.boxShadow = `0 0 10px ${color}`;
-    }
-
-    function updateHeaderTimestamp() {
-      document.getElementById("dashboardTimestamp").textContent =
-        new Intl.DateTimeFormat("pt-BR", {
+        return new Intl.DateTimeFormat("pt-BR", {
           timeZone: "America/Sao_Paulo",
-          weekday: "long",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
+          dateStyle: "short",
+          timeStyle: seconds ? "medium" : "short"
+        }).format(date);
+      }
+
+      function formatHour(value) {
+        return new Intl.DateTimeFormat("pt-BR", {
+          timeZone: "America/Sao_Paulo",
           hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }).format(new Date());
-    }
-
-    function destroyChart(chart) {
-      if (chart) chart.destroy();
-    }
-
-    async function fetchFeeds() {
-      const endDate = new Date();
-      const startDate = new Date();
-
-      startDate.setMonth(startDate.getMonth() - HISTORY_MONTHS);
-
-      const url = new URL(THINGSPEAK_URL);
-
-      url.searchParams.set("api_key", READ_API_KEY);
-      url.searchParams.set("start", startDate.toISOString());
-      url.searchParams.set("end", endDate.toISOString());
-      url.searchParams.set("results", THINGSPEAK_PAGE_SIZE);
-
-      const response = await fetch(url.toString(), {
-        cache: "no-store"
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ThingSpeak: ${response.status}`);
+          minute: "2-digit"
+        }).format(new Date(value));
       }
 
-      const data = await response.json();
-
-      return (data.feeds || [])
-        .filter(feed => feed && feed.created_at)
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    }
-
-    function calculateWeightedForecast(feeds, fieldName, historyHours) {
-      const now = new Date();
-      const start = now.getTime() - historyHours * 60 * 60 * 1000;
-
-      const data = feeds
-        .map(feed => ({
-          date: new Date(feed.created_at),
-          value: parseValue(feed[fieldName])
-        }))
-        .filter(item =>
-          item.value !== null &&
-          !Number.isNaN(item.date.getTime()) &&
-          item.date.getTime() >= start
-        )
-        .sort((a, b) => a.date - b.date);
-
-      if (!data.length) {
-        return {
-          valid: false,
-          now: null,
-          h3: null,
-          h6: null,
-          lower3: null,
-          upper3: null,
-          lower6: null,
-          upper6: null,
-          slope: null,
-          r2: null,
-          rmse: null,
-          points: 0,
-          method: "Sem dados suficientes"
-        };
+      function formatMonthYear(date) {
+        return new Intl.DateTimeFormat("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+          month: "short",
+          year: "numeric"
+        })
+          .format(date)
+          .replace(".", "")
+          .replace(/^./, letter => letter.toUpperCase());
       }
 
-      const lastValue = data[data.length - 1].value;
-
-      if (data.length < 4) {
-        return {
-          valid: true,
-          now: lastValue,
-          h3: lastValue,
-          h6: lastValue,
-          lower3: Math.max(0, lastValue - 1),
-          upper3: lastValue + 1,
-          lower6: Math.max(0, lastValue - 1.5),
-          upper6: lastValue + 1.5,
-          slope: 0,
-          r2: null,
-          rmse: null,
-          points: data.length,
-          method: "Persistência da última leitura"
-        };
+      function updateTimestamp() {
+        document.getElementById("dashboardTimestamp").textContent =
+          new Intl.DateTimeFormat("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+            weekday: "long",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          }).format(new Date());
       }
 
-      let sumW = 0;
-      let sumWX = 0;
-      let sumWY = 0;
-      let sumWXX = 0;
-      let sumWXY = 0;
-
-      const prepared = data.map(item => {
-        const x = (item.date.getTime() - now.getTime()) / 3600000;
-        const weight = Math.exp(x / FORECAST_HALF_LIFE_HOURS);
-
-        sumW += weight;
-        sumWX += weight * x;
-        sumWY += weight * item.value;
-        sumWXX += weight * x * x;
-        sumWXY += weight * x * item.value;
-
-        return {
-          ...item,
-          x,
-          weight
+      function setConnectionStatus(text, type = "ok") {
+        const colors = {
+          ok: "#36cc7c",
+          loading: "#f6b93b",
+          error: "#f05d5e"
         };
-      });
 
-      const denominator = sumW * sumWXX - sumWX * sumWX;
+        const color = colors[type] || colors.ok;
 
-      if (Math.abs(denominator) < 0.000001) {
-        return {
-          valid: true,
-          now: lastValue,
-          h3: lastValue,
-          h6: lastValue,
-          lower3: Math.max(0, lastValue - 1),
-          upper3: lastValue + 1,
-          lower6: Math.max(0, lastValue - 1.5),
-          upper6: lastValue + 1.5,
-          slope: 0,
-          r2: null,
-          rmse: null,
-          points: data.length,
-          method: "Persistência da última leitura"
-        };
+        document.getElementById("connectionStatus").textContent = text;
+        document.getElementById("statusDot").style.background = color;
+        document.getElementById("statusDot").style.boxShadow = `0 0 10px ${color}`;
       }
 
-      let slope = (sumW * sumWXY - sumWX * sumWY) / denominator;
-      const intercept = (sumWY - slope * sumWX) / sumW;
+      function getLastValidFeed(feeds, fieldName) {
+        for (let index = feeds.length - 1; index >= 0; index--) {
+          const value = parseValue(feeds[index][fieldName]);
 
-      slope = Math.max(-5, Math.min(5, slope));
-
-      const weightedMean = sumWY / sumW;
-      let totalVariance = 0;
-      let residualVariance = 0;
-      let weightedSquaredError = 0;
-
-      prepared.forEach(item => {
-        const predicted = intercept + slope * item.x;
-        const residual = item.value - predicted;
-
-        totalVariance += item.weight * Math.pow(item.value - weightedMean, 2);
-        residualVariance += item.weight * Math.pow(residual, 2);
-        weightedSquaredError += item.weight * Math.pow(residual, 2);
-      });
-
-      const r2 = totalVariance > 0
-        ? Math.max(0, 1 - residualVariance / totalVariance)
-        : null;
-
-      const rmse = Math.sqrt(weightedSquaredError / sumW);
-      const uncertainty3 = Math.max(.5, rmse || .5) * 1.35;
-      const uncertainty6 = Math.max(.5, rmse || .5) * 1.7;
-
-      return {
-        valid: true,
-        now: intercept,
-        h3: intercept + slope * 3,
-        h6: intercept + slope * 6,
-        lower3: Math.max(0, intercept + slope * 3 - 1.96 * uncertainty3),
-        upper3: intercept + slope * 3 + 1.96 * uncertainty3,
-        lower6: Math.max(0, intercept + slope * 6 - 1.96 * uncertainty6),
-        upper6: intercept + slope * 6 + 1.96 * uncertainty6,
-        slope,
-        r2,
-        rmse,
-        points: data.length,
-        method: "Regressão linear local ponderada"
-      };
-    }
-
-    function calculateTemperatureForecast(feeds) {
-      return calculateWeightedForecast(
-        feeds,
-        FIELDS.temperature,
-        FORECAST_HISTORY_HOURS
-      );
-    }
-
-    function calculateWindForecast(feeds) {
-      return calculateWeightedForecast(
-        feeds,
-        FIELDS.windSpeed,
-        WIND_FORECAST_HISTORY_HOURS
-      );
-    }
-
-    function updateForecastCards(forecast) {
-      const detail = forecast.valid
-        ? `${forecast.method} · ${forecast.points} leituras analisadas`
-        : "Não existem leituras válidas suficientes.";
-
-      document.getElementById("forecastNow").textContent =
-        forecast.valid ? formatNumber(forecast.now, 2) : "--";
-
-      document.getElementById("forecast3h").textContent =
-        forecast.valid ? formatNumber(forecast.h3, 2) : "--";
-
-      document.getElementById("forecast6h").textContent =
-        forecast.valid ? formatNumber(forecast.h6, 2) : "--";
-
-      document.getElementById("forecastNowDetail").textContent = detail;
-
-      document.getElementById("forecast3hDetail").textContent =
-        forecast.valid
-          ? `Projeção para ${formatHour(new Date(Date.now() + 3 * 3600000))}.`
-          : detail;
-
-      document.getElementById("forecast6hDetail").textContent =
-        forecast.valid
-          ? `Projeção para ${formatHour(new Date(Date.now() + 6 * 3600000))}.`
-          : detail;
-    }
-
-    function updateWindForecastCards(forecast) {
-      document.getElementById("windForecast3h").textContent =
-        forecast.valid ? formatNumber(forecast.h3, 1) : "--";
-
-      document.getElementById("windForecast6h").textContent =
-        forecast.valid ? formatNumber(forecast.h6, 1) : "--";
-
-      document.getElementById("windForecast3hDetail").textContent =
-        forecast.valid
-          ? `Faixa estimada: ${formatNumber(forecast.lower3, 1)} a ${formatNumber(forecast.upper3, 1)} km/h.`
-          : "Dados insuficientes para projeção.";
-
-      document.getElementById("windForecast6hDetail").textContent =
-        forecast.valid
-          ? `Faixa estimada: ${formatNumber(forecast.lower6, 1)} a ${formatNumber(forecast.upper6, 1)} km/h.`
-          : "Dados insuficientes para projeção.";
-    }
-
-    function createTemperatureChart(feeds, forecast) {
-      const colors = getChartColors();
-      const limitDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-      const data24h = feeds
-        .map(feed => ({
-          date: new Date(feed.created_at),
-          value: parseValue(feed[FIELDS.temperature])
-        }))
-        .filter(item =>
-          item.value !== null &&
-          !Number.isNaN(item.date.getTime()) &&
-          item.date >= limitDate
-        )
-        .sort((a, b) => a.date - b.date);
-
-      const allTemperatures = feeds
-        .map(feed => parseValue(feed[FIELDS.temperature]))
-        .filter(value => value !== null);
-
-      document.getElementById("periodMinTemperature").textContent =
-        allTemperatures.length ? formatNumber(Math.min(...allTemperatures)) : "--";
-
-      document.getElementById("periodMaxTemperature").textContent =
-        allTemperatures.length ? formatNumber(Math.max(...allTemperatures)) : "--";
-
-      const labels = [
-        ...data24h.map(item => formatHour(item.date)),
-        "Agora",
-        "+3 h",
-        "+6 h"
-      ];
-
-      const observedData = [
-        ...data24h.map(item => item.value),
-        null,
-        null,
-        null
-      ];
-
-      const lastObserved = data24h.length ? data24h[data24h.length - 1].value : null;
-
-      const forecastData = [
-        ...Array(Math.max(0, data24h.length - 1)).fill(null),
-        lastObserved,
-        forecast.valid ? forecast.now : null,
-        forecast.valid ? forecast.h3 : null,
-        forecast.valid ? forecast.h6 : null
-      ];
-
-      const comfortData = labels.map(() => COMFORT_TEMPERATURE);
-
-      destroyChart(temperatureChart);
-
-      temperatureChart = new Chart(document.getElementById("temperatureChart"), {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Temperatura registrada (°C)",
-              data: observedData,
-              borderColor: "#20b7d8",
-              backgroundColor: "rgba(32,183,216,.14)",
-              fill: true,
-              tension: .25,
-              pointRadius: 2,
-              pointHoverRadius: 5,
-              borderWidth: 2.5
-            },
-            {
-              label: "Conforto térmico — 26,50 °C",
-              data: comfortData,
-              borderColor: "#b56cff",
-              borderDash: [10, 7],
-              borderWidth: 2.5,
-              pointRadius: 0,
-              pointHoverRadius: 0,
-              tension: 0
-            },
-            {
-              label: "Predição térmica",
-              data: forecastData,
-              borderColor: "#f7b731",
-              backgroundColor: "rgba(247,183,49,.15)",
-              borderDash: [6, 5],
-              borderWidth: 3,
-              pointBackgroundColor: "#f7b731",
-              pointBorderColor: "#fff",
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              tension: .2,
-              spanGaps: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          interaction: {
-            intersect: false,
-            mode: "index"
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: colors.text
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  if (context.raw === null) return "";
-                  return `${context.dataset.label}: ${formatNumber(context.raw, 2)} °C`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: colors.muted,
-                maxTicksLimit: 14
-              },
-              grid: {
-                color: colors.grid
-              },
-              title: {
-                display: true,
-                text: "Horário das leituras e projeções",
-                color: colors.muted
-              }
-            },
-            y: {
-              ticks: {
-                color: colors.muted,
-                callback: value => `${value} °C`
-              },
-              grid: {
-                color: colors.grid
-              },
-              title: {
-                display: true,
-                text: "Temperatura (°C)",
-                color: colors.muted
-              }
-            }
+          if (value !== null) {
+            return { feed: feeds[index], value };
           }
         }
-      });
-    }
 
-    function createGustChart(feeds) {
-      const colors = getChartColors();
-      const monthlyData = {};
-
-      feeds.forEach(feed => {
-        const gust = parseValue(feed[FIELDS.windSpeed]);
-
-        if (gust === null) return;
-
-        const key = getMonthKeySP(feed.created_at);
-
-        if (!monthlyData[key] || gust > monthlyData[key]) {
-          monthlyData[key] = gust;
-        }
-      });
-
-      const entries = Object.entries(monthlyData)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .slice(-6);
-
-      const values = entries.map(item => item[1]);
-
-      document.getElementById("periodMaxGust").textContent =
-        values.length ? formatNumber(Math.max(...values)) : "--";
-
-      destroyChart(gustChart);
-
-      gustChart = new Chart(document.getElementById("gustChart"), {
-        type: "bar",
-        data: {
-          labels: entries.map(([key]) => {
-            const [year, month] = key.split("-");
-            return `${month}/${year}`;
-          }),
-          datasets: [{
-            label: "Maior rajada (km/h)",
-            data: values,
-            backgroundColor: "rgba(247,183,49,.7)",
-            borderColor: "#f7b731",
-            borderWidth: 1,
-            borderRadius: 5
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          plugins: {
-            legend: {
-              labels: {
-                color: colors.text
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: colors.muted
-              },
-              grid: {
-                color: colors.grid
-              }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: colors.muted,
-                callback: value => `${value} km/h`
-              },
-              grid: {
-                color: colors.grid
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function createWindChart(feeds, forecast) {
-      const colors = getChartColors();
-      const limitDate = new Date(Date.now() - 48 * 60 * 60 * 1000);
-
-      const data48h = feeds
-        .map(feed => ({
-          date: new Date(feed.created_at),
-          value: parseValue(feed[FIELDS.windSpeed])
-        }))
-        .filter(item =>
-          item.value !== null &&
-          !Number.isNaN(item.date.getTime()) &&
-          item.date >= limitDate
-        )
-        .sort((a, b) => a.date - b.date);
-
-      const labels = [
-        ...data48h.map(item => formatHour(item.date)),
-        "Agora",
-        "+3 h",
-        "+6 h"
-      ];
-
-      const observedData = [
-        ...data48h.map(item => item.value),
-        null,
-        null,
-        null
-      ];
-
-      const lastObserved = data48h.length ? data48h[data48h.length - 1].value : null;
-
-      const forecastData = [
-        ...Array(Math.max(0, data48h.length - 1)).fill(null),
-        lastObserved,
-        forecast.valid ? forecast.now : null,
-        forecast.valid ? forecast.h3 : null,
-        forecast.valid ? forecast.h6 : null
-      ];
-
-      destroyChart(windChart);
-
-      windChart = new Chart(document.getElementById("windChart"), {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Velocidade / rajada observada (km/h)",
-              data: observedData,
-              borderColor: "#20b7d8",
-              backgroundColor: "rgba(32,183,216,.12)",
-              fill: true,
-              borderWidth: 2.5,
-              tension: .25,
-              pointRadius: 1.5
-            },
-            {
-              label: "Projeção eólica",
-              data: forecastData,
-              borderColor: "#f7b731",
-              borderDash: [6, 5],
-              borderWidth: 3,
-              pointRadius: 4,
-              pointBackgroundColor: "#f7b731",
-              pointBorderColor: "#fff",
-              tension: .2,
-              spanGaps: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          interaction: {
-            intersect: false,
-            mode: "index"
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: colors.text
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  if (context.raw === null) return "";
-                  return `${context.dataset.label}: ${formatNumber(context.raw, 1)} km/h`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: colors.muted,
-                maxTicksLimit: 14
-              },
-              grid: {
-                color: colors.grid
-              }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: colors.muted,
-                callback: value => `${value} km/h`
-              },
-              grid: {
-                color: colors.grid
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function calculateCOMovingAverage(feeds) {
-      const valid = feeds
-        .map(feed => ({
-          date: new Date(feed.created_at),
-          value: parseValue(feed[FIELDS.co])
-        }))
-        .filter(item => item.value !== null && !Number.isNaN(item.date.getTime()))
-        .sort((a, b) => a.date - b.date);
-
-      return valid.map((current, index) => {
-        const windowStart = current.date.getTime() - 8 * 3600000;
-
-        const values = valid
-          .slice(0, index + 1)
-          .filter(item => item.date.getTime() >= windowStart)
-          .map(item => item.value);
-
-        return {
-          date: current.date,
-          value: current.value,
-          average: values.reduce((sum, value) => sum + value, 0) / values.length
-        };
-      });
-    }
-
-    function createCOChart(feeds) {
-      const colors = getChartColors();
-      const data = calculateCOMovingAverage(feeds).slice(-150);
-
-      destroyChart(coChart);
-
-      coChart = new Chart(document.getElementById("coChart"), {
-        type: "line",
-        data: {
-          labels: data.map(item => formatDate(item.date)),
-          datasets: [
-            {
-              label: "CO (ppm)",
-              data: data.map(item => item.value),
-              borderColor: "#20b7d8",
-              backgroundColor: "rgba(32,183,216,.13)",
-              fill: true,
-              tension: .25,
-              pointRadius: 1.5
-            },
-            {
-              label: "Média móvel de 8 h",
-              data: data.map(item => item.average),
-              borderColor: "#f7b731",
-              borderWidth: 2,
-              tension: .25,
-              pointRadius: 0
-            },
-            {
-              label: "Referência 8 h (9 ppm)",
-              data: data.map(() => 9),
-              borderColor: "#ef5b5b",
-              borderDash: [7, 5],
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          plugins: {
-            legend: {
-              labels: {
-                color: colors.text
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: colors.muted,
-                maxTicksLimit: 8
-              },
-              grid: {
-                color: colors.grid
-              }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: colors.muted
-              },
-              grid: {
-                color: colors.grid
-              }
-            }
-          }
-        }
-      });
-
-      const lastAverage = data.length ? data[data.length - 1].average : null;
-
-      document.getElementById("coMovingAverage").textContent =
-        lastAverage !== null ? formatNumber(lastAverage, 2) : "--";
-
-      updateCOStatus(lastAverage);
-    }
-
-    function createCO2Chart(feeds) {
-      const colors = getChartColors();
-
-      const data = feeds
-        .map(feed => ({
-          date: new Date(feed.created_at),
-          value: parseValue(feed[FIELDS.co2])
-        }))
-        .filter(item => item.value !== null && !Number.isNaN(item.date.getTime()))
-        .slice(-150);
-
-      destroyChart(co2Chart);
-
-      co2Chart = new Chart(document.getElementById("co2Chart"), {
-        type: "line",
-        data: {
-          labels: data.map(item => formatDate(item.date)),
-          datasets: [
-            {
-              label: "CO₂ (ppm)",
-              data: data.map(item => item.value),
-              borderColor: "#35c879",
-              backgroundColor: "rgba(53,200,121,.12)",
-              fill: true,
-              tension: .25,
-              pointRadius: 1.5
-            },
-            {
-              label: "Referência de ventilação (1.000 ppm)",
-              data: data.map(() => 1000),
-              borderColor: "#f7b731",
-              borderDash: [7, 5],
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          plugins: {
-            legend: {
-              labels: {
-                color: colors.text
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: colors.muted,
-                maxTicksLimit: 8
-              },
-              grid: {
-                color: colors.grid
-              }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: colors.muted
-              },
-              grid: {
-                color: colors.grid
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function updateCOStatus(movingAverage) {
-      const status = document.getElementById("coStatus");
-      const detail = document.getElementById("coStatusDetail");
-
-      if (!Number.isFinite(movingAverage)) {
-        status.textContent = "--";
-        detail.textContent = "Dados insuficientes para calcular a média móvel.";
-      } else if (movingAverage < 7) {
-        status.innerHTML = '<span class="badge good">ADEQUADO</span>';
-        detail.textContent = "Média móvel abaixo da referência de 9 ppm em 8 horas.";
-      } else if (movingAverage < 9) {
-        status.innerHTML = '<span class="badge attention">ATENÇÃO</span>';
-        detail.textContent = "Média móvel próxima da referência de 9 ppm em 8 horas.";
-      } else {
-        status.innerHTML = '<span class="badge critical">ACIMA DA REFERÊNCIA</span>';
-        detail.textContent = "Média móvel igual ou superior a 9 ppm em 8 horas.";
-      }
-    }
-
-    function updateClimatePanel(feeds) {
-      const latest = getLastValidFeed(feeds, FIELDS.temperature);
-      const forecast = calculateTemperatureForecast(feeds);
-
-      document.getElementById("currentTemperature").textContent =
-        latest ? formatNumber(latest.value) : "--";
-
-      document.getElementById("temperatureDate").textContent =
-        latest
-          ? `Última leitura: ${formatDate(latest.feed.created_at, true)}`
-          : "Sem leitura disponível";
-
-      updateForecastCards(forecast);
-      createTemperatureChart(feeds, forecast);
-
-      return forecast;
-    }
-
-    function updateWindPanel(feeds) {
-      const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
-      const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
-      const windForecast = calculateWindForecast(feeds);
-
-      document.getElementById("windSpeed").textContent =
-        latestWind ? formatNumber(latestWind.value) : "--";
-
-      const direction = latestDirection ? latestDirection.value : null;
-      const directionName = direction !== null ? windDirectionName(direction) : "--";
-
-      document.getElementById("windDirectionValue").textContent =
-        direction !== null ? formatNumber(direction, 0) : "--";
-
-      document.getElementById("windDirectionText").textContent = directionName;
-
-      document.getElementById("compassDirection").textContent =
-        direction !== null
-          ? `${directionName} (${formatNumber(direction, 0)}°)`
-          : "--";
-
-      const pointer = document.getElementById("directionArrow");
-
-      if (direction !== null && Number.isFinite(direction)) {
-        const normalizedDirection = ((direction % 360) + 360) % 360;
-
-        /*
-          0° = Norte.
-          A seta possui origem no centro da rosa e gira no sentido horário.
-        */
-        pointer.style.transform = `rotate(${normalizedDirection}deg)`;
-        pointer.style.opacity = "1";
-        pointer.style.visibility = "visible";
-      } else {
-        pointer.style.transform = "rotate(0deg)";
-        pointer.style.opacity = ".45";
-        pointer.style.visibility = "visible";
+        return null;
       }
 
-      updateWindForecastCards(windForecast);
-      createWindChart(feeds, windForecast);
+      function getSeries(feeds, fieldName, hours = 72) {
+        const limit = Date.now() - hours * 60 * 60 * 1000;
 
-      return windForecast;
-    }
+        return feeds
+          .map(feed => ({
+            date: new Date(feed.created_at),
+            value: parseValue(feed[fieldName])
+          }))
+          .filter(item =>
+            item.value !== null &&
+            !Number.isNaN(item.date.getTime()) &&
+            item.date.getTime() >= limit
+          )
+          .sort((a, b) => a.date - b.date);
+      }
 
-    function updateGustTable(feeds) {
-      const strongestByHour = Array.from({ length: 24 }, () => null);
+      async function fetchFeeds(startDate = null, endDate = null) {
+        const url = new URL(THINGSPEAK_URL);
 
-      feeds.forEach(feed => {
-        const gust = parseValue(feed[FIELDS.windSpeed]);
+        url.searchParams.set("api_key", READ_API_KEY);
+        url.searchParams.set("results", RESULTS_LIMIT);
 
-        if (gust === null) return;
+        if (startDate && endDate) {
+          url.searchParams.set("start", startDate.toISOString());
+          url.searchParams.set("end", endDate.toISOString());
+        }
 
-        const hour = Number(getDatePartsSP(feed.created_at).hour);
+        const response = await fetch(url.toString(), { cache: "no-store" });
 
-        if (!strongestByHour[hour] || gust > strongestByHour[hour].gust) {
-          strongestByHour[hour] = {
-            gust,
-            date: feed.created_at
+        if (!response.ok) {
+          throw new Error(`Erro na API ThingSpeak: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        return (data.feeds || [])
+          .filter(feed => feed && feed.created_at)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      }
+
+      function windDirectionName(degrees) {
+        const directions = [
+          "N", "NNE", "NE", "ENE",
+          "L", "LSE", "SE", "SSE",
+          "S", "SSO", "SO", "OSO",
+          "O", "ONO", "NO", "NNO"
+        ];
+
+        const normalized = ((degrees % 360) + 360) % 360;
+        return directions[Math.round(normalized / 22.5) % 16];
+      }
+
+      function calculateCOMovingAverage(feeds) {
+        const data = feeds
+          .map(feed => ({
+            date: new Date(feed.created_at),
+            value: parseValue(feed[FIELDS.co])
+          }))
+          .filter(item => item.value !== null && !Number.isNaN(item.date.getTime()))
+          .sort((a, b) => a.date - b.date);
+
+        return data.map((current, index) => {
+          const startWindow = current.date.getTime() - 8 * 60 * 60 * 1000;
+
+          const values = data
+            .slice(0, index + 1)
+            .filter(item => item.date.getTime() >= startWindow)
+            .map(item => item.value);
+
+          return {
+            date: current.date,
+            value: current.value,
+            average: values.reduce((sum, value) => sum + value, 0) / values.length
           };
-        }
-      });
+        });
+      }
 
-      document.getElementById("gustTableBody").innerHTML =
-        strongestByHour.map((item, hour) => {
-          if (!item) {
-            return `
-              <tr>
-                <td>${String(hour).padStart(2, "0")}:00</td>
-                <td>Sem registro</td>
-                <td>--</td>
-              </tr>
-            `;
+      function calculateRainProbability(feeds) {
+        const humidity = getLastValidFeed(feeds, FIELDS.humidity);
+        const temperature = getLastValidFeed(feeds, FIELDS.temperature);
+        const pressureSeries = getSeries(feeds, FIELDS.pressure, 6);
+        const wind = getLastValidFeed(feeds, FIELDS.wind);
+
+        if (!humidity || !temperature || !pressureSeries.length) {
+          return { valid: false };
+        }
+
+        const latestPressure = pressureSeries[pressureSeries.length - 1];
+        const referenceTime = latestPressure.date.getTime() - 3 * 60 * 60 * 1000;
+
+        let pastPressure = pressureSeries[0];
+
+        pressureSeries.forEach(item => {
+          if (item.date.getTime() <= referenceTime) {
+            pastPressure = item;
           }
-
-          return `
-            <tr>
-              <td>${String(hour).padStart(2, "0")}:00</td>
-              <td><strong>${formatNumber(item.gust)} km/h</strong></td>
-              <td>${formatDate(item.date, true)}</td>
-            </tr>
-          `;
-        }).join("");
-    }
-
-    function updateEnvironmentalPanel(feeds) {
-      const latestCO = getLastValidFeed(feeds, FIELDS.co);
-      const latestCO2 = getLastValidFeed(feeds, FIELDS.co2);
-
-      document.getElementById("coValue").textContent =
-        latestCO ? formatNumber(latestCO.value, 2) : "--";
-
-      document.getElementById("co2Value").textContent =
-        latestCO2 ? formatNumber(latestCO2.value, 0) : "--";
-
-      createCOChart(feeds);
-      createCO2Chart(feeds);
-    }
-
-    function runClimaticoInteligente(feeds, temperatureForecast, windForecast) {
-      const analysis = [];
-
-      const latestTemperature = getLastValidFeed(feeds, FIELDS.temperature);
-      const latestWind = getLastValidFeed(feeds, FIELDS.windSpeed);
-      const latestDirection = getLastValidFeed(feeds, FIELDS.windDirection);
-      const latestCO2 = getLastValidFeed(feeds, FIELDS.co2);
-
-      const coData = calculateCOMovingAverage(feeds);
-      const movingCO = coData.length ? coData[coData.length - 1].average : null;
-
-      if (latestTemperature) {
-        const difference = latestTemperature.value - COMFORT_TEMPERATURE;
-
-        const relation =
-          Math.abs(difference) < .5
-            ? "muito próxima da referência de conforto térmico"
-            : difference > 0
-              ? "acima da referência de conforto térmico"
-              : "abaixo da referência de conforto térmico";
-
-        analysis.push({
-          type: "normal",
-          text: `<strong>Condição térmica atual:</strong> temperatura de
-            ${formatNumber(latestTemperature.value)} °C, ${relation} de 26,50 °C.`
         });
+
+        const pressureTrend = latestPressure.value - pastPressure.value;
+        const humidityScore = Math.max(0, Math.min(55, (humidity.value - 45) * 1.1));
+        const pressureScore = Math.max(0, Math.min(30, -pressureTrend * 8));
+        const temperatureScore = temperature.value >= 18 && temperature.value <= 31 ? 8 : 3;
+        const windScore = wind ? Math.max(0, Math.min(7, wind.value / 5)) : 0;
+        const probability = Math.max(0, Math.min(100, humidityScore + pressureScore + temperatureScore + windScore));
+
+        return {
+          valid: true,
+          probability,
+          pressureTrend,
+          classification: probability >= 70 ? "ALTA" : probability >= 40 ? "MODERADA" : "BAIXA"
+        };
       }
 
-      if (temperatureForecast.valid) {
-        const trend =
-          temperatureForecast.slope > .05
-            ? "tendência de elevação"
-            : temperatureForecast.slope < -.05
-              ? "tendência de redução"
-              : "tendência de estabilidade";
+      function updateKPICards(feeds) {
+        const temperature = getLastValidFeed(feeds, FIELDS.temperature);
+        const humidity = getLastValidFeed(feeds, FIELDS.humidity);
+        const pressure = getLastValidFeed(feeds, FIELDS.pressure);
+        const wind = getLastValidFeed(feeds, FIELDS.wind);
+        const direction = getLastValidFeed(feeds, FIELDS.windDirection);
+        const co2 = getLastValidFeed(feeds, FIELDS.co2);
 
-        analysis.push({
-          type: Math.abs(temperatureForecast.h6 - COMFORT_TEMPERATURE) > 3
-            ? "warning"
-            : "normal",
-          text: `<strong>Projeção térmica:</strong> ${trend}. A previsão para 3 horas é
-            ${formatNumber(temperatureForecast.h3, 2)} °C e para 6 horas é
-            ${formatNumber(temperatureForecast.h6, 2)} °C.`
-        });
+        document.getElementById("temperatureValue").textContent = temperature ? formatNumber(temperature.value, 1) : "--";
+        document.getElementById("temperatureDetail").textContent = temperature ? `Última leitura: ${formatDate(temperature.feed.created_at, true)}` : "Sem leitura válida.";
+
+        document.getElementById("humidityValue").textContent = humidity ? formatNumber(humidity.value, 1) : "--";
+        document.getElementById("humidityDetail").textContent = humidity ? `Última leitura: ${formatDate(humidity.feed.created_at, true)}` : "Sem leitura válida.";
+
+        document.getElementById("pressureValue").textContent = pressure ? formatNumber(pressure.value, 1) : "--";
+        document.getElementById("pressureDetail").textContent = pressure ? `Última leitura: ${formatDate(pressure.feed.created_at, true)}` : "Sem leitura válida.";
+
+        document.getElementById("windValue").textContent = wind ? formatNumber(wind.value, 1) : "--";
+        document.getElementById("windDetail").textContent = wind
+          ? `Direção: ${direction ? `${windDirectionName(direction.value)} (${formatNumber(direction.value, 0)}°)` : "indisponível"}`
+          : "Sem leitura válida.";
+
+        document.getElementById("co2Value").textContent = co2 ? formatNumber(co2.value, 0) : "--";
+        document.getElementById("co2Detail").textContent = co2 ? `Última leitura: ${formatDate(co2.feed.created_at, true)}` : "Sem leitura válida.";
+
+        updateCOCard(feeds);
+        updateRainCard(feeds);
+        updateCompass(direction);
       }
 
-      if (latestWind && latestDirection) {
-        const directionName = windDirectionName(latestDirection.value);
+      function updateCOCard(feeds) {
+        const series = calculateCOMovingAverage(feeds);
+        const last = series.length ? series[series.length - 1] : null;
 
-        analysis.push({
-          type: latestWind.value >= 30 ? "warning" : "normal",
-          text: `<strong>Dinâmica eólica:</strong> velocidade/rajada atual de
-            ${formatNumber(latestWind.value)} km/h, proveniente de ${directionName}
-            (${formatNumber(latestDirection.value, 0)}°).`
-        });
-      }
+        const value = document.getElementById("coAverageValue");
+        const detail = document.getElementById("coDetail");
+        const badge = document.getElementById("coBadge");
 
-      if (windForecast.valid) {
-        analysis.push({
-          type: windForecast.h6 >= 30 ? "warning" : "normal",
-          text: `<strong>Projeção eólica:</strong> previsão de
-            ${formatNumber(windForecast.h3, 1)} km/h para +3 horas e
-            ${formatNumber(windForecast.h6, 1)} km/h para +6 horas.
-            Faixa estimada em +6h: ${formatNumber(windForecast.lower6, 1)} a
-            ${formatNumber(windForecast.upper6, 1)} km/h.`
-        });
-      }
-
-      if (movingCO !== null) {
-        analysis.push({
-          type: movingCO >= 9
-            ? "danger"
-            : movingCO >= 7
-              ? "warning"
-              : "normal",
-          text: `<strong>Qualidade do ar — CO:</strong> média móvel de 8 horas em
-            ${formatNumber(movingCO, 2)} ppm.`
-        });
-      }
-
-      if (latestCO2) {
-        analysis.push({
-          type: latestCO2.value >= 1200 ? "warning" : "normal",
-          text: `<strong>Indicador de CO₂:</strong> leitura atual de
-            ${formatNumber(latestCO2.value, 0)} ppm.`
-        });
-      }
-
-      if (!analysis.length) {
-        analysis.push({
-          type: "warning",
-          text: "Ainda não existem leituras válidas suficientes para a análise automática."
-        });
-      }
-
-      document.getElementById("smartAnalysis").innerHTML = analysis
-        .map(item => `<div class="analysis-item ${item.type}">${item.text}</div>`)
-        .join("");
-    }
-
-    async function updateDashboard() {
-      try {
-        setConnectionStatus("Atualizando dados...", "loading");
-
-        const feeds = await fetchFeeds();
-
-        if (!feeds.length) {
-          throw new Error("Nenhuma leitura retornada pelo canal.");
+        if (!last) {
+          value.textContent = "--";
+          detail.textContent = "Não há dados suficientes para o cálculo.";
+          badge.textContent = "--";
+          badge.className = "badge";
+          return;
         }
 
-        const temperatureForecast = updateClimatePanel(feeds);
-        const windForecast = updateWindPanel(feeds);
+        value.textContent = formatNumber(last.average, 2);
+        detail.textContent = `Média móvel das últimas 8 horas. Referência CONAMA: ${CO_8H_REFERENCE_PPM} ppm.`;
 
-        updateGustTable(feeds);
-        updateEnvironmentalPanel(feeds);
-        createGustChart(feeds);
+        if (last.average < 7) {
+          badge.textContent = "ADEQUADO";
+          badge.className = "badge good";
+        } else if (last.average < CO_8H_REFERENCE_PPM) {
+          badge.textContent = "ATENÇÃO";
+          badge.className = "badge warning";
+        } else {
+          badge.textContent = "ACIMA DA REFERÊNCIA";
+          badge.className = "badge danger";
+        }
+      }
 
-        runClimaticoInteligente(
-          feeds,
-          temperatureForecast,
-          windForecast
+      function updateRainCard(feeds) {
+        const rain = calculateRainProbability(feeds);
+
+        const value = document.getElementById("rainProbabilityValue");
+        const detail = document.getElementById("rainDetail");
+        const badge = document.getElementById("rainBadge");
+
+        if (!rain.valid) {
+          value.textContent = "--";
+          detail.textContent = "Dados insuficientes para estimativa.";
+          badge.textContent = "--";
+          badge.className = "badge";
+          return;
+        }
+
+        value.textContent = formatNumber(rain.probability, 0);
+
+        detail.textContent = rain.pressureTrend < 0
+          ? `Pressão em queda de ${formatNumber(Math.abs(rain.pressureTrend), 1)} hPa em aproximadamente 3 h.`
+          : `Pressão estável/em alta: ${formatNumber(rain.pressureTrend, 1)} hPa em aproximadamente 3 h.`;
+
+        badge.textContent = `PROBABILIDADE ${rain.classification}`;
+        badge.className = rain.classification === "ALTA"
+          ? "badge danger"
+          : rain.classification === "MODERADA"
+            ? "badge warning"
+            : "badge good";
+      }
+
+      function updateCompass(direction) {
+        const arrow = document.getElementById("directionArrow");
+        const readout = document.getElementById("windDirectionReadout");
+
+        if (!direction || !Number.isFinite(direction.value)) {
+          arrow.style.transform = "rotate(0deg)";
+          arrow.style.opacity = "0.35";
+          readout.textContent = "Sem direção disponível";
+          return;
+        }
+
+        const degrees = ((direction.value % 360) + 360) % 360;
+
+        arrow.style.opacity = "1";
+        arrow.style.transform = `rotate(${degrees}deg)`;
+        readout.textContent = `${windDirectionName(degrees)} (${formatNumber(degrees, 0)}°)`;
+      }
+
+      function parseBrazilianDate(value, endOfDay = false) {
+        const text = String(value || "").trim();
+
+        let day;
+        let month;
+        let year;
+
+        const br = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+        if (br) {
+          day = Number(br[1]);
+          month = Number(br[2]);
+          year = Number(br[3]);
+        } else if (iso) {
+          year = Number(iso[1]);
+          month = Number(iso[2]);
+          day = Number(iso[3]);
+        } else {
+          return null;
+        }
+
+        const date = new Date(
+          year,
+          month - 1,
+          day,
+          endOfDay ? 23 : 0,
+          endOfDay ? 59 : 0,
+          endOfDay ? 59 : 0
         );
 
-        const updateTime = new Intl.DateTimeFormat("pt-BR", {
-          timeZone: "America/Sao_Paulo",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }).format(new Date());
+        if (
+          date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
+          date.getDate() !== day
+        ) {
+          return null;
+        }
 
-        setConnectionStatus(`Atualizado às ${updateTime}`, "ok");
-      } catch (error) {
-        console.error(error);
-
-        setConnectionStatus("Erro ao atualizar dados", "error");
-
-        document.getElementById("smartAnalysis").innerHTML = `
-          <div class="error">
-            Não foi possível atualizar os dados do canal ThingSpeak no momento.
-            Verifique a conexão, a chave de leitura e a disponibilidade do canal.
-          </div>
-        `;
+        return date;
       }
-    }
 
-    function updateThemeButton() {
-      document.getElementById("themeButton").textContent =
-        document.body.classList.contains("light-theme")
-          ? "🌙 Tema escuro"
-          : "☀️ Tema claro";
-    }
+      function formatInputDate(date) {
+        return new Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }).format(date);
+      }
 
-    function toggleTheme() {
-      document.body.classList.toggle("light-theme");
+      function getMonthRange(startDate, endDate) {
+        const months = [];
+        const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
-      localStorage.setItem(
-        "climaUdiaTheme",
-        document.body.classList.contains("light-theme") ? "light" : "dark"
+        while (current.getTime() <= last.getTime()) {
+          months.push(new Date(current.getFullYear(), current.getMonth(), 1));
+          current.setMonth(current.getMonth() + 1);
+        }
+
+        return months;
+      }
+
+      function getTemperatureMonthlyStatistics(feeds, startDate, endDate) {
+        const groups = new Map();
+
+        getMonthRange(startDate, endDate).forEach(month => {
+          const key = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
+
+          groups.set(key, {
+            date: month,
+            values: []
+          });
+        });
+
+        feeds.forEach(feed => {
+          const date = new Date(feed.created_at);
+          const value = parseValue(feed[FIELDS.temperature]);
+
+          if (
+            value === null ||
+            Number.isNaN(date.getTime()) ||
+            date.getTime() < startDate.getTime() ||
+            date.getTime() > endDate.getTime()
+          ) {
+            return;
+          }
+
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+          if (groups.has(key)) {
+            groups.get(key).values.push(value);
+          }
+        });
+
+        return [...groups.values()]
+          .sort((a, b) => a.date - b.date)
+          .map(group => {
+            if (!group.values.length) {
+              return {
+                date: group.date,
+                minimum: null,
+                average: null,
+                median: null,
+                mode: null,
+                maximum: null,
+                count: 0
+              };
+            }
+
+            const values = [...group.values].sort((a, b) => a - b);
+            const total = values.reduce((sum, value) => sum + value, 0);
+            const middle = Math.floor(values.length / 2);
+
+            const median = values.length % 2 === 0
+              ? (values[middle - 1] + values[middle]) / 2
+              : values[middle];
+
+            const frequency = new Map();
+
+            values.forEach(item => {
+              const key = item.toFixed(1);
+              frequency.set(key, (frequency.get(key) || 0) + 1);
+            });
+
+            let mode = values[0];
+            let greatestFrequency = 0;
+
+            frequency.forEach((count, key) => {
+              const numericValue = Number(key);
+
+              if (count > greatestFrequency || (count === greatestFrequency && numericValue < mode)) {
+                greatestFrequency = count;
+                mode = numericValue;
+              }
+            });
+
+            return {
+              date: group.date,
+              minimum: values[0],
+              average: total / values.length,
+              median,
+              mode,
+              maximum: values[values.length - 1],
+              count: values.length
+            };
+          });
+      }
+
+      function getChartColors() {
+        const isLight = document.body.classList.contains("light-theme");
+
+        return {
+          text: isLight ? "#13263c" : "#eef7ff",
+          muted: isLight ? "#5b7389" : "#9cb4c9",
+          grid: isLight ? "rgba(91,115,137,.18)" : "rgba(156,180,201,.14)"
+        };
+      }
+
+      function destroyChart() {
+        if (mainChart) {
+          mainChart.destroy();
+          mainChart = null;
+        }
+      }
+
+      function createChart(feeds, kpi) {
+        if (typeof Chart === "undefined") {
+          document.getElementById("chartTitle").textContent =
+            "Erro ao carregar a biblioteca de gráficos.";
+          return;
+        }
+
+        const colors = getChartColors();
+        const canvas = document.getElementById("mainChart");
+        const title = document.getElementById("chartTitle");
+
+        destroyChart();
+
+        if (kpi === "temperatureAnnual") {
+          const startDate = selectedTemperatureStartDate;
+          const endDate = selectedTemperatureEndDate;
+
+          if (!startDate || !endDate) {
+            title.textContent = "Temperatura anual — selecione o período";
+
+            mainChart = new Chart(canvas, {
+              type: "bar",
+              data: { labels: [], datasets: [] },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false
+              }
+            });
+
+            return;
+          }
+
+          const statistics = getTemperatureMonthlyStatistics(feeds, startDate, endDate);
+
+          title.textContent =
+            `Temperatura anual — estatísticas mensais de ${formatInputDate(startDate)} a ${formatInputDate(endDate)}`;
+
+          mainChart = new Chart(canvas, {
+            type: "bar",
+            data: {
+              labels: statistics.map(item => formatMonthYear(item.date)),
+              datasets: [
+                {
+                  label: "Mínima (°C)",
+                  data: statistics.map(item => item.minimum),
+                  backgroundColor: "rgba(75, 193, 255, 0.80)",
+                  borderColor: "#4bc1ff",
+                  borderWidth: 1
+                },
+                {
+                  label: "Média (°C)",
+                  data: statistics.map(item => item.average),
+                  backgroundColor: "rgba(33, 186, 220, 0.82)",
+                  borderColor: "#21badc",
+                  borderWidth: 1
+                },
+                {
+                  label: "Mediana (°C)",
+                  data: statistics.map(item => item.median),
+                  backgroundColor: "rgba(173, 114, 255, 0.82)",
+                  borderColor: "#ad72ff",
+                  borderWidth: 1
+                },
+                {
+                  label: "Moda (°C)",
+                  data: statistics.map(item => item.mode),
+                  backgroundColor: "rgba(246, 185, 59, 0.82)",
+                  borderColor: "#f6b93b",
+                  borderWidth: 1
+                },
+                {
+                  label: "Máxima (°C)",
+                  data: statistics.map(item => item.maximum),
+                  backgroundColor: "rgba(240, 93, 94, 0.82)",
+                  borderColor: "#f05d5e",
+                  borderWidth: 1
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              interaction: {
+                mode: "index",
+                intersect: false
+              },
+              plugins: {
+                legend: {
+                  labels: { color: colors.text }
+                },
+                tooltip: {
+                  callbacks: {
+                    label(context) {
+                      if (context.raw === null) {
+                        return `${context.dataset.label}: sem leituras`;
+                      }
+
+                      return `${context.dataset.label}: ${formatNumber(context.raw, 1)} °C`;
+                    },
+                    afterBody(context) {
+                      const item = statistics[context[0].dataIndex];
+
+                      return item && item.count === 0
+                        ? "Não há leituras válidas neste mês."
+                        : "";
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: colors.muted,
+                    maxRotation: 0,
+                    autoSkip: false
+                  },
+                  grid: { color: colors.grid }
+                },
+                y: {
+                  beginAtZero: false,
+                  title: {
+                    display: true,
+                    text: "Temperatura (°C)",
+                    color: colors.muted
+                  },
+                  ticks: { color: colors.muted },
+                  grid: { color: colors.grid }
+                }
+              }
+            }
+          });
+
+          return;
+        }
+
+        let labels = [];
+        let datasets = [];
+        let chartTitle = "";
+        let yTitle = "";
+
+        if (kpi === "co") {
+          const series = calculateCOMovingAverage(feeds).slice(-180);
+
+          labels = series.map(item => formatHour(item.date));
+          chartTitle = "CO — série recente e média móvel de 8 horas";
+          yTitle = "Concentração de CO (ppm)";
+
+          datasets = [
+            {
+              label: "CO medido (ppm)",
+              data: series.map(item => item.value),
+              borderColor: "#21badc",
+              backgroundColor: "rgba(33,186,220,.13)",
+              fill: true,
+              tension: 0.25,
+              pointRadius: 1.5
+            },
+            {
+              label: "Média móvel de 8 horas",
+              data: series.map(item => item.average),
+              borderColor: "#f6b93b",
+              borderWidth: 2.5,
+              tension: 0.25,
+              pointRadius: 0
+            },
+            {
+              label: "Referência CONAMA 506/2024 — 9 ppm",
+              data: series.map(() => CO_8H_REFERENCE_PPM),
+              borderColor: "#f05d5e",
+              borderDash: [8, 5],
+              borderWidth: 2,
+              pointRadius: 0
+            }
+          ];
+        } else {
+          const configs = {
+            temperature: {
+              field: FIELDS.temperature,
+              title: "Temperatura — últimas 72 horas",
+              yTitle: "Temperatura (°C)",
+              label: "Temperatura (°C)",
+              color: "#21badc",
+              fill: "rgba(33,186,220,.13)"
+            },
+            humidity: {
+              field: FIELDS.humidity,
+              title: "Umidade relativa — últimas 72 horas",
+              yTitle: "Umidade relativa (%)",
+              label: "Umidade (%)",
+              color: "#4bc1ff",
+              fill: "rgba(75,193,255,.13)"
+            },
+            pressure: {
+              field: FIELDS.pressure,
+              title: "Pressão atmosférica — últimas 72 horas",
+              yTitle: "Pressão atmosférica (hPa)",
+              label: "Pressão (hPa)",
+              color: "#ad72ff",
+              fill: "rgba(173,114,255,.12)"
+            },
+            wind: {
+              field: FIELDS.wind,
+              title: "Velocidade do vento — últimas 72 horas",
+              yTitle: "Velocidade do vento (km/h)",
+              label: "Vento (km/h)",
+              color: "#f6b93b",
+              fill: "rgba(246,185,59,.13)"
+            },
+            rain: {
+              field: FIELDS.humidity,
+              title: "Umidade relativa — indicador para chuva",
+              yTitle: "Umidade relativa (%)",
+              label: "Umidade (%)",
+              color: "#4d90fe",
+              fill: "rgba(77,144,254,.13)"
+            },
+            co2: {
+              field: FIELDS.co2,
+              title: "CO₂ — últimas 72 horas",
+              yTitle: "CO₂ (ppm)",
+              label: "CO₂ (ppm)",
+              color: "#36cc7c",
+              fill: "rgba(54,204,124,.12)"
+            }
+          };
+
+          const config = configs[kpi] || configs.temperature;
+          const series = getSeries(feeds, config.field, 72).slice(-180);
+
+          labels = series.map(item => formatHour(item.date));
+          chartTitle = config.title;
+          yTitle = config.yTitle;
+
+          datasets = [{
+            label: config.label,
+            data: series.map(item => item.value),
+            borderColor: config.color,
+            backgroundColor: config.fill,
+            fill: true,
+            tension: 0.25,
+            borderWidth: 2.5,
+            pointRadius: 1.5,
+            pointHoverRadius: 5
+          }];
+
+          if (kpi === "co2") {
+            datasets.push({
+              label: "Referência indicativa de ventilação — 1.000 ppm",
+              data: series.map(() => 1000),
+              borderColor: "#f6b93b",
+              borderDash: [8, 5],
+              borderWidth: 2,
+              pointRadius: 0
+            });
+          }
+        }
+
+        title.textContent = chartTitle;
+
+        mainChart = new Chart(canvas, {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: {
+              mode: "index",
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                labels: { color: colors.text }
+              },
+              tooltip: {
+                callbacks: {
+                  title(context) {
+                    return context.length ? `Horário: ${context[0].label}` : "";
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: {
+                  color: colors.muted,
+                  maxTicksLimit: 12
+                },
+                grid: { color: colors.grid }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: yTitle,
+                  color: colors.muted
+                },
+                ticks: { color: colors.muted },
+                grid: { color: colors.grid }
+              }
+            }
+          }
+        });
+      }
+
+      function updateDetails(feeds, kpi) {
+        const content = document.getElementById("detailsContent");
+
+        if (kpi === "temperatureAnnual") {
+          if (!selectedTemperatureStartDate || !selectedTemperatureEndDate) {
+            content.innerHTML = `
+              <strong>KPI de Temperatura Anual:</strong><br />
+              Informe a data inicial e a data final e clique em
+              <strong>Aplicar período</strong>.
+            `;
+            return;
+          }
+
+          const statistics = getTemperatureMonthlyStatistics(
+            feeds,
+            selectedTemperatureStartDate,
+            selectedTemperatureEndDate
+          );
+
+          const monthsWithData = statistics.filter(item => item.count > 0).length;
+
+          content.innerHTML = `
+            <strong>KPI de Temperatura Anual:</strong><br />
+            Período analisado:
+            <strong>${formatInputDate(selectedTemperatureStartDate)} a ${formatInputDate(selectedTemperatureEndDate)}</strong>.
+            <br /><br />
+            O gráfico mostra <strong>${statistics.length}</strong> mês(es) do intervalo,
+            sendo <strong>${monthsWithData}</strong> com leituras válidas.
+            <br /><br />
+            Para cada mês são calculadas as temperaturas:
+            <strong>mínima, média, mediana, moda e máxima</strong>.
+          `;
+          return;
+        }
+
+        const messages = {
+          temperature: "<strong>KPI de Temperatura:</strong><br />Série obtida diretamente do <strong>field1</strong>.",
+          humidity: "<strong>KPI de Umidade:</strong><br />Série obtida diretamente do <strong>field2</strong>.",
+          pressure: "<strong>KPI de Pressão Atmosférica:</strong><br />Série obtida diretamente do <strong>field3</strong>.",
+          wind: "<strong>KPI de Vento:</strong><br />Velocidade obtida pelo <strong>field4</strong> e direção pelo <strong>field6</strong>.",
+          rain: "<strong>Previsão calculada de chuva:</strong><br />Estimativa baseada em umidade, temperatura, vento e tendência de pressão.",
+          co: `<strong>KPI de Monóxido de Carbono — CO:</strong><br />Média móvel de 8 horas calculada com o <strong>field7</strong>. Referência: <strong>${CO_8H_REFERENCE_PPM} ppm</strong>.`,
+          co2: "<strong>KPI de Dióxido de Carbono — CO₂:</strong><br />Série obtida diretamente do <strong>field8</strong>."
+        };
+
+        content.innerHTML = messages[kpi] || messages.temperature;
+      }
+
+      function applyKPISelection(kpi) {
+        selectedKPI = kpi;
+
+        document.querySelectorAll(".kpi-button").forEach(button => {
+          button.classList.toggle("active", button.dataset.kpi === kpi);
+        });
+
+        const overview = document.getElementById("overviewSection");
+        const windSection = document.getElementById("windSection");
+        const dateFilter = document.getElementById("temperatureDateFilter");
+
+        overview.classList.remove("hidden");
+        windSection.classList.add("hidden");
+        dateFilter.classList.add("hidden");
+
+        document.querySelectorAll("[data-card]").forEach(card => {
+          card.classList.toggle("hidden", card.dataset.card !== kpi);
+        });
+
+        if (kpi === "wind") {
+          windSection.classList.remove("hidden");
+        }
+
+        if (kpi === "temperatureAnnual") {
+          overview.classList.add("hidden");
+          dateFilter.classList.remove("hidden");
+        }
+
+        if (cachedFeeds.length) {
+          createChart(cachedFeeds, selectedKPI);
+          updateDetails(cachedFeeds, selectedKPI);
+        }
+      }
+
+      async function applyTemperaturePeriod() {
+        const startInput = document.getElementById("temperatureStartDate");
+        const endInput = document.getElementById("temperatureEndDate");
+        const errorElement = document.getElementById("temperatureDateError");
+
+        const startDate = parseBrazilianDate(startInput.value, false);
+        const endDate = parseBrazilianDate(endInput.value, true);
+
+        errorElement.textContent = "";
+
+        if (!startDate || !endDate) {
+          errorElement.textContent = "Informe as duas datas no formato DD/MM/AAAA.";
+          return;
+        }
+
+        if (startDate.getTime() > endDate.getTime()) {
+          errorElement.textContent = "A data inicial não pode ser maior que a data final.";
+          return;
+        }
+
+        try {
+          errorElement.textContent = "Consultando dados do período...";
+          setConnectionStatus("Consultando período...", "loading");
+
+          selectedTemperatureStartDate = startDate;
+          selectedTemperatureEndDate = endDate;
+
+          const periodFeeds = await fetchFeeds(startDate, endDate);
+
+          cachedFeeds = periodFeeds;
+          errorElement.textContent = "";
+
+          createChart(periodFeeds, "temperatureAnnual");
+          updateDetails(periodFeeds, "temperatureAnnual");
+
+          setConnectionStatus("Período atualizado", "ok");
+        } catch (error) {
+          console.error(error);
+          errorElement.textContent = "Não foi possível consultar os dados do período informado.";
+          setConnectionStatus("Erro ao consultar período", "error");
+        }
+      }
+
+      function setRefreshInterval(milliseconds) {
+        refreshInterval = Number(milliseconds);
+
+        document.querySelectorAll(".interval-button").forEach(button => {
+          button.classList.toggle("active", Number(button.dataset.interval) === refreshInterval);
+        });
+
+        if (refreshTimer) {
+          clearInterval(refreshTimer);
+          refreshTimer = null;
+        }
+
+        if (refreshInterval > 0) {
+          refreshTimer = setInterval(updateDashboard, refreshInterval);
+        }
+      }
+
+      async function updateDashboard() {
+        try {
+          setConnectionStatus("Atualizando dados...", "loading");
+
+          const feeds = await fetchFeeds();
+
+          if (!feeds.length) {
+            throw new Error("O canal não retornou leituras.");
+          }
+
+          cachedFeeds = feeds;
+
+          updateKPICards(feeds);
+          createChart(feeds, selectedKPI);
+          updateDetails(feeds, selectedKPI);
+
+          const time = new Intl.DateTimeFormat("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          }).format(new Date());
+
+          setConnectionStatus(`Atualizado às ${time}`, "ok");
+        } catch (error) {
+          console.error(error);
+          setConnectionStatus("Erro ao atualizar dados", "error");
+
+          document.getElementById("detailsContent").innerHTML = `
+            <strong>Não foi possível acessar o ThingSpeak.</strong><br />
+            Verifique a conexão com a internet, o ID do canal e a chave de leitura.
+          `;
+        }
+      }
+
+      function updateThemeButton() {
+        document.getElementById("themeButton").textContent =
+          document.body.classList.contains("light-theme")
+            ? "🌙 Tema escuro"
+            : "☀️ Tema claro";
+      }
+
+      function toggleTheme() {
+        document.body.classList.toggle("light-theme");
+
+        localStorage.setItem(
+          "climaUdiaTheme",
+          document.body.classList.contains("light-theme") ? "light" : "dark"
+        );
+
+        updateThemeButton();
+
+        if (cachedFeeds.length) {
+          createChart(cachedFeeds, selectedKPI);
+        }
+      }
+
+      function loadTheme() {
+        if (localStorage.getItem("climaUdiaTheme") === "light") {
+          document.body.classList.add("light-theme");
+        }
+
+        updateThemeButton();
+      }
+
+      function initializeTemperaturePeriod() {
+        const end = new Date();
+        const start = new Date();
+
+        start.setMonth(start.getMonth() - 12);
+
+        selectedTemperatureStartDate = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate(),
+          0,
+          0,
+          0
+        );
+
+        selectedTemperatureEndDate = new Date(
+          end.getFullYear(),
+          end.getMonth(),
+          end.getDate(),
+          23,
+          59,
+          59
+        );
+
+        document.getElementById("temperatureStartDate").value =
+          formatInputDate(selectedTemperatureStartDate);
+
+        document.getElementById("temperatureEndDate").value =
+          formatInputDate(selectedTemperatureEndDate);
+      }
+
+      document.querySelectorAll(".kpi-button").forEach(button => {
+        button.addEventListener("click", () => {
+          applyKPISelection(button.dataset.kpi);
+        });
+      });
+
+      document.querySelectorAll(".interval-button").forEach(button => {
+        button.addEventListener("click", () => {
+          setRefreshInterval(button.dataset.interval);
+        });
+      });
+
+      document.getElementById("applyTemperaturePeriodButton").addEventListener(
+        "click",
+        applyTemperaturePeriod
       );
 
-      updateThemeButton();
-      updateDashboard();
-    }
-
-    function loadSavedTheme() {
-      if (localStorage.getItem("climaUdiaTheme") === "light") {
-        document.body.classList.add("light-theme");
-      }
-
-      updateThemeButton();
-    }
-
-    document.querySelectorAll(".tab-button").forEach(button => {
-      button.addEventListener("click", () => {
-        const targetTab = button.dataset.tab;
-
-        document.querySelectorAll(".tab-button").forEach(item => {
-          item.classList.remove("active");
-        });
-
-        document.querySelectorAll(".tab-content").forEach(item => {
-          item.classList.remove("active");
-        });
-
-        button.classList.add("active");
-        document.getElementById(targetTab).classList.add("active");
+      document.getElementById("temperatureStartDate").addEventListener("input", () => {
+        document.getElementById("temperatureDateError").textContent = "";
       });
+
+      document.getElementById("temperatureEndDate").addEventListener("input", () => {
+        document.getElementById("temperatureDateError").textContent = "";
+      });
+
+      document.getElementById("manualRefreshButton").addEventListener("click", updateDashboard);
+      document.getElementById("themeButton").addEventListener("click", toggleTheme);
+
+      loadTheme();
+      initializeTemperaturePeriod();
+
+      updateTimestamp();
+      setInterval(updateTimestamp, 1000);
+
+      setRefreshInterval(DEFAULT_REFRESH_MS);
+      applyKPISelection("temperature");
+      updateDashboard();
     });
-
-    document.getElementById("refreshButton").addEventListener(
-      "click",
-      updateDashboard
-    );
-
-    document.getElementById("themeButton").addEventListener(
-      "click",
-      toggleTheme
-    );
-
-    loadSavedTheme();
-    updateHeaderTimestamp();
-
-    setInterval(updateHeaderTimestamp, 1000);
-
-    updateDashboard();
-    setInterval(updateDashboard, AUTO_REFRESH_MS);
   </script>
 </body>
 </html>
+
