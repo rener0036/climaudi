@@ -72,8 +72,8 @@
       margin: auto;
       display: flex;
       justify-content: space-between;
-      gap: 18px;
       align-items: center;
+      gap: 18px;
       flex-wrap: wrap;
     }
 
@@ -103,15 +103,20 @@
       border-radius: 8px;
       padding: 10px 13px;
       cursor: pointer;
-      color: #ffffff;
+      color: #fff;
       background: var(--primary);
       font-weight: 700;
       transition: 0.2s ease;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       filter: brightness(1.12);
       transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
     }
 
     button.secondary,
@@ -124,15 +129,15 @@
 
     .kpi-button.active,
     .interval-button.active {
-      color: #ffffff;
+      color: #fff;
       border-color: var(--primary);
       background: var(--primary);
     }
 
     .status-dot {
+      display: inline-block;
       width: 10px;
       height: 10px;
-      display: inline-block;
       border-radius: 50%;
       background: var(--warning);
       box-shadow: 0 0 10px var(--warning);
@@ -173,16 +178,12 @@
     }
 
     .controls-panel-title {
+      margin-bottom: 8px;
       color: var(--muted);
       font-size: 0.83rem;
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-
-    .kpi-navigation {
-      margin-bottom: 6px;
     }
 
     .date-filter-panel {
@@ -260,8 +261,8 @@
 
     .card {
       position: relative;
-      overflow: hidden;
       min-height: 150px;
+      overflow: hidden;
       border-top: 3px solid var(--primary);
     }
 
@@ -273,9 +274,9 @@
     .card.co2 { border-top-color: var(--success); }
 
     .metric-label {
+      margin-bottom: 10px;
       color: var(--muted);
       font-size: 0.84rem;
-      margin-bottom: 10px;
     }
 
     .metric-value {
@@ -285,8 +286,8 @@
     }
 
     .metric-unit {
-      color: var(--primary);
       margin-left: 4px;
+      color: var(--primary);
       font-size: 0.9rem;
     }
 
@@ -334,12 +335,13 @@
     }
 
     .details-card {
-      line-height: 1.6;
       color: var(--muted);
       font-size: 0.9rem;
+      line-height: 1.6;
     }
 
-    .details-card strong {
+    .details-card strong,
+    .notice strong {
       color: var(--text);
     }
 
@@ -347,10 +349,6 @@
       color: var(--muted);
       font-size: 0.87rem;
       line-height: 1.55;
-    }
-
-    .notice strong {
-      color: var(--text);
     }
 
     .hidden {
@@ -391,8 +389,8 @@
       z-index: 15;
       width: 28px;
       height: 132px;
-      transform-origin: 50% 100%;
       transform: rotate(0deg);
+      transform-origin: 50% 100%;
       transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
@@ -465,22 +463,10 @@
     }
 
     @media (max-width: 560px) {
-      main {
-        padding: 14px;
-      }
-
-      header {
-        padding: 15px 14px;
-      }
-
-      .compass {
-        width: 280px;
-        height: 280px;
-      }
-
-      .chart-box {
-        height: 300px;
-      }
+      main { padding: 14px; }
+      header { padding: 15px 14px; }
+      .compass { width: 280px; height: 280px; }
+      .chart-box { height: 300px; }
     }
   </style>
 </head>
@@ -511,6 +497,7 @@
     <section class="controls-panel">
       <div>
         <div class="controls-panel-title">Periodicidade de atualização</div>
+
         <div class="controls">
           <button class="interval-button" data-interval="60000" type="button">1 minuto</button>
           <button class="interval-button active" data-interval="300000" type="button">5 minutos</button>
@@ -541,7 +528,7 @@
 
       <p>
         Informe a data inicial e final no formato <strong>DD/MM/AAAA</strong>.
-        O gráfico exibirá, separadamente por mês, a temperatura mínima, média,
+        O gráfico exibirá, separadamente por mês, temperatura mínima, média,
         mediana, moda e máxima.
       </p>
 
@@ -568,7 +555,7 @@
       Direção do vento: field6 · CO: field7 · CO₂: field8.
       <br />
       <strong>Chuva:</strong> como não há campo de precipitação, a probabilidade é calculada
-      por um índice meteorológico baseado em temperatura, umidade e tendência de pressão.
+      por índice meteorológico baseado em temperatura, umidade, vento e tendência de pressão.
     </div>
 
     <section id="overviewSection">
@@ -664,6 +651,11 @@
       const READ_API_KEY = "0EPAIXIM4UL9LIW9";
       const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`;
 
+      const RESULTS_LIMIT = 8000;
+      const DEFAULT_REFRESH_MS = 5 * 60 * 1000;
+      const CO_8H_REFERENCE_PPM = 9;
+      const TIMEZONE = "America/Sao_Paulo";
+
       const FIELDS = {
         temperature: "field1",
         humidity: "field2",
@@ -674,17 +666,16 @@
         co2: "field8"
       };
 
-      const CO_8H_REFERENCE_PPM = 9;
-      const DEFAULT_REFRESH_MS = 5 * 60 * 1000;
-      const RESULTS_LIMIT = 8000;
-
       let selectedKPI = "temperature";
       let refreshInterval = DEFAULT_REFRESH_MS;
       let refreshTimer = null;
       let mainChart = null;
+
       let cachedFeeds = [];
+      let temperatureAnnualFeeds = [];
       let selectedTemperatureStartDate = null;
       let selectedTemperatureEndDate = null;
+      let annualRequestController = null;
 
       function parseValue(value) {
         if (value === null || value === undefined || value === "") return null;
@@ -708,7 +699,7 @@
         if (Number.isNaN(date.getTime())) return "--";
 
         return new Intl.DateTimeFormat("pt-BR", {
-          timeZone: "America/Sao_Paulo",
+          timeZone: TIMEZONE,
           dateStyle: "short",
           timeStyle: seconds ? "medium" : "short"
         }).format(date);
@@ -716,7 +707,7 @@
 
       function formatHour(value) {
         return new Intl.DateTimeFormat("pt-BR", {
-          timeZone: "America/Sao_Paulo",
+          timeZone: TIMEZONE,
           hour: "2-digit",
           minute: "2-digit"
         }).format(new Date(value));
@@ -724,7 +715,7 @@
 
       function formatMonthYear(date) {
         return new Intl.DateTimeFormat("pt-BR", {
-          timeZone: "America/Sao_Paulo",
+          timeZone: TIMEZONE,
           month: "short",
           year: "numeric"
         })
@@ -736,7 +727,7 @@
       function updateTimestamp() {
         document.getElementById("dashboardTimestamp").textContent =
           new Intl.DateTimeFormat("pt-BR", {
-            timeZone: "America/Sao_Paulo",
+            timeZone: TIMEZONE,
             weekday: "long",
             day: "2-digit",
             month: "2-digit",
@@ -789,7 +780,7 @@
           .sort((a, b) => a.date - b.date);
       }
 
-      async function fetchFeeds(startDate = null, endDate = null) {
+      async function fetchFeeds(startDate = null, endDate = null, signal = null) {
         const url = new URL(THINGSPEAK_URL);
 
         url.searchParams.set("api_key", READ_API_KEY);
@@ -800,7 +791,10 @@
           url.searchParams.set("end", endDate.toISOString());
         }
 
-        const response = await fetch(url.toString(), { cache: "no-store" });
+        const response = await fetch(url.toString(), {
+          cache: "no-store",
+          signal
+        });
 
         if (!response.ok) {
           throw new Error(`Erro na API ThingSpeak: ${response.status}`);
@@ -813,6 +807,79 @@
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       }
 
+      function getMonthRanges(startDate, endDate) {
+        const ranges = [];
+        const cursor = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          1,
+          0,
+          0,
+          0
+        );
+
+        while (cursor.getTime() <= endDate.getTime()) {
+          const monthStart = new Date(cursor);
+          const monthEnd = new Date(
+            cursor.getFullYear(),
+            cursor.getMonth() + 1,
+            0,
+            23,
+            59,
+            59
+          );
+
+          ranges.push({
+            start: monthStart.getTime() < startDate.getTime() ? new Date(startDate) : monthStart,
+            end: monthEnd.getTime() > endDate.getTime() ? new Date(endDate) : monthEnd
+          });
+
+          cursor.setMonth(cursor.getMonth() + 1);
+        }
+
+        return ranges;
+      }
+
+      async function fetchTemperaturePeriodFeeds(startDate, endDate, onProgress) {
+        if (annualRequestController) {
+          annualRequestController.abort();
+        }
+
+        annualRequestController = new AbortController();
+        const signal = annualRequestController.signal;
+
+        const ranges = getMonthRanges(startDate, endDate);
+        const allFeeds = [];
+
+        for (let index = 0; index < ranges.length; index++) {
+          if (signal.aborted) {
+            throw new DOMException("Consulta cancelada.", "AbortError");
+          }
+
+          const range = ranges[index];
+          const feeds = await fetchFeeds(range.start, range.end, signal);
+
+          allFeeds.push(...feeds);
+
+          if (typeof onProgress === "function") {
+            onProgress(index + 1, ranges.length);
+          }
+        }
+
+        const uniqueFeeds = new Map();
+
+        allFeeds.forEach(feed => {
+          const key = feed.entry_id
+            ? `entry-${feed.entry_id}`
+            : `date-${feed.created_at}`;
+
+          uniqueFeeds.set(key, feed);
+        });
+
+        return [...uniqueFeeds.values()]
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      }
+
       function windDirectionName(degrees) {
         const directions = [
           "N", "NNE", "NE", "ENE",
@@ -822,6 +889,7 @@
         ];
 
         const normalized = ((degrees % 360) + 360) % 360;
+
         return directions[Math.round(normalized / 22.5) % 16];
       }
 
@@ -876,44 +944,26 @@
         const pressureScore = Math.max(0, Math.min(30, -pressureTrend * 8));
         const temperatureScore = temperature.value >= 18 && temperature.value <= 31 ? 8 : 3;
         const windScore = wind ? Math.max(0, Math.min(7, wind.value / 5)) : 0;
-        const probability = Math.max(0, Math.min(100, humidityScore + pressureScore + temperatureScore + windScore));
+
+        const probability = Math.max(
+          0,
+          Math.min(
+            100,
+            humidityScore + pressureScore + temperatureScore + windScore
+          )
+        );
 
         return {
           valid: true,
           probability,
           pressureTrend,
-          classification: probability >= 70 ? "ALTA" : probability >= 40 ? "MODERADA" : "BAIXA"
+          classification:
+            probability >= 70
+              ? "ALTA"
+              : probability >= 40
+                ? "MODERADA"
+                : "BAIXA"
         };
-      }
-
-      function updateKPICards(feeds) {
-        const temperature = getLastValidFeed(feeds, FIELDS.temperature);
-        const humidity = getLastValidFeed(feeds, FIELDS.humidity);
-        const pressure = getLastValidFeed(feeds, FIELDS.pressure);
-        const wind = getLastValidFeed(feeds, FIELDS.wind);
-        const direction = getLastValidFeed(feeds, FIELDS.windDirection);
-        const co2 = getLastValidFeed(feeds, FIELDS.co2);
-
-        document.getElementById("temperatureValue").textContent = temperature ? formatNumber(temperature.value, 1) : "--";
-        document.getElementById("temperatureDetail").textContent = temperature ? `Última leitura: ${formatDate(temperature.feed.created_at, true)}` : "Sem leitura válida.";
-
-        document.getElementById("humidityValue").textContent = humidity ? formatNumber(humidity.value, 1) : "--";
-        document.getElementById("humidityDetail").textContent = humidity ? `Última leitura: ${formatDate(humidity.feed.created_at, true)}` : "Sem leitura válida.";
-
-        document.getElementById("pressureValue").textContent = pressure ? formatNumber(pressure.value, 1) : "--";
-        document.getElementById("pressureDetail").textContent = pressure ? `Última leitura: ${formatDate(pressure.feed.created_at, true)}` : "Sem leitura válida.";
-
-        document.getElementById("windValue").textContent = wind ? formatNumber(wind.value, 1) : "--";
-        document.getElementById("windDetail").textContent = wind
-          ? `Direção: ${direction ? `${windDirectionName(direction.value)} (${formatNumber(direction.value, 0)}°)` : "indisponível"}`
-          : "Sem leitura válida.";
-
-        document.getElementById("co2Value").textContent = co2 ? formatNumber(co2.value, 0) : "--";
-        document.getElementById("co2Detail").textContent = co2 ? `Última leitura: ${formatDate(co2.feed.created_at, true)}` : "Sem leitura válida.";
-
-        updateCOCard(feeds);
-        updateRainCard(feeds);
-        updateCompass(direction);
       }
 
       function updateCOCard(feeds) {
@@ -933,7 +983,8 @@
         }
 
         value.textContent = formatNumber(last.average, 2);
-        detail.textContent = `Média móvel das últimas 8 horas. Referência CONAMA: ${CO_8H_REFERENCE_PPM} ppm.`;
+        detail.textContent =
+          `Média móvel das últimas 8 horas. Referência CONAMA: ${CO_8H_REFERENCE_PPM} ppm.`;
 
         if (last.average < 7) {
           badge.textContent = "ADEQUADO";
@@ -969,11 +1020,12 @@
           : `Pressão estável/em alta: ${formatNumber(rain.pressureTrend, 1)} hPa em aproximadamente 3 h.`;
 
         badge.textContent = `PROBABILIDADE ${rain.classification}`;
-        badge.className = rain.classification === "ALTA"
-          ? "badge danger"
-          : rain.classification === "MODERADA"
-            ? "badge warning"
-            : "badge good";
+        badge.className =
+          rain.classification === "ALTA"
+            ? "badge danger"
+            : rain.classification === "MODERADA"
+              ? "badge warning"
+              : "badge good";
       }
 
       function updateCompass(direction) {
@@ -991,7 +1043,64 @@
 
         arrow.style.opacity = "1";
         arrow.style.transform = `rotate(${degrees}deg)`;
-        readout.textContent = `${windDirectionName(degrees)} (${formatNumber(degrees, 0)}°)`;
+        readout.textContent =
+          `${windDirectionName(degrees)} (${formatNumber(degrees, 0)}°)`;
+      }
+
+      function updateKPICards(feeds) {
+        const temperature = getLastValidFeed(feeds, FIELDS.temperature);
+        const humidity = getLastValidFeed(feeds, FIELDS.humidity);
+        const pressure = getLastValidFeed(feeds, FIELDS.pressure);
+        const wind = getLastValidFeed(feeds, FIELDS.wind);
+        const direction = getLastValidFeed(feeds, FIELDS.windDirection);
+        const co2 = getLastValidFeed(feeds, FIELDS.co2);
+
+        document.getElementById("temperatureValue").textContent =
+          temperature ? formatNumber(temperature.value, 1) : "--";
+
+        document.getElementById("temperatureDetail").textContent =
+          temperature
+            ? `Última leitura: ${formatDate(temperature.feed.created_at, true)}`
+            : "Sem leitura válida.";
+
+        document.getElementById("humidityValue").textContent =
+          humidity ? formatNumber(humidity.value, 1) : "--";
+
+        document.getElementById("humidityDetail").textContent =
+          humidity
+            ? `Última leitura: ${formatDate(humidity.feed.created_at, true)}`
+            : "Sem leitura válida.";
+
+        document.getElementById("pressureValue").textContent =
+          pressure ? formatNumber(pressure.value, 1) : "--";
+
+        document.getElementById("pressureDetail").textContent =
+          pressure
+            ? `Última leitura: ${formatDate(pressure.feed.created_at, true)}`
+            : "Sem leitura válida.";
+
+        document.getElementById("windValue").textContent =
+          wind ? formatNumber(wind.value, 1) : "--";
+
+        document.getElementById("windDetail").textContent = wind
+          ? `Direção: ${
+              direction
+                ? `${windDirectionName(direction.value)} (${formatNumber(direction.value, 0)}°)`
+                : "indisponível"
+            }`
+          : "Sem leitura válida.";
+
+        document.getElementById("co2Value").textContent =
+          co2 ? formatNumber(co2.value, 0) : "--";
+
+        document.getElementById("co2Detail").textContent =
+          co2
+            ? `Última leitura: ${formatDate(co2.feed.created_at, true)}`
+            : "Sem leitura válida.";
+
+        updateCOCard(feeds);
+        updateRainCard(feeds);
+        updateCompass(direction);
       }
 
       function parseBrazilianDate(value, endOfDay = false) {
@@ -1044,13 +1153,26 @@
         }).format(date);
       }
 
+      function getMonthKey(date) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: TIMEZONE,
+          year: "numeric",
+          month: "2-digit"
+        }).formatToParts(date);
+
+        const year = parts.find(item => item.type === "year")?.value;
+        const month = parts.find(item => item.type === "month")?.value;
+
+        return `${year}-${month}`;
+      }
+
       function getMonthRange(startDate, endDate) {
         const months = [];
         const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
         while (current.getTime() <= last.getTime()) {
-          months.push(new Date(current.getFullYear(), current.getMonth(), 1));
+          months.push(new Date(current));
           current.setMonth(current.getMonth() + 1);
         }
 
@@ -1082,7 +1204,7 @@
             return;
           }
 
-          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          const key = getMonthKey(date);
 
           if (groups.has(key)) {
             groups.get(key).values.push(value);
@@ -1108,14 +1230,15 @@
             const total = values.reduce((sum, value) => sum + value, 0);
             const middle = Math.floor(values.length / 2);
 
-            const median = values.length % 2 === 0
-              ? (values[middle - 1] + values[middle]) / 2
-              : values[middle];
+            const median =
+              values.length % 2 === 0
+                ? (values[middle - 1] + values[middle]) / 2
+                : values[middle];
 
             const frequency = new Map();
 
-            values.forEach(item => {
-              const key = item.toFixed(1);
+            values.forEach(value => {
+              const key = value.toFixed(1);
               frequency.set(key, (frequency.get(key) || 0) + 1);
             });
 
@@ -1125,7 +1248,10 @@
             frequency.forEach((count, key) => {
               const numericValue = Number(key);
 
-              if (count > greatestFrequency || (count === greatestFrequency && numericValue < mode)) {
+              if (
+                count > greatestFrequency ||
+                (count === greatestFrequency && numericValue < mode)
+              ) {
                 greatestFrequency = count;
                 mode = numericValue;
               }
@@ -1149,7 +1275,9 @@
         return {
           text: isLight ? "#13263c" : "#eef7ff",
           muted: isLight ? "#5b7389" : "#9cb4c9",
-          grid: isLight ? "rgba(91,115,137,.18)" : "rgba(156,180,201,.14)"
+          grid: isLight
+            ? "rgba(91,115,137,.18)"
+            : "rgba(156,180,201,.14)"
         };
       }
 
@@ -1174,28 +1302,28 @@
         destroyChart();
 
         if (kpi === "temperatureAnnual") {
-          const startDate = selectedTemperatureStartDate;
-          const endDate = selectedTemperatureEndDate;
-
-          if (!startDate || !endDate) {
+          if (!selectedTemperatureStartDate || !selectedTemperatureEndDate) {
             title.textContent = "Temperatura anual — selecione o período";
 
             mainChart = new Chart(canvas, {
               type: "bar",
               data: { labels: [], datasets: [] },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false
-              }
+              options: { responsive: true, maintainAspectRatio: false }
             });
 
             return;
           }
 
-          const statistics = getTemperatureMonthlyStatistics(feeds, startDate, endDate);
+          const statistics = getTemperatureMonthlyStatistics(
+            feeds,
+            selectedTemperatureStartDate,
+            selectedTemperatureEndDate
+          );
 
           title.textContent =
-            `Temperatura anual — estatísticas mensais de ${formatInputDate(startDate)} a ${formatInputDate(endDate)}`;
+            `Temperatura anual — estatísticas mensais de ` +
+            `${formatInputDate(selectedTemperatureStartDate)} a ` +
+            `${formatInputDate(selectedTemperatureEndDate)}`;
 
           mainChart = new Chart(canvas, {
             type: "bar",
@@ -1265,7 +1393,7 @@
 
                       return item && item.count === 0
                         ? "Não há leituras válidas neste mês."
-                        : "";
+                        : `${item.count} leitura(s) válida(s).`;
                     }
                   }
                 }
@@ -1327,7 +1455,7 @@
               pointRadius: 0
             },
             {
-              label: "Referência CONAMA 506/2024 — 9 ppm",
+              label: "Referência CONAMA — 9 ppm",
               data: series.map(() => CO_8H_REFERENCE_PPM),
               borderColor: "#f05d5e",
               borderDash: [8, 5],
@@ -1438,7 +1566,9 @@
               tooltip: {
                 callbacks: {
                   title(context) {
-                    return context.length ? `Horário: ${context[0].label}` : "";
+                    return context.length
+                      ? `Horário: ${context[0].label}`
+                      : "";
                   }
                 }
               }
@@ -1472,7 +1602,7 @@
           if (!selectedTemperatureStartDate || !selectedTemperatureEndDate) {
             content.innerHTML = `
               <strong>KPI de Temperatura Anual:</strong><br />
-              Informe a data inicial e a data final e clique em
+              Informe a data inicial e final e clique em
               <strong>Aplicar período</strong>.
             `;
             return;
@@ -1491,12 +1621,13 @@
             Período analisado:
             <strong>${formatInputDate(selectedTemperatureStartDate)} a ${formatInputDate(selectedTemperatureEndDate)}</strong>.
             <br /><br />
-            O gráfico mostra <strong>${statistics.length}</strong> mês(es) do intervalo,
+            O gráfico mostra <strong>${statistics.length}</strong> mês(es),
             sendo <strong>${monthsWithData}</strong> com leituras válidas.
             <br /><br />
-            Para cada mês são calculadas as temperaturas:
+            Para cada mês são calculadas:
             <strong>mínima, média, mediana, moda e máxima</strong>.
           `;
+
           return;
         }
 
@@ -1511,6 +1642,12 @@
         };
 
         content.innerHTML = messages[kpi] || messages.temperature;
+      }
+
+      function getFeedsForCurrentKPI() {
+        return selectedKPI === "temperatureAnnual"
+          ? temperatureAnnualFeeds
+          : cachedFeeds;
       }
 
       function applyKPISelection(kpi) {
@@ -1541,9 +1678,14 @@
           dateFilter.classList.remove("hidden");
         }
 
-        if (cachedFeeds.length) {
-          createChart(cachedFeeds, selectedKPI);
-          updateDetails(cachedFeeds, selectedKPI);
+        const feeds = getFeedsForCurrentKPI();
+
+        if (feeds.length) {
+          createChart(feeds, selectedKPI);
+          updateDetails(feeds, selectedKPI);
+        } else if (kpi === "temperatureAnnual") {
+          createChart([], selectedKPI);
+          updateDetails([], selectedKPI);
         }
       }
 
@@ -1551,6 +1693,7 @@
         const startInput = document.getElementById("temperatureStartDate");
         const endInput = document.getElementById("temperatureEndDate");
         const errorElement = document.getElementById("temperatureDateError");
+        const button = document.getElementById("applyTemperaturePeriodButton");
 
         const startDate = parseBrazilianDate(startInput.value, false);
         const endDate = parseBrazilianDate(endInput.value, true);
@@ -1568,25 +1711,39 @@
         }
 
         try {
-          errorElement.textContent = "Consultando dados do período...";
-          setConnectionStatus("Consultando período...", "loading");
-
           selectedTemperatureStartDate = startDate;
           selectedTemperatureEndDate = endDate;
 
-          const periodFeeds = await fetchFeeds(startDate, endDate);
+          button.disabled = true;
+          setConnectionStatus("Consultando período...", "loading");
 
-          cachedFeeds = periodFeeds;
+          const periodFeeds = await fetchTemperaturePeriodFeeds(
+            startDate,
+            endDate,
+            (currentMonth, totalMonths) => {
+              errorElement.textContent =
+                `Consultando mês ${currentMonth} de ${totalMonths}...`;
+            }
+          );
+
+          temperatureAnnualFeeds = periodFeeds;
           errorElement.textContent = "";
 
-          createChart(periodFeeds, "temperatureAnnual");
-          updateDetails(periodFeeds, "temperatureAnnual");
+          if (selectedKPI === "temperatureAnnual") {
+            createChart(temperatureAnnualFeeds, "temperatureAnnual");
+            updateDetails(temperatureAnnualFeeds, "temperatureAnnual");
+          }
 
           setConnectionStatus("Período atualizado", "ok");
         } catch (error) {
-          console.error(error);
-          errorElement.textContent = "Não foi possível consultar os dados do período informado.";
-          setConnectionStatus("Erro ao consultar período", "error");
+          if (error.name !== "AbortError") {
+            console.error(error);
+            errorElement.textContent =
+              "Não foi possível consultar os dados do período informado.";
+            setConnectionStatus("Erro ao consultar período", "error");
+          }
+        } finally {
+          button.disabled = false;
         }
       }
 
@@ -1594,7 +1751,10 @@
         refreshInterval = Number(milliseconds);
 
         document.querySelectorAll(".interval-button").forEach(button => {
-          button.classList.toggle("active", Number(button.dataset.interval) === refreshInterval);
+          button.classList.toggle(
+            "active",
+            Number(button.dataset.interval) === refreshInterval
+          );
         });
 
         if (refreshTimer) {
@@ -1608,7 +1768,10 @@
       }
 
       async function updateDashboard() {
+        const refreshButton = document.getElementById("manualRefreshButton");
+
         try {
+          refreshButton.disabled = true;
           setConnectionStatus("Atualizando dados...", "loading");
 
           const feeds = await fetchFeeds();
@@ -1620,11 +1783,14 @@
           cachedFeeds = feeds;
 
           updateKPICards(feeds);
-          createChart(feeds, selectedKPI);
-          updateDetails(feeds, selectedKPI);
+
+          if (selectedKPI !== "temperatureAnnual") {
+            createChart(cachedFeeds, selectedKPI);
+            updateDetails(cachedFeeds, selectedKPI);
+          }
 
           const time = new Intl.DateTimeFormat("pt-BR", {
-            timeZone: "America/Sao_Paulo",
+            timeZone: TIMEZONE,
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit"
@@ -1633,12 +1799,15 @@
           setConnectionStatus(`Atualizado às ${time}`, "ok");
         } catch (error) {
           console.error(error);
+
           setConnectionStatus("Erro ao atualizar dados", "error");
 
           document.getElementById("detailsContent").innerHTML = `
             <strong>Não foi possível acessar o ThingSpeak.</strong><br />
             Verifique a conexão com a internet, o ID do canal e a chave de leitura.
           `;
+        } finally {
+          refreshButton.disabled = false;
         }
       }
 
@@ -1654,13 +1823,17 @@
 
         localStorage.setItem(
           "climaUdiaTheme",
-          document.body.classList.contains("light-theme") ? "light" : "dark"
+          document.body.classList.contains("light-theme")
+            ? "light"
+            : "dark"
         );
 
         updateThemeButton();
 
-        if (cachedFeeds.length) {
-          createChart(cachedFeeds, selectedKPI);
+        const feeds = getFeedsForCurrentKPI();
+
+        if (feeds.length || selectedKPI === "temperatureAnnual") {
+          createChart(feeds, selectedKPI);
         }
       }
 
@@ -1681,7 +1854,7 @@
         selectedTemperatureStartDate = new Date(
           start.getFullYear(),
           start.getMonth(),
-          start.getDate(),
+          1,
           0,
           0,
           0
@@ -1715,21 +1888,24 @@
         });
       });
 
-      document.getElementById("applyTemperaturePeriodButton").addEventListener(
-        "click",
-        applyTemperaturePeriod
-      );
+      document.getElementById("applyTemperaturePeriodButton")
+        .addEventListener("click", applyTemperaturePeriod);
 
-      document.getElementById("temperatureStartDate").addEventListener("input", () => {
-        document.getElementById("temperatureDateError").textContent = "";
-      });
+      document.getElementById("temperatureStartDate")
+        .addEventListener("input", () => {
+          document.getElementById("temperatureDateError").textContent = "";
+        });
 
-      document.getElementById("temperatureEndDate").addEventListener("input", () => {
-        document.getElementById("temperatureDateError").textContent = "";
-      });
+      document.getElementById("temperatureEndDate")
+        .addEventListener("input", () => {
+          document.getElementById("temperatureDateError").textContent = "";
+        });
 
-      document.getElementById("manualRefreshButton").addEventListener("click", updateDashboard);
-      document.getElementById("themeButton").addEventListener("click", toggleTheme);
+      document.getElementById("manualRefreshButton")
+        .addEventListener("click", updateDashboard);
+
+      document.getElementById("themeButton")
+        .addEventListener("click", toggleTheme);
 
       loadTheme();
       initializeTemperaturePeriod();
@@ -1744,4 +1920,3 @@
   </script>
 </body>
 </html>
-
