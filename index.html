@@ -44,6 +44,7 @@ th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
 th{color:var(--muted);text-transform:uppercase;font-size:.68rem;letter-spacing:.4px;}
 tr.row-empty{background:rgba(255,92,92,.06);}
 tr.row-partial{background:rgba(245,166,35,.06);}
+tr.row-outlier{background:rgba(245,166,35,.10);}
 .insight{margin:0;padding-left:18px;}
 .insight li{margin-bottom:8px;font-size:.88rem;line-height:1.4;}
 .badge{padding:2px 10px;border-radius:10px;font-size:.72rem;font-weight:700;text-transform:uppercase;}
@@ -149,6 +150,7 @@ tr.row-partial{background:rgba(245,166,35,.06);}
 <span>📡 Última atualização: <strong id="lastFeedTime">carregando…</strong></span>
 <span>🔢 Pontos analisados hoje: <strong id="pointsCount">—</strong></span>
 <span>📊 Pontos no cálculo CO: <strong id="coPointsCount">—</strong></span>
+<span>🚫 Outliers de vento descartados: <strong id="windOutlierCount">—</strong></span>
 <span>🔁 Polling: <strong id="currentInterval">detectando…</strong></span>
 </div>
 
@@ -179,7 +181,11 @@ tr.row-partial{background:rgba(245,166,35,.06);}
 <h2>Vento (field4)</h2>
 <div class="grid cols-2">
 <div class="card accent-good"><div class="label">Velocidade</div><div class="value" id="windNow">—</div><div class="foot" id="windNowTime">—</div></div>
-<div class="card accent-warn"><div class="label">Rajada</div><div class="value" id="windGust">—</div><div class="foot" id="windGustTime">—</div></div>
+<div class="card accent-warn"><div class="label">Rajada (válida)</div><div class="value" id="windGust">—</div><div class="foot" id="windGustTime">—</div></div>
+</div>
+<div class="card" id="windOutlierCard" style="margin-top:14px; display:none;">
+  <div class="label">⚠️ Leituras de vento descartadas como outlier</div>
+  <div class="limits" id="windOutlierDetail">—</div>
 </div>
 </section>
 
@@ -219,15 +225,10 @@ tr.row-partial{background:rgba(245,166,35,.06);}
 <div class="card">
   <!--
     Sinais usados: temperatura (field1), umidade relativa (field2),
-    pressão atmosférica (field3) e velocidade do vento (field4) —
-    todos do canal. O ponto de orvalho é CALCULADO (Magnus-Tetens,
-    a partir de temperatura e umidade), pois não existe field dedicado.
-
-    Pressão atmosférica: valor absoluto muito baixo/alto e a
-    TENDÊNCIA (queda ou alta na janela recente) são usados como sinal
-    clássico de meteorologia básica — queda de pressão costuma
-    acompanhar aproximação de sistemas de instabilidade; alta ou
-    estabilidade de pressão costuma acompanhar tempo firme.
+    pressão atmosférica (field3) e velocidade do vento (field4, já com
+    filtro de outliers aplicado) — todos do canal. O ponto de orvalho
+    é CALCULADO (Magnus-Tetens, a partir de temperatura e umidade),
+    pois não existe field dedicado.
 
     Previsão HEURÍSTICA (pontuação por regras), não modelo numérico
     de previsão do tempo — não substitui previsão oficial.
@@ -245,8 +246,9 @@ tr.row-partial{background:rgba(245,166,35,.06);}
   </div>
   <div class="disclaimer" style="margin-top:14px;">
     ⚠️ Previsão heurística baseada em temperatura, umidade relativa, ponto de orvalho (calculado),
-    pressão atmosférica e velocidade do vento do próprio canal. Não é meteorologia numérica oficial,
-    não considera frentes atmosféricas, radar ou satélite, e pode divergir bastante da previsão real.
+    pressão atmosférica e velocidade do vento do próprio canal (com filtro de outliers).
+    Não é meteorologia numérica oficial, não considera frentes atmosféricas, radar ou satélite,
+    e pode divergir bastante da previsão real.
   </div>
 </div>
 </section>
@@ -285,7 +287,7 @@ tr.row-partial{background:rgba(245,166,35,.06);}
     <div class="sv-foot">Comparação entre início e fim da janela analisada</div>
   </div>
   <div class="subval-card">
-    <div class="sv-label">Velocidade do Vento</div>
+    <div class="sv-label">Velocidade do Vento (filtrada)</div>
     <div class="sv-value" id="fWindNow">—</div>
     <div class="sv-foot" id="fWindTime">—</div>
   </div>
@@ -407,6 +409,27 @@ const MG_FALLBACK_NAME = 'Belo Horizonte, MG (Open-Meteo)';
 const MG_FALLBACK_LAT = -19.9167;
 const MG_FALLBACK_LON = -43.9345;
 
+/*
+  FILTRO DE SANIDADE FÍSICA — VELOCIDADE DO VENTO (field4)
+  ------------------------------------------------------------
+  O recorde mundial oficial de rajada de vento em superfície é de
+  aproximadamente 408 km/h (Monte Washington, EUA, evento excepcional).
+  Sensores de estações amadoras/IoT podem gerar picos falsos por ruído
+  elétrico, spike de conversão analógico-digital ou falha momentânea
+  de leitura — nunca eventos reais nesses patamares.
+
+  Adotamos 150 km/h como limite plausível de leitura válida (acima de
+  furacões de categoria 5, ~252 km/h de sustentado, e bem acima do que
+  qualquer rajada de tempestade severa típica registraria em sensores
+  de baixo custo). Qualquer leitura de field4 acima desse valor é
+  tratada como outlier de sensor: EXCLUÍDA do cálculo (nunca zerada,
+  nunca "corrigida" para um valor estimado), e contabilizada
+  separadamente para rastreabilidade.
+*/
+const WIND_MAX_PLAUSIBLE_KMH = 150;
+let windOutlierCount = 0;
+let windOutlierSamples = [];
+
 let lastParsedFeeds = [];
 let currentMode = 'auto';
 let pollTimer = null;
@@ -420,6 +443,18 @@ function fmtSigned(v,dec=1){ return (v===null||v===undefined||isNaN(v)) ? '—' 
 function startOfToday(){ const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
 function formatDateInmet(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* Sanitiza leitura de vento: retorna null se acima do limite plausível,
+   registrando o outlier para exibição transparente ao usuário. */
+function sanitizeWind(raw, timeRef){
+  if(raw === null) return null;
+  if(raw > WIND_MAX_PLAUSIBLE_KMH){
+    windOutlierCount++;
+    windOutlierSamples.push({ value: raw, time: timeRef });
+    return null;
+  }
+  return raw;
+}
 
 /* ---------- metadados do canal ---------- */
 async function loadMetadata(){
@@ -479,16 +514,24 @@ function calcDewPoint(tempC, rh){
 async function loadDashboard(){
   const errBox = document.getElementById('loadError');
   errBox.textContent = '';
+  windOutlierCount = 0;
+  windOutlierSamples = [];
   try{
     const feeds = await fetchChannel();
-    const fc = feeds.map(f => ({
-      time: new Date(f.created_at),
-      temp: toNum(f.field1), hum: toNum(f.field2), pres: toNum(f.field3),
-      wind: toNum(f.field4), co: toNum(f.field7)
-    }));
+    const fc = feeds.map(f => {
+      const time = new Date(f.created_at);
+      const windRaw = toNum(f.field4);
+      const wind = sanitizeWind(windRaw, time);
+      return {
+        time,
+        temp: toNum(f.field1), hum: toNum(f.field2), pres: toNum(f.field3),
+        wind, windRaw, co: toNum(f.field7)
+      };
+    });
     lastParsedFeeds = fc;
     const last = fc[fc.length-1];
     document.getElementById('lastFeedTime').textContent = last.time.toLocaleString('pt-BR');
+    document.getElementById('windOutlierCount').textContent = windOutlierCount;
 
     const fToday = fc.filter(p => p.time >= startOfToday());
     const base = fToday.length>0 ? fToday : fc;
@@ -519,13 +562,30 @@ async function loadDashboard(){
       document.getElementById('presBar').style.width = Math.max(4,Math.min(100,((last.pres-pmin)/((pmax-pmin)||1))*100))+'%';
     }
 
+    // Vento — usa apenas leituras já filtradas (sanitizeWind aplicado na construção de fc)
+    const lastWindValid = (() => { for(let i=fc.length-1;i>=0;i--){ if(fc[i].wind!==null) return fc[i]; } return null; })();
     const winds = fc.map(p=>p.wind).filter(v=>v!==null);
-    if(winds.length && last.wind!==null){
-      document.getElementById('windNow').textContent = fmt(last.wind,1);
-      document.getElementById('windNowTime').textContent = 'Leitura em ' + last.time.toLocaleTimeString('pt-BR');
-      const maxWind = fc.reduce((a,b)=> (b.wind!==null && (a.wind===null || b.wind>a.wind)) ? b : a);
-      document.getElementById('windGust').textContent = fmt(maxWind.wind,1);
-      document.getElementById('windGustTime').textContent = 'Pico em ' + maxWind.time.toLocaleTimeString('pt-BR');
+    if(winds.length && lastWindValid){
+      document.getElementById('windNow').textContent = fmt(lastWindValid.wind,1);
+      document.getElementById('windNowTime').textContent = 'Leitura em ' + lastWindValid.time.toLocaleTimeString('pt-BR');
+      const maxWindPoint = fc.reduce((a,b)=> (b.wind!==null && (a===null || b.wind>a.wind)) ? b : a, null);
+      if(maxWindPoint){
+        document.getElementById('windGust').textContent = fmt(maxWindPoint.wind,1);
+        document.getElementById('windGustTime').textContent = 'Pico válido em ' + maxWindPoint.time.toLocaleTimeString('pt-BR');
+      }
+    } else {
+      document.getElementById('windNow').textContent = '—';
+      document.getElementById('windGust').textContent = '—';
+    }
+
+    const outlierCard = document.getElementById('windOutlierCard');
+    const outlierDetail = document.getElementById('windOutlierDetail');
+    if(windOutlierCount > 0){
+      outlierCard.style.display = 'block';
+      const sample = windOutlierSamples.slice(-5).map(o => `${fmt(o.value,1)} km/h às ${o.time.toLocaleTimeString('pt-BR')}`).join('; ');
+      outlierDetail.innerHTML = `${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h (limite físico plausível) foram descartadas do cálculo de velocidade/rajada. Exemplos: ${sample}. Valores mantidos na fonte original, apenas excluídos desta análise.`;
+    } else {
+      outlierCard.style.display = 'none';
     }
 
     const coPts = fc.filter(p=>p.co!==null);
@@ -564,25 +624,32 @@ async function loadDashboard(){
     }
 
     const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = fc.slice(-10).reverse().map(p => `<tr>
-      <td>${p.time.toLocaleString('pt-BR')}</td>
-      <td>${fmt(p.temp,1)}</td><td>${fmt(p.hum,0)}</td><td>${fmt(p.pres,1)}</td>
-      <td>${fmt(p.wind,1)}</td><td>${fmt(p.co,2)}</td>
-    </tr>`).join('');
+    tbody.innerHTML = fc.slice(-10).reverse().map(p => {
+      const isOutlier = p.windRaw !== null && p.wind === null;
+      const windCell = isOutlier ? `<span title="Outlier descartado (${fmt(p.windRaw,1)} km/h)" style="color:var(--warn);">⚠️ descartado</span>` : fmt(p.wind,1);
+      return `<tr class="${isOutlier?'row-outlier':''}">
+        <td>${p.time.toLocaleString('pt-BR')}</td>
+        <td>${fmt(p.temp,1)}</td><td>${fmt(p.hum,0)}</td><td>${fmt(p.pres,1)}</td>
+        <td>${windCell}</td><td>${fmt(p.co,2)}</td>
+      </tr>`;
+    }).join('');
 
     const insights=[];
     if(temps.length){
       const amp=Math.max(...temps)-Math.min(...temps);
       insights.push(`<b>Fato:</b> amplitude térmica do dia ${amp.toFixed(1)}°C (${Math.min(...temps).toFixed(1)} a ${Math.max(...temps).toFixed(1)}), ${temps.length} leituras`);
     }
-    if(winds.length) insights.push(`<b>Fato:</b> rajada máxima ${Math.max(...winds).toFixed(1)} (field4)`);
+    if(winds.length) insights.push(`<b>Fato:</b> rajada máxima válida ${Math.max(...winds).toFixed(1)} km/h (field4, após filtro de outliers)`);
+    if(windOutlierCount > 0) insights.push(`<b>Interpretação:</b> ${windOutlierCount} leitura(s) de vento fisicamente implausível(is) (acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h) foram detectadas e excluídas — provável ruído/glitch do sensor, não evento real.`);
     if(movAvg!==null){
       if(coverageH>=8 && movAvg>9) insights.push(`<b>Interpretação:</b> média móvel 8h (${movAvg.toFixed(2)} ppm) acima do padrão final.`);
       else if(coverageH<8) insights.push('Dados de média móvel incompletos (cobertura inferior a 8h).');
     }
     document.getElementById('insightsList').innerHTML = insights.length ? insights.map(i=>`<li>${i}</li>`).join('') : '<li>Sem dados suficientes para insights.</li>';
 
-    document.getElementById('limitsBox').innerHTML = `Cobertura dos últimos 8h de CO: ${coverageH!==null ? coverageH.toFixed(1)+'h' : 'indisponível'}`;
+    const limitParts = [`Cobertura dos últimos 8h de CO: ${coverageH!==null ? coverageH.toFixed(1)+'h' : 'indisponível'}.`];
+    if(windOutlierCount > 0) limitParts.push(`${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h foram tratadas como outlier de sensor e excluídas dos cálculos de velocidade/rajada (ver detalhe na seção de Vento).`);
+    document.getElementById('limitsBox').innerHTML = limitParts.join('<br>');
 
     renderForecast(fc);
 
@@ -594,15 +661,8 @@ async function loadDashboard(){
 
 /* ============================================================
    ABA PREVISÃO DO TEMPO — HEURÍSTICA POR PONTUAÇÃO DE REGRAS
-   ============================================================
-   Sinais usados:
-     - Temperatura (field1)
-     - Umidade relativa (field2)
-     - Ponto de orvalho (CALCULADO via Magnus-Tetens a partir de T e UR)
-     - Pressão atmosférica (field3) — valor e tendência
-     - Velocidade do vento (field4)
    ============================================================ */
-const FORECAST_WINDOW_HOURS = 6; // janela recente usada para tendências de umidade e pressão
+const FORECAST_WINDOW_HOURS = 6;
 
 function renderForecast(fc){
   const iconEl = document.getElementById('forecastIcon');
@@ -625,7 +685,7 @@ function renderForecast(fc){
   }
   const lTemp = lastValid('temp');
   const lHum = lastValid('hum');
-  const lWind = lastValid('wind');
+  const lWind = lastValid('wind'); // já filtrado de outliers
   const lPres = lastValid('pres');
 
   if(!lTemp || !lHum){
@@ -649,11 +709,10 @@ function renderForecast(fc){
   document.getElementById('fDewNow').textContent = dewNow!==null ? fmt(dewNow,1)+'°C' : '—';
   document.getElementById('fDewDepr').textContent = dewDepression!==null ? fmt(dewDepression,1)+'°C' : '—';
   document.getElementById('fWindNow').textContent = windNow!==null ? fmt(windNow,1) : '—';
-  document.getElementById('fWindTime').textContent = lWind ? 'Leitura em ' + lWind.time.toLocaleTimeString('pt-BR') : 'Sem leitura de vento disponível';
+  document.getElementById('fWindTime').textContent = lWind ? 'Leitura em ' + lWind.time.toLocaleTimeString('pt-BR') : 'Sem leitura válida de vento disponível';
   document.getElementById('fPresNow').textContent = presNow!==null ? fmt(presNow,1)+' hPa' : '—';
   document.getElementById('fPresTime').textContent = lPres ? 'Leitura em ' + lPres.time.toLocaleTimeString('pt-BR') : 'Sem leitura de pressão disponível';
 
-  // Tendências na janela recente
   const now = lTemp.time;
   const windowStart = new Date(now.getTime() - FORECAST_WINDOW_HOURS*60*60*1000);
   const windowPtsHum = fc.filter(p => p.time>=windowStart && p.time<=now && p.hum!==null);
@@ -667,28 +726,20 @@ function renderForecast(fc){
   if(windowPtsPres.length >= 2) presTrend = windowPtsPres[windowPtsPres.length-1].pres - windowPtsPres[0].pres;
   document.getElementById('fPresTrend').textContent = presTrend!==null ? fmtSigned(presTrend,1)+' hPa' : 'Dados insuficientes na janela';
 
-  // ---------- Fatores normalizados (0 a 100) ----------
-  // Depressão do orvalho: 0°C -> 100, 15°C+ -> 0
   let fDew = 0;
   if(dewDepression !== null) fDew = Math.max(0, Math.min(100, 100 - (dewDepression/15)*100));
 
-  // Umidade relativa: 40% -> 0, 100% -> 100
   const fHum = Math.max(0, Math.min(100, ((humNow-40)/60)*100));
 
-  // Tendência de umidade: -10 p.p. -> 0, +10 p.p. -> 100
   let fTrendHum = 50;
   if(humTrend !== null) fTrendHum = Math.max(0, Math.min(100, ((humTrend+10)/20)*100));
 
-  // Queda de pressão: quanto maior a queda na janela, maior o fator.
-  // 0 hPa ou alta -> 0; queda de -6 hPa ou mais -> 100.
   let fPresDrop = 0;
   if(presTrend !== null) fPresDrop = Math.max(0, Math.min(100, ((-presTrend)/6)*100));
 
-  // Vento (redutor): 0 -> 0 (sem redução), 20+ -> 100 (redução máxima)
   let fWindReduction = 0;
   if(windNow !== null) fWindReduction = Math.max(0, Math.min(100, (windNow/20)*100));
 
-  // Pesos do modelo heurístico (documentados e fixos, somam 1.0 nos positivos)
   const W_DEW = 0.30, W_HUM = 0.25, W_TREND_HUM = 0.10, W_PRES = 0.20, W_WIND = 0.25;
   let rawScore = (fDew*W_DEW) + (fHum*W_HUM) + (fTrendHum*W_TREND_HUM) + (fPresDrop*W_PRES) - (fWindReduction*W_WIND);
   const score = Math.max(0, Math.min(100, rawScore));
@@ -731,16 +782,18 @@ function renderForecast(fc){
   if(presTrend!==null && presTrend <= -3) ins.push(`<b>Fato:</b> pressão atmosférica caiu ${fmt(Math.abs(presTrend),1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h — queda associada a maior chance de instabilidade.`);
   if(presTrend!==null && presTrend >= 3) ins.push(`<b>Fato:</b> pressão atmosférica subiu ${fmt(presTrend,1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h — alta associada a tempo mais estável.`);
   if(humTrend!==null && humTrend > 5) ins.push(`<b>Fato:</b> umidade subiu ${fmtSigned(humTrend,0)} p.p. na janela de ${FORECAST_WINDOW_HOURS}h — tendência de aumento de umidade.`);
-  if(windNow!==null && windNow > 10) ins.push(`<b>Fato:</b> vento de ${fmt(windNow,1)} (field4) — intensidade que tende a dispersar nebulosidade e reduzir o score.`);
+  if(windNow!==null && windNow > 10) ins.push(`<b>Fato:</b> vento (filtrado) de ${fmt(windNow,1)} km/h — intensidade que tende a dispersar nebulosidade e reduzir o score.`);
   insightsEl.innerHTML = ins.length ? ins.map(i=>`<li>${i}</li>`).join('') : '<li>Sinais atuais não indicam padrão relevante para destacar.</li>';
 
-  limitsEl.innerHTML = [
+  const limitMsgs = [
     'O ponto de orvalho não é medido diretamente pelo sensor — é calculado a partir de temperatura e umidade pela fórmula de Magnus-Tetens (a=17.27, b=237.7°C).',
     'A leitura de pressão (field3) e sua tendência são usadas como sinal qualitativo clássico (queda favorece instabilidade, alta favorece estabilidade), não como medição direta de precipitação.',
+    'A leitura de vento passa por um filtro de sanidade física (limite de ' + WIND_MAX_PLAUSIBLE_KMH + ' km/h): valores acima disso são tratados como outlier de sensor e excluídos, nunca zerados ou estimados.',
     'Este modelo é heurístico (pontuação por regras simples), não um modelo numérico de previsão do tempo — não considera frentes atmosféricas, radar ou satélite.',
-    'Os pesos (0.30 / 0.25 / 0.10 / 0.20 / 0.25) são fixos e simplificados; não foram calibrados estatisticamente com dados históricos de chuva real.',
-    'As tendências de umidade e pressão dependem de pelo menos 2 leituras válidas na janela de ' + FORECAST_WINDOW_HOURS + 'h — cobertura baixa reduz a confiabilidade desses fatores.'
-  ].map(m=>`• ${m}`).join('<br>');
+    'Os pesos (0.30 / 0.25 / 0.10 / 0.20 / 0.25) são fixos e simplificados; não foram calibrados estatisticamente com dados históricos de chuva real.'
+  ];
+  if(windOutlierCount > 0) limitMsgs.push(`No momento, ${windOutlierCount} leitura(s) de vento foram descartadas como outlier na base geral — ver detalhe na aba Tempo Real.`);
+  limitsEl.innerHTML = limitMsgs.map(m=>`• ${m}`).join('<br>');
 }
 
 /* ---------- polling / toolbar ---------- */
@@ -1015,7 +1068,7 @@ async function loadInmetComparison(){
   const localTemp = localLastValid('temp');
   const localHum = localLastValid('hum');
   const localPres = localLastValid('pres');
-  const localWind = localLastValid('wind');
+  const localWind = localLastValid('wind'); // já sanitizado (sem outliers)
 
   statusEl.style.display = 'none';
   contentEl.style.display = 'block';
@@ -1040,6 +1093,7 @@ async function loadInmetComparison(){
   const limitMsgs = [
     usedFallback ? `A comparação usa a estação alternativa <strong>${result.source}</strong>, pois a API do INMET não respondeu (provável bloqueio de CORS).` : 'A comparação usa a API oficial do INMET (estação A507, Uberlândia-MG).',
     'Os horários de coleta não são sincronizados entre as fontes.',
+    'O vento do sensor local exibido aqui já passou pelo filtro de outliers (limite de ' + WIND_MAX_PLAUSIBLE_KMH + ' km/h) aplicado na aba Tempo Real.',
     'Nenhum valor foi estimado ou simulado.'
   ];
   limitsEl.innerHTML = limitMsgs.map(m => `• ${m}`).join('<br>');
