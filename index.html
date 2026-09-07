@@ -71,7 +71,6 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 .progress-status{font-size:.72rem;color:var(--muted);margin-top:6px;}
 .disclaimer{font-size:.75rem;color:var(--muted);font-style:italic;}
 
-/* histórico mensal */
 .monthly-chart-title{font-size:.9rem;color:#fff;font-weight:700;margin-bottom:4px;}
 .monthly-chart-sub{font-size:.75rem;color:var(--muted);margin-bottom:16px;}
 .monthly-chart-container{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:36px 12px 10px;overflow-x:auto;}
@@ -92,7 +91,6 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 .legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
 .dot-min{background:#3ea6ff;} .dot-avg{background:#8b6bff;} .dot-max{background:#ff5c5c;}
 
-/* ===== Previsão do Tempo ===== */
 .forecast-hero{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 .forecast-icon{font-size:3.2rem;line-height:1;}
 .forecast-main-label{font-size:1.1rem;font-weight:700;color:#fff;}
@@ -223,16 +221,6 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 <section>
 <h2>Previsão Heurística de Curto Prazo</h2>
 <div class="card">
-  <!--
-    Sinais usados: temperatura (field1), umidade relativa (field2),
-    pressão atmosférica (field3) e velocidade do vento (field4, já com
-    filtro de outliers aplicado) — todos do canal. O ponto de orvalho
-    é CALCULADO (Magnus-Tetens, a partir de temperatura e umidade),
-    pois não existe field dedicado.
-
-    Previsão HEURÍSTICA (pontuação por regras), não modelo numérico
-    de previsão do tempo — não substitui previsão oficial.
-  -->
   <div class="forecast-hero">
     <div class="forecast-icon" id="forecastIcon">🔄</div>
     <div>
@@ -247,8 +235,7 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
   <div class="disclaimer" style="margin-top:14px;">
     ⚠️ Previsão heurística baseada em temperatura, umidade relativa, ponto de orvalho (calculado),
     pressão atmosférica e velocidade do vento do próprio canal (com filtro de outliers).
-    Não é meteorologia numérica oficial, não considera frentes atmosféricas, radar ou satélite,
-    e pode divergir bastante da previsão real.
+    Não é meteorologia numérica oficial.
   </div>
 </div>
 </section>
@@ -256,46 +243,14 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 <section>
 <h2>Sinais de Entrada (últimas leituras válidas)</h2>
 <div class="subvals-grid">
-  <div class="subval-card">
-    <div class="sv-label">Temperatura Atual</div>
-    <div class="sv-value" id="fTempNow">—</div>
-    <div class="sv-foot" id="fTempTime">—</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Umidade Relativa</div>
-    <div class="sv-value" id="fHumNow">—</div>
-    <div class="sv-foot" id="fHumTime">—</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Ponto de Orvalho (calculado)</div>
-    <div class="sv-value" id="fDewNow">—</div>
-    <div class="sv-foot">Magnus-Tetens: γ=(17.27·T)/(237.7+T)+ln(UR/100)</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Depressão do Ponto de Orvalho</div>
-    <div class="sv-value" id="fDewDepr">—</div>
-    <div class="sv-foot">Temperatura − Ponto de orvalho</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Pressão Atmosférica</div>
-    <div class="sv-value" id="fPresNow">—</div>
-    <div class="sv-foot" id="fPresTime">—</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Tendência de Pressão (janela recente)</div>
-    <div class="sv-value" id="fPresTrend">—</div>
-    <div class="sv-foot">Comparação entre início e fim da janela analisada</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Velocidade do Vento (filtrada)</div>
-    <div class="sv-value" id="fWindNow">—</div>
-    <div class="sv-foot" id="fWindTime">—</div>
-  </div>
-  <div class="subval-card">
-    <div class="sv-label">Tendência de Umidade (janela recente)</div>
-    <div class="sv-value" id="fHumTrend">—</div>
-    <div class="sv-foot">Comparação entre início e fim da janela analisada</div>
-  </div>
+  <div class="subval-card"><div class="sv-label">Temperatura Atual</div><div class="sv-value" id="fTempNow">—</div><div class="sv-foot" id="fTempTime">—</div></div>
+  <div class="subval-card"><div class="sv-label">Umidade Relativa</div><div class="sv-value" id="fHumNow">—</div><div class="sv-foot" id="fHumTime">—</div></div>
+  <div class="subval-card"><div class="sv-label">Ponto de Orvalho (calculado)</div><div class="sv-value" id="fDewNow">—</div><div class="sv-foot">Magnus-Tetens: γ=(17.27·T)/(237.7+T)+ln(UR/100)</div></div>
+  <div class="subval-card"><div class="sv-label">Depressão do Ponto de Orvalho</div><div class="sv-value" id="fDewDepr">—</div><div class="sv-foot">Temperatura − Ponto de orvalho</div></div>
+  <div class="subval-card"><div class="sv-label">Pressão Atmosférica</div><div class="sv-value" id="fPresNow">—</div><div class="sv-foot" id="fPresTime">—</div></div>
+  <div class="subval-card"><div class="sv-label">Tendência de Pressão (janela recente)</div><div class="sv-value" id="fPresTrend">—</div><div class="sv-foot">Comparação entre início e fim da janela analisada</div></div>
+  <div class="subval-card"><div class="sv-label">Velocidade do Vento (filtrada)</div><div class="sv-value" id="fWindNow">—</div><div class="sv-foot" id="fWindTime">—</div></div>
+  <div class="subval-card"><div class="sv-label">Tendência de Umidade (janela recente)</div><div class="sv-value" id="fHumTrend">—</div><div class="sv-foot">Comparação entre início e fim da janela analisada</div></div>
 </div>
 </section>
 
@@ -366,10 +321,10 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 <!-- ===================== ABA COMPARAÇÃO REGIONAL (MG) ===================== -->
 <div class="tab-panel" id="tabInmet">
 <section>
-<h2>Comparação com Estação de Referência em Minas Gerais</h2>
+<h2>Comparação com OpenWeatherMap (dados regionais)</h2>
 <div class="card">
   <div class="label" id="inmetSourceLabel" style="margin-bottom:8px;">
-    Tentando fonte primária: API do INMET (estação A507 — Uberlândia-MG)…
+    Consultando API OpenWeatherMap (Current Weather Data)…
   </div>
   <div id="inmetStatus" class="loading-box">Aguardando abertura desta aba…</div>
   <div id="inmetContent" style="display:none;"></div>
@@ -379,7 +334,7 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 <h2>Tabela Comparativa</h2>
 <div class="card" style="overflow-x:auto;">
 <table id="inmetCompareTable" style="display:none;">
-<thead><tr><th>Variável</th><th>Sensor Local</th><th>Horário Local</th><th>Estação de Referência (MG)</th><th>Horário Ref.</th><th>Diferença</th></tr></thead>
+<thead><tr><th>Variável</th><th>Sensor Local</th><th>Horário Local</th><th>OpenWeatherMap</th><th>Horário Ref.</th><th>Diferença</th></tr></thead>
 <tbody id="inmetCompareBody"></tbody>
 </table>
 </div>
@@ -404,28 +359,19 @@ const CHANNEL_ID = 321770;
 const API_KEY = '0EPAIXIM4UL9LIW9';
 const RESULTS = 8000;
 
-const INMET_STATION_CODE = 'A507';
-const MG_FALLBACK_NAME = 'Belo Horizonte, MG (Open-Meteo)';
-const MG_FALLBACK_LAT = -19.9167;
-const MG_FALLBACK_LON = -43.9345;
-
 /*
-  FILTRO DE SANIDADE FÍSICA — VELOCIDADE DO VENTO (field4)
+  OPENWEATHERMAP — fonte de comparação regional
   ------------------------------------------------------------
-  O recorde mundial oficial de rajada de vento em superfície é de
-  aproximadamente 408 km/h (Monte Washington, EUA, evento excepcional).
-  Sensores de estações amadoras/IoT podem gerar picos falsos por ruído
-  elétrico, spike de conversão analógico-digital ou falha momentânea
-  de leitura — nunca eventos reais nesses patamares.
-
-  Adotamos 150 km/h como limite plausível de leitura válida (acima de
-  furacões de categoria 5, ~252 km/h de sustentado, e bem acima do que
-  qualquer rajada de tempestade severa típica registraria em sensores
-  de baixo custo). Qualquer leitura de field4 acima desse valor é
-  tratada como outlier de sensor: EXCLUÍDA do cálculo (nunca zerada,
-  nunca "corrigida" para um valor estimado), e contabilizada
-  separadamente para rastreabilidade.
+  Chave fornecida pelo usuário para a API "Current Weather Data".
+  ⚠️ Exposta no client-side: adequada para uso pessoal/teste,
+  não recomendada para produção pública (ideal seria proxy backend).
 */
+const OWM_API_KEY = '734f9c515b73c39674f4b819050915bd';
+const MG_FALLBACK_NAME = 'Uberlândia, MG (coordenadas padrão)';
+const MG_FALLBACK_LAT = -18.9188;
+const MG_FALLBACK_LON = -48.2767;
+let stationLat = null, stationLon = null;
+
 const WIND_MAX_PLAUSIBLE_KMH = 150;
 let windOutlierCount = 0;
 let windOutlierSamples = [];
@@ -441,11 +387,8 @@ function pad(n){ return n.toString().padStart(2,'0'); }
 function fmt(v,dec=1){ return (v===null||v===undefined||isNaN(v)) ? '—' : v.toFixed(dec); }
 function fmtSigned(v,dec=1){ return (v===null||v===undefined||isNaN(v)) ? '—' : (v>=0?'+':'')+v.toFixed(dec); }
 function startOfToday(){ const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
-function formatDateInmet(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-/* Sanitiza leitura de vento: retorna null se acima do limite plausível,
-   registrando o outlier para exibição transparente ao usuário. */
 function sanitizeWind(raw, timeRef){
   if(raw === null) return null;
   if(raw > WIND_MAX_PLAUSIBLE_KMH){
@@ -476,6 +419,7 @@ async function loadMetadata(){
   const name = info.name ? info.name.trim() : null;
   const lat = toNum(info.latitude), lon = toNum(info.longitude), elev = toNum(info.elevation);
   const hasCoords = lat!==null && lon!==null && !(lat===0 && lon===0);
+  if(hasCoords){ stationLat = lat; stationLon = lon; }
   let html = '';
   if(name) html += `<strong>${name}</strong>`;
   if(hasCoords){
@@ -497,9 +441,6 @@ async function fetchChannel(){
   return data.feeds;
 }
 
-/* ============================================================
-   CÁLCULO DO PONTO DE ORVALHO — FÓRMULA DE MAGNUS-TETENS
-   ============================================================ */
 function calcDewPoint(tempC, rh){
   if(tempC===null || rh===null || rh<=0 || rh>100) return null;
   const a = 17.27, b = 237.7;
@@ -522,11 +463,7 @@ async function loadDashboard(){
       const time = new Date(f.created_at);
       const windRaw = toNum(f.field4);
       const wind = sanitizeWind(windRaw, time);
-      return {
-        time,
-        temp: toNum(f.field1), hum: toNum(f.field2), pres: toNum(f.field3),
-        wind, windRaw, co: toNum(f.field7)
-      };
+      return { time, temp: toNum(f.field1), hum: toNum(f.field2), pres: toNum(f.field3), wind, windRaw, co: toNum(f.field7) };
     });
     lastParsedFeeds = fc;
     const last = fc[fc.length-1];
@@ -562,7 +499,6 @@ async function loadDashboard(){
       document.getElementById('presBar').style.width = Math.max(4,Math.min(100,((last.pres-pmin)/((pmax-pmin)||1))*100))+'%';
     }
 
-    // Vento — usa apenas leituras já filtradas (sanitizeWind aplicado na construção de fc)
     const lastWindValid = (() => { for(let i=fc.length-1;i>=0;i--){ if(fc[i].wind!==null) return fc[i]; } return null; })();
     const winds = fc.map(p=>p.wind).filter(v=>v!==null);
     if(winds.length && lastWindValid){
@@ -583,7 +519,7 @@ async function loadDashboard(){
     if(windOutlierCount > 0){
       outlierCard.style.display = 'block';
       const sample = windOutlierSamples.slice(-5).map(o => `${fmt(o.value,1)} km/h às ${o.time.toLocaleTimeString('pt-BR')}`).join('; ');
-      outlierDetail.innerHTML = `${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h (limite físico plausível) foram descartadas do cálculo de velocidade/rajada. Exemplos: ${sample}. Valores mantidos na fonte original, apenas excluídos desta análise.`;
+      outlierDetail.innerHTML = `${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h (limite físico plausível) foram descartadas do cálculo. Exemplos: ${sample}. Valores mantidos na fonte original, apenas excluídos desta análise.`;
     } else {
       outlierCard.style.display = 'none';
     }
@@ -640,7 +576,7 @@ async function loadDashboard(){
       insights.push(`<b>Fato:</b> amplitude térmica do dia ${amp.toFixed(1)}°C (${Math.min(...temps).toFixed(1)} a ${Math.max(...temps).toFixed(1)}), ${temps.length} leituras`);
     }
     if(winds.length) insights.push(`<b>Fato:</b> rajada máxima válida ${Math.max(...winds).toFixed(1)} km/h (field4, após filtro de outliers)`);
-    if(windOutlierCount > 0) insights.push(`<b>Interpretação:</b> ${windOutlierCount} leitura(s) de vento fisicamente implausível(is) (acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h) foram detectadas e excluídas — provável ruído/glitch do sensor, não evento real.`);
+    if(windOutlierCount > 0) insights.push(`<b>Interpretação:</b> ${windOutlierCount} leitura(s) de vento fisicamente implausível(is) foram excluídas — provável ruído/glitch do sensor.`);
     if(movAvg!==null){
       if(coverageH>=8 && movAvg>9) insights.push(`<b>Interpretação:</b> média móvel 8h (${movAvg.toFixed(2)} ppm) acima do padrão final.`);
       else if(coverageH<8) insights.push('Dados de média móvel incompletos (cobertura inferior a 8h).');
@@ -648,7 +584,7 @@ async function loadDashboard(){
     document.getElementById('insightsList').innerHTML = insights.length ? insights.map(i=>`<li>${i}</li>`).join('') : '<li>Sem dados suficientes para insights.</li>';
 
     const limitParts = [`Cobertura dos últimos 8h de CO: ${coverageH!==null ? coverageH.toFixed(1)+'h' : 'indisponível'}.`];
-    if(windOutlierCount > 0) limitParts.push(`${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h foram tratadas como outlier de sensor e excluídas dos cálculos de velocidade/rajada (ver detalhe na seção de Vento).`);
+    if(windOutlierCount > 0) limitParts.push(`${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h foram tratadas como outlier de sensor e excluídas.`);
     document.getElementById('limitsBox').innerHTML = limitParts.join('<br>');
 
     renderForecast(fc);
@@ -660,7 +596,7 @@ async function loadDashboard(){
 }
 
 /* ============================================================
-   ABA PREVISÃO DO TEMPO — HEURÍSTICA POR PONTUAÇÃO DE REGRAS
+   ABA PREVISÃO DO TEMPO
    ============================================================ */
 const FORECAST_WINDOW_HOURS = 6;
 
@@ -673,30 +609,19 @@ function renderForecast(fc){
   const insightsEl = document.getElementById('forecastInsights');
   const limitsEl = document.getElementById('forecastLimits');
 
-  if(!fc || !fc.length){
-    labelEl.textContent = 'Sem dados suficientes';
-    subEl.textContent = 'Aguardando leituras do canal';
-    return;
-  }
+  if(!fc || !fc.length){ labelEl.textContent = 'Sem dados suficientes'; subEl.textContent = 'Aguardando leituras do canal'; return; }
 
-  function lastValid(key){
-    for(let i=fc.length-1;i>=0;i--){ if(fc[i][key]!==null) return fc[i]; }
-    return null;
-  }
-  const lTemp = lastValid('temp');
-  const lHum = lastValid('hum');
-  const lWind = lastValid('wind'); // já filtrado de outliers
-  const lPres = lastValid('pres');
+  function lastValid(key){ for(let i=fc.length-1;i>=0;i--){ if(fc[i][key]!==null) return fc[i]; } return null; }
+  const lTemp = lastValid('temp'), lHum = lastValid('hum'), lWind = lastValid('wind'), lPres = lastValid('pres');
 
   if(!lTemp || !lHum){
     labelEl.textContent = 'Dados insuficientes';
-    subEl.textContent = 'Faltam leituras válidas de temperatura e/ou umidade para calcular a previsão.';
-    limitsEl.innerHTML = 'Não há leituras válidas simultâneas de temperatura e umidade na base recente para calcular o ponto de orvalho e a previsão heurística.';
+    subEl.textContent = 'Faltam leituras válidas de temperatura e/ou umidade.';
+    limitsEl.innerHTML = 'Não há leituras válidas simultâneas de temperatura e umidade na base recente.';
     return;
   }
 
-  const tempNow = lTemp.temp;
-  const humNow = lHum.hum;
+  const tempNow = lTemp.temp, humNow = lHum.hum;
   const windNow = lWind ? lWind.wind : null;
   const presNow = lPres ? lPres.pres : null;
   const dewNow = calcDewPoint(tempNow, humNow);
@@ -709,9 +634,9 @@ function renderForecast(fc){
   document.getElementById('fDewNow').textContent = dewNow!==null ? fmt(dewNow,1)+'°C' : '—';
   document.getElementById('fDewDepr').textContent = dewDepression!==null ? fmt(dewDepression,1)+'°C' : '—';
   document.getElementById('fWindNow').textContent = windNow!==null ? fmt(windNow,1) : '—';
-  document.getElementById('fWindTime').textContent = lWind ? 'Leitura em ' + lWind.time.toLocaleTimeString('pt-BR') : 'Sem leitura válida de vento disponível';
+  document.getElementById('fWindTime').textContent = lWind ? 'Leitura em ' + lWind.time.toLocaleTimeString('pt-BR') : 'Sem leitura válida de vento';
   document.getElementById('fPresNow').textContent = presNow!==null ? fmt(presNow,1)+' hPa' : '—';
-  document.getElementById('fPresTime').textContent = lPres ? 'Leitura em ' + lPres.time.toLocaleTimeString('pt-BR') : 'Sem leitura de pressão disponível';
+  document.getElementById('fPresTime').textContent = lPres ? 'Leitura em ' + lPres.time.toLocaleTimeString('pt-BR') : 'Sem leitura de pressão';
 
   const now = lTemp.time;
   const windowStart = new Date(now.getTime() - FORECAST_WINDOW_HOURS*60*60*1000);
@@ -728,15 +653,11 @@ function renderForecast(fc){
 
   let fDew = 0;
   if(dewDepression !== null) fDew = Math.max(0, Math.min(100, 100 - (dewDepression/15)*100));
-
   const fHum = Math.max(0, Math.min(100, ((humNow-40)/60)*100));
-
   let fTrendHum = 50;
   if(humTrend !== null) fTrendHum = Math.max(0, Math.min(100, ((humTrend+10)/20)*100));
-
   let fPresDrop = 0;
   if(presTrend !== null) fPresDrop = Math.max(0, Math.min(100, ((-presTrend)/6)*100));
-
   let fWindReduction = 0;
   if(windNow !== null) fWindReduction = Math.max(0, Math.min(100, (windNow/20)*100));
 
@@ -746,26 +667,15 @@ function renderForecast(fc){
   scoreEl.textContent = score.toFixed(0);
 
   let icon, label, sub;
-  if(score >= 70){
-    icon='🌧️'; label='Alta chance de chuva/nebulosidade'; sub='Baixa depressão de orvalho, umidade elevada e/ou queda de pressão apontam forte instabilidade.';
-  } else if(score >= 45){
-    icon='⛅'; label='Possibilidade moderada de nebulosidade'; sub='Sinais mistos — atenção a mudanças na umidade, vento e pressão nas próximas horas.';
-  } else if(score >= 20){
-    icon='🌤️'; label='Tempo provavelmente estável'; sub='Sinais indicam baixa probabilidade de chuva no curto prazo.';
-  } else {
-    icon='☀️'; label='Tempo estável/seco'; sub='Depressão de orvalho alta, pressão estável/alta e/ou vento significativo reduzem a chance de nebulosidade.';
-  }
-  iconEl.textContent = icon;
-  labelEl.textContent = label;
-  subEl.textContent = sub;
+  if(score >= 70){ icon='🌧️'; label='Alta chance de chuva/nebulosidade'; sub='Baixa depressão de orvalho, umidade elevada e/ou queda de pressão apontam forte instabilidade.'; }
+  else if(score >= 45){ icon='⛅'; label='Possibilidade moderada de nebulosidade'; sub='Sinais mistos — atenção a mudanças nas próximas horas.'; }
+  else if(score >= 20){ icon='🌤️'; label='Tempo provavelmente estável'; sub='Sinais indicam baixa probabilidade de chuva no curto prazo.'; }
+  else { icon='☀️'; label='Tempo estável/seco'; sub='Depressão de orvalho alta, pressão estável/alta e/ou vento significativo reduzem a chance de nebulosidade.'; }
+  iconEl.textContent = icon; labelEl.textContent = label; subEl.textContent = sub;
 
   function factorBar(name, value, isNegative){
     const cls = isNegative ? 'neg' : 'pos';
-    return `<div class="factor-row">
-      <div class="factor-name">${name}</div>
-      <div class="factor-track"><div class="factor-fill ${cls}" style="width:${value.toFixed(0)}%;"></div></div>
-      <div class="factor-val">${value.toFixed(0)}</div>
-    </div>`;
+    return `<div class="factor-row"><div class="factor-name">${name}</div><div class="factor-track"><div class="factor-fill ${cls}" style="width:${value.toFixed(0)}%;"></div></div><div class="factor-val">${value.toFixed(0)}</div></div>`;
   }
   factorsEl.innerHTML =
     factorBar('Depressão do orvalho (peso 0.30)', fDew, false) +
@@ -776,23 +686,23 @@ function renderForecast(fc){
 
   const ins = [];
   if(dewDepression!==null){
-    ins.push(`<b>Fato:</b> depressão do ponto de orvalho de ${fmt(dewDepression,1)}°C (temperatura ${fmt(tempNow,1)}°C, ponto de orvalho calculado ${fmt(dewNow,1)}°C).`);
-    if(dewDepression <= 2) ins.push('<b>Interpretação:</b> depressão muito baixa — ar próximo da saturação, favorável a neblina, orvalho ou nebulosidade.');
+    ins.push(`<b>Fato:</b> depressão do ponto de orvalho de ${fmt(dewDepression,1)}°C.`);
+    if(dewDepression <= 2) ins.push('<b>Interpretação:</b> depressão muito baixa — ar próximo da saturação.');
   }
-  if(presTrend!==null && presTrend <= -3) ins.push(`<b>Fato:</b> pressão atmosférica caiu ${fmt(Math.abs(presTrend),1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h — queda associada a maior chance de instabilidade.`);
-  if(presTrend!==null && presTrend >= 3) ins.push(`<b>Fato:</b> pressão atmosférica subiu ${fmt(presTrend,1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h — alta associada a tempo mais estável.`);
-  if(humTrend!==null && humTrend > 5) ins.push(`<b>Fato:</b> umidade subiu ${fmtSigned(humTrend,0)} p.p. na janela de ${FORECAST_WINDOW_HOURS}h — tendência de aumento de umidade.`);
-  if(windNow!==null && windNow > 10) ins.push(`<b>Fato:</b> vento (filtrado) de ${fmt(windNow,1)} km/h — intensidade que tende a dispersar nebulosidade e reduzir o score.`);
+  if(presTrend!==null && presTrend <= -3) ins.push(`<b>Fato:</b> pressão caiu ${fmt(Math.abs(presTrend),1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h.`);
+  if(presTrend!==null && presTrend >= 3) ins.push(`<b>Fato:</b> pressão subiu ${fmt(presTrend,1)} hPa na janela de ${FORECAST_WINDOW_HOURS}h.`);
+  if(humTrend!==null && humTrend > 5) ins.push(`<b>Fato:</b> umidade subiu ${fmtSigned(humTrend,0)} p.p. na janela.`);
+  if(windNow!==null && windNow > 10) ins.push(`<b>Fato:</b> vento (filtrado) de ${fmt(windNow,1)} km/h — tende a dispersar nebulosidade.`);
   insightsEl.innerHTML = ins.length ? ins.map(i=>`<li>${i}</li>`).join('') : '<li>Sinais atuais não indicam padrão relevante para destacar.</li>';
 
   const limitMsgs = [
-    'O ponto de orvalho não é medido diretamente pelo sensor — é calculado a partir de temperatura e umidade pela fórmula de Magnus-Tetens (a=17.27, b=237.7°C).',
-    'A leitura de pressão (field3) e sua tendência são usadas como sinal qualitativo clássico (queda favorece instabilidade, alta favorece estabilidade), não como medição direta de precipitação.',
-    'A leitura de vento passa por um filtro de sanidade física (limite de ' + WIND_MAX_PLAUSIBLE_KMH + ' km/h): valores acima disso são tratados como outlier de sensor e excluídos, nunca zerados ou estimados.',
-    'Este modelo é heurístico (pontuação por regras simples), não um modelo numérico de previsão do tempo — não considera frentes atmosféricas, radar ou satélite.',
-    'Os pesos (0.30 / 0.25 / 0.10 / 0.20 / 0.25) são fixos e simplificados; não foram calibrados estatisticamente com dados históricos de chuva real.'
+    'O ponto de orvalho é calculado (Magnus-Tetens), não medido diretamente.',
+    'A pressão e sua tendência são usadas como sinal qualitativo, não medição direta de precipitação.',
+    'A leitura de vento passa por filtro de sanidade física (limite de ' + WIND_MAX_PLAUSIBLE_KMH + ' km/h).',
+    'Modelo heurístico simplificado, não substitui previsão numérica oficial.',
+    'Pesos fixos, não calibrados estatisticamente.'
   ];
-  if(windOutlierCount > 0) limitMsgs.push(`No momento, ${windOutlierCount} leitura(s) de vento foram descartadas como outlier na base geral — ver detalhe na aba Tempo Real.`);
+  if(windOutlierCount > 0) limitMsgs.push(`${windOutlierCount} leitura(s) de vento foram descartadas como outlier na base geral.`);
   limitsEl.innerHTML = limitMsgs.map(m=>`• ${m}`).join('<br>');
 }
 
@@ -813,7 +723,7 @@ document.querySelectorAll('.toolbar .btn').forEach(btn=>{
 });
 
 /* ============================================================
-   HISTÓRICO MENSAL — 12 MESES FIXOS
+   HISTÓRICO MENSAL
    ============================================================ */
 const SAFE_WINDOW_DAYS = 2;
 const MAX_RESULTS_PER_CALL = 8000;
@@ -821,20 +731,14 @@ const REQUEST_DELAY_MS = 400;
 const MAX_RETRIES = 3;
 const RETRY_BACKOFF_MS = 800;
 
-function formatDateForApi(d){
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}%20${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
+function formatDateForApi(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}%20${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
 async function fetchWindowWithRetry(start, end){
   let lastError = null;
   for(let attempt=1; attempt<=MAX_RETRIES; attempt++){
     try{
       const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&start=${formatDateForApi(start)}&end=${formatDateForApi(end)}&results=${MAX_RESULTS_PER_CALL}`;
       const res = await fetch(url);
-      if(!res.ok){
-        lastError = new Error('HTTP '+res.status);
-        if(res.status===429 || res.status>=500){ await sleep(RETRY_BACKOFF_MS*attempt); continue; }
-        throw lastError;
-      }
+      if(!res.ok){ lastError = new Error('HTTP '+res.status); if(res.status===429 || res.status>=500){ await sleep(RETRY_BACKOFF_MS*attempt); continue; } throw lastError; }
       const data = await res.json();
       if(!Array.isArray(data.feeds)){ lastError=new Error('Resposta inválida'); await sleep(RETRY_BACKOFF_MS*attempt); continue; }
       return { feeds: data.feeds, success: true };
@@ -854,12 +758,8 @@ async function fetchMonthAggregated(monthStart, monthEnd, onSubProgress){
   let allTemps = [], failedWindows = [];
   for(const w of subWindows){
     const result = await fetchWindowWithRetry(w.start, w.end);
-    if(!result.success){
-      failedWindows.push({ start:w.start.toLocaleDateString('pt-BR'), end:w.end.toLocaleDateString('pt-BR'), error:result.error });
-    } else {
-      const temps = result.feeds.map(f => toNum(f.field1)).filter(v => v !== null);
-      allTemps = allTemps.concat(temps);
-    }
+    if(!result.success){ failedWindows.push({ start:w.start.toLocaleDateString('pt-BR'), end:w.end.toLocaleDateString('pt-BR'), error:result.error }); }
+    else { const temps = result.feeds.map(f => toNum(f.field1)).filter(v => v !== null); allTemps = allTemps.concat(temps); }
     if(onSubProgress) onSubProgress();
     await sleep(REQUEST_DELAY_MS);
   }
@@ -890,10 +790,7 @@ async function loadMonthlyHistory(){
   const limitsBox = document.getElementById('monthlyLimits');
   const reloadBtn = document.getElementById('btnReloadMonthly');
 
-  loadingBox.style.display = 'block';
-  chartWrap.style.display = 'none';
-  table.style.display = 'none';
-  reloadBtn.style.display = 'none';
+  loadingBox.style.display = 'block'; chartWrap.style.display = 'none'; table.style.display = 'none'; reloadBtn.style.display = 'none';
 
   const months = buildLast12MonthsSkeleton();
   const totalSubWindows = months.reduce((sum,m)=>{
@@ -901,30 +798,19 @@ async function loadMonthlyHistory(){
     return sum + Math.max(1, Math.ceil(days / SAFE_WINDOW_DAYS));
   },0);
   let doneSubWindows = 0;
-
-  const results = [];
-  const monthsWithFailures = [];
-  const emptyMonths = [];
+  const results = [], monthsWithFailures = [], emptyMonths = [];
 
   for(let i=0;i<months.length;i++){
     const m = months[i];
     progressStatus.textContent = `Coletando ${m.label} (${i+1}/12)…`;
-    const { temps, failedWindows } = await fetchMonthAggregated(m.start, m.end, ()=>{
-      doneSubWindows++;
-      progressFill.style.width = ((doneSubWindows/totalSubWindows)*100)+'%';
-    });
+    const { temps, failedWindows } = await fetchMonthAggregated(m.start, m.end, ()=>{ doneSubWindows++; progressFill.style.width = ((doneSubWindows/totalSubWindows)*100)+'%'; });
     const hasFailures = failedWindows.length>0;
     if(hasFailures) monthsWithFailures.push({ label:m.label, failedWindows });
-    if(temps.length){
-      results.push({ label:m.label, min:Math.min(...temps), avg:temps.reduce((a,b)=>a+b,0)/temps.length, max:Math.max(...temps), count:temps.length, hasFailures, failedCount:failedWindows.length });
-    } else {
-      results.push({ label:m.label, min:null, avg:null, max:null, count:0, hasFailures, failedCount:failedWindows.length });
-      emptyMonths.push(m.label);
-    }
+    if(temps.length){ results.push({ label:m.label, min:Math.min(...temps), avg:temps.reduce((a,b)=>a+b,0)/temps.length, max:Math.max(...temps), count:temps.length, hasFailures, failedCount:failedWindows.length }); }
+    else { results.push({ label:m.label, min:null, avg:null, max:null, count:0, hasFailures, failedCount:failedWindows.length }); emptyMonths.push(m.label); }
   }
 
   chartSub.textContent = `Últimos 12 meses calendário (${months[0].label} a ${months[11].label}), incluindo meses sem dados, quando aplicável.`;
-
   const allVals = results.flatMap(r=>[r.min,r.avg,r.max]).filter(v=>v!==null);
   const globalMax = allVals.length ? Math.max(...allVals) : 40;
   const globalMin = allVals.length ? Math.min(...allVals) : 0;
@@ -950,65 +836,48 @@ async function loadMonthlyHistory(){
   }).join('');
 
   const limitMsgs = [];
-  limitMsgs.push('O eixo do gráfico sempre exibe os 12 meses calendário mais recentes, mesmo que algum mês não tenha nenhuma leitura válida.');
-  limitMsgs.push('Cada mês foi coletado individualmente via parâmetros start/end da API do ThingSpeak, em sub-janelas de 2 dias, com retry automático em falhas HTTP 429/5xx.');
+  limitMsgs.push('O eixo do gráfico sempre exibe os 12 meses calendário mais recentes, mesmo sem leituras.');
+  limitMsgs.push('Cada mês foi coletado via start/end da API ThingSpeak, sub-janelas de 2 dias, com retry automático.');
   if(monthsWithFailures.length){
-    limitMsgs.push('<strong>Atenção:</strong> meses com sub-janelas que falharam mesmo após retry (excluídas do cálculo, nunca tratadas como zero):');
+    limitMsgs.push('<strong>Atenção:</strong> meses com sub-janelas que falharam mesmo após retry:');
     monthsWithFailures.forEach(m=>{ limitMsgs.push(`&nbsp;&nbsp;— ${m.label}: ${m.failedWindows.length} janela(s) com falha.`); });
   }
   if(emptyMonths.length) limitMsgs.push(`Meses sem nenhum dado válido de temperatura: ${emptyMonths.join(', ')}.`);
-  limitMsgs.push('Valores ausentes/inválidos no field1 são descartados antes do cálculo — nunca tratados como 0.');
+  limitMsgs.push('Valores ausentes/inválidos são descartados — nunca tratados como 0.');
   limitsBox.innerHTML = limitMsgs.map(m=>`• ${m}`).join('<br>');
 
-  loadingBox.style.display = 'none';
-  chartWrap.style.display = 'block';
-  table.style.display = 'table';
-  reloadBtn.style.display = 'inline-block';
+  loadingBox.style.display = 'none'; chartWrap.style.display = 'block'; table.style.display = 'table'; reloadBtn.style.display = 'inline-block';
 }
-document.getElementById('btnReloadMonthly').addEventListener('click', ()=>{
-  monthlyLoaded = false;
-  loadMonthlyHistory();
-});
+document.getElementById('btnReloadMonthly').addEventListener('click', ()=>{ monthlyLoaded = false; loadMonthlyHistory(); });
 
 /* ============================================================
-   COMPARAÇÃO REGIONAL (MG)
+   COMPARAÇÃO REGIONAL — OPENWEATHERMAP
    ============================================================ */
-async function tryFetchInmet(){
-  const now = new Date();
-  const start = new Date(now.getTime() - 24*60*60*1000);
-  const url = `https://apitempo.inmet.gov.br/estacao/${formatDateInmet(start)}/${formatDateInmet(now)}/${INMET_STATION_CODE}`;
+async function tryFetchOpenWeather(){
+  const hasStationCoords = stationLat !== null && stationLon !== null;
+  const lat = hasStationCoords ? stationLat : MG_FALLBACK_LAT;
+  const lon = hasStationCoords ? stationLon : MG_FALLBACK_LON;
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=pt_br`;
   const res = await fetch(url);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
+  if(!res.ok){
+    let msg = 'HTTP ' + res.status;
+    if(res.status === 401) msg = 'Chave de API inválida ou não ativada ainda (chaves novas da OpenWeatherMap podem levar até 2h para ativar)';
+    throw new Error(msg);
+  }
   const data = await res.json();
-  if(!Array.isArray(data) || data.length === 0) throw new Error('Resposta vazia do INMET');
-  const parsed = data.map(r=>{
-    const dateStr = r.DT_MEDICAO;
-    const hourStr = String(r.HR_MEDICAO || '').padStart(4,'0');
-    if(!dateStr) return null;
-    const utcDate = new Date(`${dateStr}T${hourStr.slice(0,2)}:${hourStr.slice(2,4)}:00Z`);
-    if(isNaN(utcDate.getTime())) return null;
-    return { timeUTC: utcDate, temp: toNum(r.TEM_INS), hum: toNum(r.UMD_INS), pres: toNum(r.PRE_INS), wind: toNum(r.VEN_VEL) };
-  }).filter(p=>p!==null).sort((a,b)=>a.timeUTC-b.timeUTC);
-  if(!parsed.length) throw new Error('Sem registros interpretáveis');
-  return { source: 'INMET (A507 — Uberlândia-MG)', records: parsed };
-}
-async function tryFetchOpenMeteo(){
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${MG_FALLBACK_LAT}&longitude=${MG_FALLBACK_LON}` +
-              `&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m&timezone=America%2FSao_Paulo&past_days=1`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const data = await res.json();
-  if(!data.hourly || !data.hourly.time || !data.hourly.time.length) throw new Error('Resposta vazia do Open-Meteo');
-  const h = data.hourly;
-  const records = h.time.map((t,i)=>({
-    timeUTC: new Date(t), temp: toNum(h.temperature_2m?.[i]), hum: toNum(h.relative_humidity_2m?.[i]),
-    pres: toNum(h.pressure_msl?.[i]), wind: toNum(h.wind_speed_10m?.[i])
-  }));
-  return { source: MG_FALLBACK_NAME, records };
-}
-function lastValidFrom(records, key){
-  for(let i = records.length - 1; i >= 0; i--){ if(records[i][key] !== null) return records[i]; }
-  return null;
+  if(!data || !data.main) throw new Error('Resposta sem dados meteorológicos');
+  const timeUTC = new Date(data.dt * 1000);
+  return {
+    source: `OpenWeatherMap${hasStationCoords ? ' (coordenadas da estação)' : ` (${MG_FALLBACK_NAME})`} — ${data.name || 'local não identificado'}`,
+    usedStationCoords: hasStationCoords,
+    record: {
+      timeUTC,
+      temp: toNum(data.main.temp),
+      hum: toNum(data.main.humidity),
+      pres: toNum(data.main.pressure),
+      wind: toNum(data.wind ? data.wind.speed : null) // m/s
+    }
+  };
 }
 function buildCompareRow(label, localVal, localTime, refVal, refTime, unit, dec){
   const diff = (localVal !== null && refVal !== null) ? (localVal - refVal) : null;
@@ -1031,69 +900,56 @@ async function loadInmetComparison(){
   const insightsEl = document.getElementById('inmetInsights');
   const limitsEl = document.getElementById('inmetLimits');
 
-  statusEl.style.display = 'block';
-  contentEl.style.display = 'none';
-  tableEl.style.display = 'none';
+  statusEl.style.display = 'block'; contentEl.style.display = 'none'; tableEl.style.display = 'none';
+  statusEl.textContent = 'Consultando API OpenWeatherMap (Current Weather Data)…';
 
   let result = null;
-  let usedFallback = false;
-
   try{
-    statusEl.textContent = 'Tentando obter dados da API do INMET (estação A507 — Uberlândia-MG)…';
-    result = await tryFetchInmet();
-    sourceLabelEl.innerHTML = `✅ Fonte utilizada: <strong>${result.source}</strong> (fonte primária, obtida com sucesso).`;
-  }catch(errInmet){
-    usedFallback = true;
-    statusEl.textContent = `API do INMET indisponível (${errInmet.message}). Tentando fonte alternativa (Open-Meteo — Belo Horizonte, MG)…`;
-    try{
-      result = await tryFetchOpenMeteo();
-      sourceLabelEl.innerHTML = `⚠️ Fonte primária (INMET A507) indisponível (motivo: ${errInmet.message}). Fonte alternativa utilizada com sucesso: <strong>${result.source}</strong>.`;
-    }catch(errFallback){
-      sourceLabelEl.innerHTML = `⚠️ Fonte primária (INMET A507) indisponível: ${errInmet.message}.`;
-      statusEl.innerHTML = `⚠️ Fonte alternativa (Open-Meteo) também falhou: ${errFallback.message}.`;
-      limitsEl.innerHTML = 'Ambas as fontes de dados externos falharam no momento da consulta. Nenhum valor foi estimado ou simulado.';
-      return;
-    }
+    result = await tryFetchOpenWeather();
+    sourceLabelEl.innerHTML = `✅ Fonte utilizada: <strong>${result.source}</strong>.`;
+  }catch(err){
+    sourceLabelEl.innerHTML = `⚠️ Falha ao consultar a OpenWeatherMap: ${err.message}.`;
+    statusEl.innerHTML = `⚠️ Não foi possível obter dados de comparação neste momento.`;
+    limitsEl.innerHTML = 'A API da OpenWeatherMap falhou ou retornou erro. Nenhum valor foi estimado ou simulado.';
+    return;
   }
 
   if(!lastParsedFeeds.length){
     statusEl.textContent = '⚠️ Dados do sensor local ainda não carregados. Abra a aba "Tempo Real" primeiro.';
     return;
   }
-  const refTemp = lastValidFrom(result.records, 'temp');
-  const refHum = lastValidFrom(result.records, 'hum');
-  const refPres = lastValidFrom(result.records, 'pres');
-  const refWind = lastValidFrom(result.records, 'wind');
+
   function localLastValid(key){ for(let i=lastParsedFeeds.length-1;i>=0;i--){ if(lastParsedFeeds[i][key]!==null) return lastParsedFeeds[i]; } return null; }
   const localTemp = localLastValid('temp');
   const localHum = localLastValid('hum');
   const localPres = localLastValid('pres');
-  const localWind = localLastValid('wind'); // já sanitizado (sem outliers)
+  const localWindKmh = localLastValid('wind'); // já sanitizado, em km/h
+  const localWindMs = localWindKmh ? { ...localWindKmh, wind: localWindKmh.wind / 3.6 } : null; // converte para m/s p/ comparar com OWM
+
+  const ref = result.record;
 
   statusEl.style.display = 'none';
   contentEl.style.display = 'block';
-  contentEl.innerHTML = `<p><strong>Fonte de referência:</strong> ${result.source} — ${result.records.length} leituras retornadas.</p>`;
+  contentEl.innerHTML = `<p><strong>Fonte de referência:</strong> ${result.source} — leitura pontual (não histórica), obtida no momento da consulta (${ref.timeUTC.toLocaleString('pt-BR')}).</p>`;
 
   tbody.innerHTML =
-    buildCompareRow('Temperatura', localTemp?.temp ?? null, localTemp?.time ?? null, refTemp?.temp ?? null, refTemp?.timeUTC ?? null, '°C', 1) +
-    buildCompareRow('Umidade', localHum?.hum ?? null, localHum?.time ?? null, refHum?.hum ?? null, refHum?.timeUTC ?? null, '%', 0) +
-    buildCompareRow('Pressão', localPres?.pres ?? null, localPres?.time ?? null, refPres?.pres ?? null, refPres?.timeUTC ?? null, 'hPa', 1) +
-    buildCompareRow('Vento', localWind?.wind ?? null, localWind?.time ?? null, refWind?.wind ?? null, refWind?.timeUTC ?? null, 'm/s', 1);
+    buildCompareRow('Temperatura', localTemp?.temp ?? null, localTemp?.time ?? null, ref.temp, ref.timeUTC, '°C', 1) +
+    buildCompareRow('Umidade', localHum?.hum ?? null, localHum?.time ?? null, ref.hum, ref.timeUTC, '%', 0) +
+    buildCompareRow('Pressão', localPres?.pres ?? null, localPres?.time ?? null, ref.pres, ref.timeUTC, 'hPa', 1) +
+    buildCompareRow('Vento', localWindMs?.wind ?? null, localWindMs?.time ?? null, ref.wind, ref.timeUTC, 'm/s', 1);
   tableEl.style.display = 'table';
 
   const insights = [];
-  if(localTemp && refTemp && refTemp.temp!==null){
-    const diffT = localTemp.temp - refTemp.temp;
-    insights.push(`<strong>Fato:</strong> diferença de temperatura entre sensor local e ${result.source} é de ${fmtSigned(diffT,1)}°C.`);
-  }
-  if(localHum && refHum && refHum.hum!==null) insights.push(`<strong>Fato:</strong> diferença de umidade é de ${fmtSigned(localHum.hum-refHum.hum,0)} p.p.`);
-  if(localPres && refPres && refPres.pres!==null) insights.push(`<strong>Fato:</strong> diferença de pressão é de ${fmtSigned(localPres.pres-refPres.pres,1)} hPa.`);
+  if(localTemp && ref.temp!==null) insights.push(`<strong>Fato:</strong> diferença de temperatura entre sensor local e OpenWeatherMap é de ${fmtSigned(localTemp.temp-ref.temp,1)}°C.`);
+  if(localHum && ref.hum!==null) insights.push(`<strong>Fato:</strong> diferença de umidade é de ${fmtSigned(localHum.hum-ref.hum,0)} p.p.`);
+  if(localPres && ref.pres!==null) insights.push(`<strong>Fato:</strong> diferença de pressão é de ${fmtSigned(localPres.pres-ref.pres,1)} hPa.`);
   insightsEl.innerHTML = insights.length ? insights.map(i=>`<li>${i}</li>`).join('') : '<li>Dados insuficientes para comparação.</li>';
 
   const limitMsgs = [
-    usedFallback ? `A comparação usa a estação alternativa <strong>${result.source}</strong>, pois a API do INMET não respondeu (provável bloqueio de CORS).` : 'A comparação usa a API oficial do INMET (estação A507, Uberlândia-MG).',
-    'Os horários de coleta não são sincronizados entre as fontes.',
-    'O vento do sensor local exibido aqui já passou pelo filtro de outliers (limite de ' + WIND_MAX_PLAUSIBLE_KMH + ' km/h) aplicado na aba Tempo Real.',
+    result.usedStationCoords ? 'A comparação usa as coordenadas da própria estação (metadados do canal ThingSpeak).' : `A estação não tem coordenadas cadastradas — foi usado o fallback de ${MG_FALLBACK_NAME}.`,
+    'A OpenWeatherMap (plano Current Weather Data) retorna uma leitura pontual em tempo (quase) real, não uma série histórica — os horários entre sensor local e referência não são sincronizados.',
+    'O vento do sensor local foi convertido de km/h para m/s apenas para permitir comparação direta com a unidade padrão da OpenWeatherMap.',
+    'A chave de API está exposta no código-fonte do cliente (uso recomendado apenas para teste/uso pessoal).',
     'Nenhum valor foi estimado ou simulado.'
   ];
   limitsEl.innerHTML = limitMsgs.map(m => `• ${m}`).join('<br>');
