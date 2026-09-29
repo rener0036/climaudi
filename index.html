@@ -138,9 +138,9 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 <div class="toolbar">
 <div class="group">
 <span class="group-label">Atualização:</span>
-<button class="btn" data-interval="30000" id="btn30s">30s</button>
+<button class="btn active" data-interval="30000" id="btn30s">30s</button>
 <button class="btn" data-interval="60000" id="btn1m">1min</button>
-<button class="btn active" data-interval="auto" id="btnAuto">Auto</button>
+<button class="btn" data-interval="auto" id="btnAuto">Auto</button>
 </div>
 </div>
 <div id="loadError"></div>
@@ -188,13 +188,17 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 </section>
 
 <section>
-<h2>CO (field7, média móvel 8h)</h2>
+<h2>CO (field7, média móvel 8h — Portaria CONAMA 506/2024)</h2>
 <div class="grid cols-3">
 <div class="card"><div class="label">Atual</div><div class="value" id="coNow">—<small>ppm</small></div><div class="foot" id="coNowTime">—</div></div>
 <div class="card" id="coCardAvg"><div class="label">Média 8h</div><div class="value" id="coMovAvg">—<small>ppm</small></div><div class="foot" id="coStatus">—</div></div>
 <div class="card"><div class="label">Padrão final</div><div class="value">9<small>ppm</small></div></div>
 </div>
 <div class="co-gauge"><div class="track" id="coGaugeTrack"><div class="marker" id="coGaugeMarker" style="left:0%;"></div></div></div>
+<div class="card" style="margin-top:14px;">
+  <div class="label">Diagnóstico da janela de 8h (auditoria)</div>
+  <div class="limits" id="coDiagnostics">—</div>
+</div>
 </section>
 
 <section>
@@ -376,8 +380,16 @@ const WIND_MAX_PLAUSIBLE_KMH = 150;
 let windOutlierCount = 0;
 let windOutlierSamples = [];
 
+/* Tolerância para considerar a janela de 8h de CO como "coberta".
+   Motivo: sensores costumam reportar em intervalos discretos (ex.: a cada
+   alguns minutos), então o primeiro ponto da janela raramente cai
+   exatamente em start8. Uma folga pequena evita falso "incompleto". */
+const CO_WINDOW_HOURS = 8;
+const CO_COVERAGE_TOLERANCE_MIN = 15;
+const CO_LIMIT_PPM = 9;
+
 let lastParsedFeeds = [];
-let currentMode = 'auto';
+let currentMode = '30000';
 let pollTimer = null;
 let inmetLoaded = false;
 let monthlyLoaded = false;
@@ -388,6 +400,7 @@ function fmt(v,dec=1){ return (v===null||v===undefined||isNaN(v)) ? '—' : v.to
 function fmtSigned(v,dec=1){ return (v===null||v===undefined||isNaN(v)) ? '—' : (v>=0?'+':'')+v.toFixed(dec); }
 function startOfToday(){ const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function formatDateForApi(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}%20${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
 
 function sanitizeWind(raw, timeRef){
   if(raw === null) return null;
@@ -439,6 +452,38 @@ async function fetchChannel(){
   const data = await res.json();
   if(!data.feeds || data.feeds.length===0) throw new Error('Sem feeds retornados');
   return data.feeds;
+}
+
+/* ---------- fetch dedicado por intervalo de tempo (com retry) ----------
+   Usado para garantir que a janela de 8h do CO seja sempre coberta,
+   independentemente de quantos feeds de OUTROS campos existam no canal
+   dentro do limite geral de RESULTS=8000. Sem isso, se o canal registrar
+   muitas entradas por hora (de qualquer campo), os 8000 feeds mais
+   recentes podem não recuar 8h inteiras — cortando o CO antes da hora. */
+async function fetchWindowWithRetry(start, end, maxRetries=3, backoffMs=800){
+  let lastError = null;
+  for(let attempt=1; attempt<=maxRetries; attempt++){
+    try{
+      const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&start=${formatDateForApi(start)}&end=${formatDateForApi(end)}&results=8000`;
+      const res = await fetch(url);
+      if(!res.ok){ lastError = new Error('HTTP '+res.status); if(res.status===429 || res.status>=500){ await sleep(backoffMs*attempt); continue; } throw lastError; }
+      const data = await res.json();
+      if(!Array.isArray(data.feeds)){ lastError=new Error('Resposta inválida'); await sleep(backoffMs*attempt); continue; }
+      return { feeds: data.feeds, success: true };
+    }catch(e){ lastError=e; await sleep(backoffMs*attempt); }
+  }
+  return { feeds: [], success:false, error: lastError ? lastError.message : 'Falha desconhecida' };
+}
+
+/* Busca dedicada da janela de 8h de CO, independente do RESULTS geral. */
+async function fetchCOWindow(now){
+  const start8 = new Date(now.getTime() - CO_WINDOW_HOURS*60*60*1000);
+  const result = await fetchWindowWithRetry(start8, now);
+  if(!result.success) return { pts: [], start8, fetchError: result.error };
+  const pts = result.feeds
+    .map(f => ({ time: new Date(f.created_at), co: toNum(f.field7) }))
+    .filter(p => p.co !== null);
+  return { pts, start8, fetchError: null };
 }
 
 function calcDewPoint(tempC, rh){
@@ -524,31 +569,48 @@ async function loadDashboard(){
       outlierCard.style.display = 'none';
     }
 
-    const coPts = fc.filter(p=>p.co!==null);
-    document.getElementById('coPointsCount').textContent = coPts.length;
-    let movAvg=null, coverageH=null;
-    if(coPts.length){
-      const now = last.time;
-      const start8 = new Date(now.getTime() - 8*60*60*1000);
-      const windowPts = coPts.filter(p => p.time>=start8 && p.time<=now);
-      if(windowPts.length){
-        movAvg = windowPts.reduce((a,b)=>a+b.co,0)/windowPts.length;
-        coverageH = (now - windowPts[0].time)/(1000*60*60);
+    /* ---------------- CO: busca dedicada da janela de 8h ---------------- */
+    const coWindowNow = (() => {
+      for(let i=fc.length-1;i>=0;i--){ if(fc[i].co!==null) return fc[i].time; }
+      return last.time;
+    })();
+    const { pts: coWindowPts, start8, fetchError: coFetchError } = await fetchCOWindow(coWindowNow);
+
+    document.getElementById('coPointsCount').textContent = coWindowPts.length;
+
+    let movAvg=null, coverageH=null, maxGapMin=null, isComplete=false;
+    if(coWindowPts.length){
+      movAvg = coWindowPts.reduce((a,b)=>a+b.co,0)/coWindowPts.length;
+      const firstPt = coWindowPts[0];
+      coverageH = (coWindowNow - firstPt.time)/(1000*60*60);
+      // maior lacuna entre leituras consecutivas dentro da janela (diagnóstico de furos internos)
+      maxGapMin = 0;
+      for(let i=1;i<coWindowPts.length;i++){
+        const gap = (coWindowPts[i].time - coWindowPts[i-1].time)/(1000*60);
+        if(gap > maxGapMin) maxGapMin = gap;
       }
-      const lastco = coPts[coPts.length-1];
+      // "completa" = primeiro ponto está a até CO_COVERAGE_TOLERANCE_MIN minutos do início teórico da janela (start8)
+      const gapAtStartMin = (firstPt.time - start8)/(1000*60);
+      isComplete = gapAtStartMin <= CO_COVERAGE_TOLERANCE_MIN;
+
+      const lastco = coWindowPts[coWindowPts.length-1];
       document.getElementById('coNow').innerHTML = fmt(lastco.co,2)+'<small>ppm</small>';
       document.getElementById('coNowTime').textContent = 'Leitura em ' + lastco.time.toLocaleTimeString('pt-BR');
+    } else {
+      document.getElementById('coNow').innerHTML = '—<small>ppm</small>';
+      document.getElementById('coNowTime').textContent = '—';
     }
+
     const coStatus = document.getElementById('coStatus');
     const coCard = document.getElementById('coCardAvg');
     if(movAvg!==null){
       document.getElementById('coMovAvg').innerHTML = fmt(movAvg,2)+'<small>ppm</small>';
       document.getElementById('coGaugeMarker').style.left = Math.min(100,(movAvg/12*100))+'%';
-      if(coverageH!==null && coverageH<8){
-        coStatus.innerHTML = '⚠️ Cobertura das últimas 8h incompleta.';
+      if(!isComplete){
+        coStatus.innerHTML = `⚠️ Cobertura das últimas ${CO_WINDOW_HOURS}h incompleta.`;
         coCard.className = 'card accent-warn';
-      }else if(movAvg>9){
-        coStatus.innerHTML = '<span class="badge bad">Acima do padrão PF (9 ppm)</span>';
+      }else if(movAvg>CO_LIMIT_PPM){
+        coStatus.innerHTML = `<span class="badge bad">Acima do padrão PF (${CO_LIMIT_PPM} ppm)</span>`;
         coCard.className = 'card accent-warn';
       }else{
         coStatus.innerHTML = '<span class="badge ok">Dentro do padrão PF</span>';
@@ -556,7 +618,27 @@ async function loadDashboard(){
       }
     }else{
       document.getElementById('coMovAvg').innerHTML = '—<small>ppm</small>';
-      coStatus.textContent = 'Sem dados suficientes';
+      coStatus.textContent = coFetchError ? `Falha ao buscar janela de 8h: ${coFetchError}` : 'Sem dados suficientes';
+      coCard.className = 'card accent-warn';
+    }
+
+    /* Diagnóstico transparente da janela, para auditoria pelo usuário */
+    const diagBox = document.getElementById('coDiagnostics');
+    if(coFetchError){
+      diagBox.innerHTML = `⚠️ Não foi possível concluir a busca dedicada de 8h para CO: ${coFetchError}. Nenhum valor foi estimado.`;
+    } else if(coWindowPts.length){
+      const firstPt = coWindowPts[0];
+      const gapAtStartMin = (firstPt.time - start8)/(1000*60);
+      diagBox.innerHTML = [
+        `Janela teórica: ${start8.toLocaleString('pt-BR')} até ${coWindowNow.toLocaleString('pt-BR')} (${CO_WINDOW_HOURS}h).`,
+        `Leituras válidas de CO na janela: ${coWindowPts.length}.`,
+        `Primeira leitura da janela: ${firstPt.time.toLocaleString('pt-BR')} (${gapAtStartMin.toFixed(0)} min após o início teórico da janela; tolerância adotada: ${CO_COVERAGE_TOLERANCE_MIN} min).`,
+        `Maior intervalo entre leituras consecutivas dentro da janela: ${maxGapMin!==null ? maxGapMin.toFixed(0)+' min' : '—'}.`,
+        `Cobertura efetiva: ${coverageH!==null ? coverageH.toFixed(1)+'h' : '—'} de ${CO_WINDOW_HOURS}h.`,
+        `Classificação: ${isComplete ? 'cobertura considerada completa (dentro da tolerância)' : 'cobertura considerada incompleta — não há leitura próxima do início da janela'}.`
+      ].join('<br>');
+    } else {
+      diagBox.innerHTML = 'Nenhuma leitura válida de CO encontrada na janela dedicada de 8h.';
     }
 
     const tbody = document.getElementById('tableBody');
@@ -578,12 +660,12 @@ async function loadDashboard(){
     if(winds.length) insights.push(`<b>Fato:</b> rajada máxima válida ${Math.max(...winds).toFixed(1)} km/h (field4, após filtro de outliers)`);
     if(windOutlierCount > 0) insights.push(`<b>Interpretação:</b> ${windOutlierCount} leitura(s) de vento fisicamente implausível(is) foram excluídas — provável ruído/glitch do sensor.`);
     if(movAvg!==null){
-      if(coverageH>=8 && movAvg>9) insights.push(`<b>Interpretação:</b> média móvel 8h (${movAvg.toFixed(2)} ppm) acima do padrão final.`);
-      else if(coverageH<8) insights.push('Dados de média móvel incompletos (cobertura inferior a 8h).');
+      if(isComplete && movAvg>CO_LIMIT_PPM) insights.push(`<b>Interpretação:</b> média móvel ${CO_WINDOW_HOURS}h (${movAvg.toFixed(2)} ppm) acima do padrão final de ${CO_LIMIT_PPM} ppm (Portaria CONAMA 506/2024).`);
+      else if(!isComplete) insights.push(`Dados de média móvel ${CO_WINDOW_HOURS}h com cobertura incompleta — ver diagnóstico da janela de CO.`);
     }
     document.getElementById('insightsList').innerHTML = insights.length ? insights.map(i=>`<li>${i}</li>`).join('') : '<li>Sem dados suficientes para insights.</li>';
 
-    const limitParts = [`Cobertura dos últimos 8h de CO: ${coverageH!==null ? coverageH.toFixed(1)+'h' : 'indisponível'}.`];
+    const limitParts = [`Cobertura efetiva da janela de ${CO_WINDOW_HOURS}h de CO: ${coverageH!==null ? coverageH.toFixed(1)+'h' : 'indisponível'} (ver seção de diagnóstico para detalhes de lacunas).`];
     if(windOutlierCount > 0) limitParts.push(`${windOutlierCount} leitura(s) de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h foram tratadas como outlier de sensor e excluídas.`);
     document.getElementById('limitsBox').innerHTML = limitParts.join('<br>');
 
@@ -709,7 +791,7 @@ function renderForecast(fc){
 /* ---------- polling / toolbar ---------- */
 function schedulePolling(){
   if(pollTimer) clearInterval(pollTimer);
-  const interval = currentMode==='auto' ? 60000 : parseInt(currentMode);
+  const interval = currentMode==='auto' ? 30000 : parseInt(currentMode,10);
   document.getElementById('currentInterval').textContent = (interval/1000)+'s';
   pollTimer = setInterval(loadDashboard, interval);
 }
@@ -731,20 +813,8 @@ const REQUEST_DELAY_MS = 400;
 const MAX_RETRIES = 3;
 const RETRY_BACKOFF_MS = 800;
 
-function formatDateForApi(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}%20${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }
-async function fetchWindowWithRetry(start, end){
-  let lastError = null;
-  for(let attempt=1; attempt<=MAX_RETRIES; attempt++){
-    try{
-      const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&start=${formatDateForApi(start)}&end=${formatDateForApi(end)}&results=${MAX_RESULTS_PER_CALL}`;
-      const res = await fetch(url);
-      if(!res.ok){ lastError = new Error('HTTP '+res.status); if(res.status===429 || res.status>=500){ await sleep(RETRY_BACKOFF_MS*attempt); continue; } throw lastError; }
-      const data = await res.json();
-      if(!Array.isArray(data.feeds)){ lastError=new Error('Resposta inválida'); await sleep(RETRY_BACKOFF_MS*attempt); continue; }
-      return { feeds: data.feeds, success: true };
-    }catch(e){ lastError=e; await sleep(RETRY_BACKOFF_MS*attempt); }
-  }
-  return { feeds: [], success:false, error: lastError ? lastError.message : 'Falha desconhecida' };
+async function fetchWindowWithRetryMonthly(start, end){
+  return fetchWindowWithRetry(start, end, MAX_RETRIES, RETRY_BACKOFF_MS);
 }
 async function fetchMonthAggregated(monthStart, monthEnd, onSubProgress){
   const subWindows = [];
@@ -757,7 +827,7 @@ async function fetchMonthAggregated(monthStart, monthEnd, onSubProgress){
   }
   let allTemps = [], failedWindows = [];
   for(const w of subWindows){
-    const result = await fetchWindowWithRetry(w.start, w.end);
+    const result = await fetchWindowWithRetryMonthly(w.start, w.end);
     if(!result.success){ failedWindows.push({ start:w.start.toLocaleDateString('pt-BR'), end:w.end.toLocaleDateString('pt-BR'), error:result.error }); }
     else { const temps = result.feeds.map(f => toNum(f.field1)).filter(v => v !== null); allTemps = allTemps.concat(temps); }
     if(onSubProgress) onSubProgress();
