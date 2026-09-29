@@ -113,6 +113,14 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 .factor-fill.pos{background:linear-gradient(90deg,#2ecc7155,#2ecc71);}
 .factor-fill.neg{background:linear-gradient(90deg,#ff5c5c55,#ff5c5c);}
 .factor-val{width:60px;text-align:right;font-size:.78rem;color:#fff;font-weight:600;}
+
+/* ---------- Aba Satélite (INPE/CPTEC) ---------- */
+.sat-frame-wrap{position:relative;width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--card2);min-height:520px;}
+.sat-frame-wrap iframe{width:100%;height:560px;border:none;display:block;background:#000;}
+.sat-fallback{padding:24px;text-align:center;color:var(--muted);font-size:.85rem;}
+.sat-fallback a{color:var(--accent);font-weight:700;text-decoration:none;}
+.sat-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.sat-controls .btn.active{background:var(--accent);color:#001827;}
 </style>
 </head>
 <body>
@@ -131,6 +139,7 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
   <button class="tab-btn" data-tab="tabForecast">Previsão do Tempo</button>
   <button class="tab-btn" data-tab="tabMonthly">Histórico Mensal</button>
   <button class="tab-btn" data-tab="tabInmet">Comparação Regional (MG)</button>
+  <button class="tab-btn" data-tab="tabSatellite">Satélite (INPE/CPTEC)</button>
 </div>
 
 <!-- ===================== ABA TEMPO REAL ===================== -->
@@ -353,6 +362,55 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 </section>
 </div>
 
+<!-- ===================== ABA SATÉLITE (INPE/CPTEC) ===================== -->
+<div class="tab-panel" id="tabSatellite">
+<section>
+<h2>Imagens de Satélite — Região do Triângulo Mineiro / Uberlândia-MG</h2>
+<div class="card">
+  <div class="label" style="margin-bottom:10px;">
+    Fonte: DSA/CPTEC-INPE (Divisão de Satélites e Sistemas Ambientais). O CPTEC não oferece
+    um recorte estático oficial exclusivo para Uberlândia/Triângulo Mineiro — o visualizador abaixo
+    é centrado sobre a região sudeste/centro-oeste de Minas Gerais, a área mais próxima disponível.
+  </div>
+  <div class="sat-controls">
+    <button class="btn active" id="satBtnTrueColor" data-product="true_color_ch13_dsa">True Color</button>
+    <button class="btn" id="satBtnIR" data-product="ch13_dsa">Infravermelho (IR)</button>
+  </div>
+  <div class="sat-frame-wrap" id="satFrameWrap">
+    <div class="sat-fallback" id="satFallback">
+      🛰️ Clique em "Carregar imagem de satélite" para exibir o visualizador do CPTEC/INPE.<br><br>
+      <button class="btn" id="satLoadBtn">📡 Carregar imagem de satélite</button>
+    </div>
+  </div>
+  <div class="disclaimer" style="margin-top:14px;">
+    ⚠️ O visualizador é incorporado via <code>iframe</code> diretamente do site do CPTEC/INPE.
+    Ele pode ser bloqueado pelo navegador ou pela política do próprio site (CORS/X-Frame-Options),
+    especialmente em conexões restritas. Caso a imagem não apareça, use o link abaixo para abrir
+    diretamente em uma nova guia.
+  </div>
+  <div style="margin-top:10px;">
+    <a href="https://www.cptec.inpe.br/dsat/?product=true_color_ch13_dsa&legend=true&options=false&zoom=6&x=3620&y=3260" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700;text-decoration:none;font-size:.85rem;">↗ Abrir visualizador do CPTEC/INPE em nova guia</a>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Limitações desta Visualização</h2>
+<div class="card">
+  <div class="limits">
+    • O CPTEC/INPE não disponibiliza um produto de imagem recortado especificamente para Uberlândia
+    ou o Triângulo Mineiro — a visualização cobre uma área regional maior (Minas Gerais/Sudeste).<br>
+    • A imagem exibida é a mais recente disponibilizada pelo satélite geoestacionário (GOES),
+    não uma leitura em tempo real contínua — há defasagem típica de captação/processamento.<br>
+    • O carregamento do iframe depende da disponibilidade do site do CPTEC/INPE e pode falhar
+    por bloqueio de incorporação (X-Frame-Options) fora do controle deste dashboard.<br>
+    • Nenhum dado numérico (temperatura, umidade, pressão, vento ou CO) é derivado desta aba —
+    trata-se apenas de uma referência visual complementar aos dados do sensor local.
+  </div>
+</div>
+</section>
+</div>
+
 </div>
 
 <script>
@@ -393,6 +451,8 @@ let currentMode = '30000';
 let pollTimer = null;
 let inmetLoaded = false;
 let monthlyLoaded = false;
+let satelliteLoaded = false;
+let satelliteProduct = 'true_color_ch13_dsa';
 
 function toNum(v){ if(v==null || v==='') return null; const n=parseFloat(v); return isNaN(n)?null:n; }
 function pad(n){ return n.toString().padStart(2,'0'); }
@@ -583,13 +643,11 @@ async function loadDashboard(){
       movAvg = coWindowPts.reduce((a,b)=>a+b.co,0)/coWindowPts.length;
       const firstPt = coWindowPts[0];
       coverageH = (coWindowNow - firstPt.time)/(1000*60*60);
-      // maior lacuna entre leituras consecutivas dentro da janela (diagnóstico de furos internos)
       maxGapMin = 0;
       for(let i=1;i<coWindowPts.length;i++){
         const gap = (coWindowPts[i].time - coWindowPts[i-1].time)/(1000*60);
         if(gap > maxGapMin) maxGapMin = gap;
       }
-      // "completa" = primeiro ponto está a até CO_COVERAGE_TOLERANCE_MIN minutos do início teórico da janela (start8)
       const gapAtStartMin = (firstPt.time - start8)/(1000*60);
       isComplete = gapAtStartMin <= CO_COVERAGE_TOLERANCE_MIN;
 
@@ -622,7 +680,6 @@ async function loadDashboard(){
       coCard.className = 'card accent-warn';
     }
 
-    /* Diagnóstico transparente da janela, para auditoria pelo usuário */
     const diagBox = document.getElementById('coDiagnostics');
     if(coFetchError){
       diagBox.innerHTML = `⚠️ Não foi possível concluir a busca dedicada de 8h para CO: ${coFetchError}. Nenhum valor foi estimado.`;
@@ -993,8 +1050,8 @@ async function loadInmetComparison(){
   const localTemp = localLastValid('temp');
   const localHum = localLastValid('hum');
   const localPres = localLastValid('pres');
-  const localWindKmh = localLastValid('wind'); // já sanitizado, em km/h
-  const localWindMs = localWindKmh ? { ...localWindKmh, wind: localWindKmh.wind / 3.6 } : null; // converte para m/s p/ comparar com OWM
+  const localWindKmh = localLastValid('wind');
+  const localWindMs = localWindKmh ? { ...localWindKmh, wind: localWindKmh.wind / 3.6 } : null;
 
   const ref = result.record;
 
@@ -1024,6 +1081,34 @@ async function loadInmetComparison(){
   ];
   limitsEl.innerHTML = limitMsgs.map(m => `• ${m}`).join('<br>');
 }
+
+/* ============================================================
+   SATÉLITE (INPE/CPTEC)
+   ============================================================ */
+function buildSatelliteUrl(product){
+  return `https://www.cptec.inpe.br/dsat/?product=${product}&legend=true&options=false&zoom=6&x=3620&y=3260`;
+}
+function renderSatelliteFrame(){
+  const wrap = document.getElementById('satFrameWrap');
+  const url = buildSatelliteUrl(satelliteProduct);
+  wrap.innerHTML = `<iframe src="${url}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Satélite CPTEC/INPE" onerror="this.parentNode.innerHTML='<div class=&quot;sat-fallback&quot;>⚠️ O visualizador foi bloqueado pelo CPTEC/INPE para incorporação (iframe). Use o link abaixo para abrir em nova guia.</div>';"></iframe>`;
+}
+document.getElementById('satLoadBtn').addEventListener('click', ()=>{
+  satelliteLoaded = true;
+  renderSatelliteFrame();
+});
+document.getElementById('satBtnTrueColor').addEventListener('click', ()=>{
+  satelliteProduct = 'true_color_ch13_dsa';
+  document.getElementById('satBtnTrueColor').classList.add('active');
+  document.getElementById('satBtnIR').classList.remove('active');
+  if(satelliteLoaded) renderSatelliteFrame();
+});
+document.getElementById('satBtnIR').addEventListener('click', ()=>{
+  satelliteProduct = 'ch13_dsa';
+  document.getElementById('satBtnIR').classList.add('active');
+  document.getElementById('satBtnTrueColor').classList.remove('active');
+  if(satelliteLoaded) renderSatelliteFrame();
+});
 
 /* ---------- controle de abas ---------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
