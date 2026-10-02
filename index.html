@@ -114,13 +114,15 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
 .factor-fill.neg{background:linear-gradient(90deg,#ff5c5c55,#ff5c5c);}
 .factor-val{width:60px;text-align:right;font-size:.78rem;color:#fff;font-weight:600;}
 
-/* ---------- Aba Satélite (INPE/CPTEC) ---------- */
-.sat-frame-wrap{position:relative;width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--card2);min-height:520px;}
-.sat-frame-wrap iframe{width:100%;height:560px;border:none;display:block;background:#000;}
-.sat-fallback{padding:24px;text-align:center;color:var(--muted);font-size:.85rem;}
-.sat-fallback a{color:var(--accent);font-weight:700;text-decoration:none;}
-.sat-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.sat-controls .btn.active{background:var(--accent);color:#001827;}
+.ext-frame-wrap{position:relative;width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--card2);min-height:520px;}
+.ext-frame-wrap iframe{width:100%;height:560px;border:none;display:block;background:#000;}
+.ext-fallback{padding:24px;text-align:center;color:var(--muted);font-size:.85rem;}
+.ext-fallback a{color:var(--accent);font-weight:700;text-decoration:none;}
+.ext-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.ext-controls .btn.active{background:var(--accent);color:#001827;}
+.severity-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin-top:12px;}
+.severity-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+.sev-observ{background:#3ea6ff;} .sev-atencao{background:#f5e623;} .sev-alerta{background:#f5a623;} .sev-emerg{background:#ff5c5c;}
 </style>
 </head>
 <body>
@@ -140,6 +142,7 @@ tr.row-outlier{background:rgba(245,166,35,.10);}
   <button class="tab-btn" data-tab="tabMonthly">Histórico Mensal</button>
   <button class="tab-btn" data-tab="tabInmet">Comparação Regional (MG)</button>
   <button class="tab-btn" data-tab="tabSatellite">Satélite (INPE/CPTEC)</button>
+  <button class="tab-btn" data-tab="tabCemaden">Alertas CEMADEN</button>
 </div>
 
 <!-- ===================== ABA TEMPO REAL ===================== -->
@@ -334,10 +337,10 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 <!-- ===================== ABA COMPARAÇÃO REGIONAL (MG) ===================== -->
 <div class="tab-panel" id="tabInmet">
 <section>
-<h2>Comparação com OpenWeatherMap (dados regionais)</h2>
+<h2>Comparação com Open-Meteo (dados regionais)</h2>
 <div class="card">
   <div class="label" id="inmetSourceLabel" style="margin-bottom:8px;">
-    Consultando API OpenWeatherMap (Current Weather Data)…
+    Consultando API Open-Meteo (Current Weather)…
   </div>
   <div id="inmetStatus" class="loading-box">Aguardando abertura desta aba…</div>
   <div id="inmetContent" style="display:none;"></div>
@@ -347,7 +350,7 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 <h2>Tabela Comparativa</h2>
 <div class="card" style="overflow-x:auto;">
 <table id="inmetCompareTable" style="display:none;">
-<thead><tr><th>Variável</th><th>Sensor Local</th><th>Horário Local</th><th>OpenWeatherMap</th><th>Horário Ref.</th><th>Diferença</th></tr></thead>
+<thead><tr><th>Variável</th><th>Sensor Local</th><th>Horário Local</th><th>Open-Meteo</th><th>Horário Ref.</th><th>Diferença</th></tr></thead>
 <tbody id="inmetCompareBody"></tbody>
 </table>
 </div>
@@ -372,12 +375,12 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
     um recorte estático oficial exclusivo para Uberlândia/Triângulo Mineiro — o visualizador abaixo
     é centrado sobre a região sudeste/centro-oeste de Minas Gerais, a área mais próxima disponível.
   </div>
-  <div class="sat-controls">
+  <div class="ext-controls">
     <button class="btn active" id="satBtnTrueColor" data-product="true_color_ch13_dsa">True Color</button>
     <button class="btn" id="satBtnIR" data-product="ch13_dsa">Infravermelho (IR)</button>
   </div>
-  <div class="sat-frame-wrap" id="satFrameWrap">
-    <div class="sat-fallback" id="satFallback">
+  <div class="ext-frame-wrap" id="satFrameWrap">
+    <div class="ext-fallback" id="satFallback">
       🛰️ Clique em "Carregar imagem de satélite" para exibir o visualizador do CPTEC/INPE.<br><br>
       <button class="btn" id="satLoadBtn">📡 Carregar imagem de satélite</button>
     </div>
@@ -411,6 +414,68 @@ Score = w1·f(Depressão do orvalho) + w2·f(Umidade Relativa) + w3·f(Tendênci
 </section>
 </div>
 
+<!-- ===================== ABA ALERTAS CEMADEN ===================== -->
+<div class="tab-panel" id="tabCemaden">
+<section>
+<h2>Alertas de Desastres Naturais — CEMADEN</h2>
+<div class="card">
+  <div class="label" style="margin-bottom:10px;">
+    Fonte: Centro Nacional de Monitoramento e Alertas de Desastres Naturais (CEMADEN/MCTI).
+    Esta aba exibe diretamente o Mapa Interativo oficial do CEMADEN, incorporado via <code>iframe</code>.
+    Nenhum alerta é interpretado, filtrado ou reclassificado por este dashboard — a leitura
+    deve ser feita diretamente na visualização oficial abaixo.
+  </div>
+  <div class="ext-controls">
+    <button class="btn active" id="cemadenBtnMapa" data-view="mapa">Mapa Interativo</button>
+    <button class="btn" id="cemadenBtnAlertas" data-view="alertas">Portal de Alertas</button>
+  </div>
+  <div class="ext-frame-wrap" id="cemadenFrameWrap">
+    <div class="ext-fallback" id="cemadenFallback">
+      🚨 Clique em "Carregar alertas do CEMADEN" para exibir o mapa/portal oficial.<br><br>
+      <button class="btn" id="cemadenLoadBtn">📡 Carregar alertas do CEMADEN</button>
+    </div>
+  </div>
+  <div class="severity-legend">
+    <span><i class="severity-dot sev-observ"></i>Observação</span>
+    <span><i class="severity-dot sev-atencao"></i>Atenção</span>
+    <span><i class="severity-dot sev-alerta"></i>Alerta</span>
+    <span><i class="severity-dot sev-emerg"></i>Alerta Máximo/Emergência</span>
+  </div>
+  <div class="disclaimer" style="margin-top:14px;">
+    ⚠️ Classificação de cores conforme padrão usual do CEMADEN para alertas hidrológicos/geológicos —
+    pode variar conforme o tipo de risco (chuva, deslizamento, inundação). Consulte sempre a legenda
+    exibida dentro do próprio mapa oficial, que prevalece sobre esta referência.
+  </div>
+  <div style="margin-top:10px;">
+    <a href="https://mapainterativo.cemaden.gov.br/" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700;text-decoration:none;font-size:.85rem;">↗ Abrir Mapa Interativo do CEMADEN em nova guia</a>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="https://www.gov.br/cemaden/pt-br" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700;text-decoration:none;font-size:.85rem;">↗ Portal institucional do CEMADEN</a>
+  </div>
+</div>
+</section>
+
+<section>
+<h2>Limitações desta Visualização</h2>
+<div class="card">
+  <div class="limits">
+    • Este dashboard <strong>não processa, não extrai e não reclassifica</strong> nenhum alerta do CEMADEN —
+    a aba apenas incorpora a visualização oficial via iframe.<br>
+    • O CEMADEN não disponibiliza, até onde foi possível confirmar nesta integração, um endpoint JSON
+    público com CORS liberado para consumo direto via JavaScript no navegador — por isso não há
+    tabela ou card numérico com alertas "parseados" nesta aba.<br>
+    • O carregamento do iframe depende da disponibilidade do site do CEMADEN e pode falhar por
+    bloqueio de incorporação (X-Frame-Options), lentidão do servidor oficial ou instabilidade pontual —
+    fora do controle deste dashboard.<br>
+    • Em caso de risco real, utilize sempre os canais oficiais do CEMADEN, Defesa Civil municipal/estadual
+    e órgãos de proteção civil locais como fonte primária de decisão — este dashboard é complementar,
+    não substitui comunicação oficial de emergência.<br>
+    • Nenhuma correlação foi estabelecida entre os dados do sensor local (temperatura, umidade, pressão,
+    vento, CO) e os alertas do CEMADEN — são fontes independentes exibidas lado a lado por conveniência.
+  </div>
+</div>
+</section>
+</div>
+
 </div>
 
 <script>
@@ -421,14 +486,6 @@ const CHANNEL_ID = 321770;
 const API_KEY = '0EPAIXIM4UL9LIW9';
 const RESULTS = 8000;
 
-/*
-  OPENWEATHERMAP — fonte de comparação regional
-  ------------------------------------------------------------
-  Chave fornecida pelo usuário para a API "Current Weather Data".
-  ⚠️ Exposta no client-side: adequada para uso pessoal/teste,
-  não recomendada para produção pública (ideal seria proxy backend).
-*/
-const OWM_API_KEY = '734f9c515b73c39674f4b819050915bd';
 const MG_FALLBACK_NAME = 'Uberlândia, MG (coordenadas padrão)';
 const MG_FALLBACK_LAT = -18.9188;
 const MG_FALLBACK_LON = -48.2767;
@@ -438,10 +495,6 @@ const WIND_MAX_PLAUSIBLE_KMH = 150;
 let windOutlierCount = 0;
 let windOutlierSamples = [];
 
-/* Tolerância para considerar a janela de 8h de CO como "coberta".
-   Motivo: sensores costumam reportar em intervalos discretos (ex.: a cada
-   alguns minutos), então o primeiro ponto da janela raramente cai
-   exatamente em start8. Uma folga pequena evita falso "incompleto". */
 const CO_WINDOW_HOURS = 8;
 const CO_COVERAGE_TOLERANCE_MIN = 15;
 const CO_LIMIT_PPM = 9;
@@ -453,6 +506,8 @@ let inmetLoaded = false;
 let monthlyLoaded = false;
 let satelliteLoaded = false;
 let satelliteProduct = 'true_color_ch13_dsa';
+let cemadenLoaded = false;
+let cemadenView = 'mapa';
 
 function toNum(v){ if(v==null || v==='') return null; const n=parseFloat(v); return isNaN(n)?null:n; }
 function pad(n){ return n.toString().padStart(2,'0'); }
@@ -514,12 +569,6 @@ async function fetchChannel(){
   return data.feeds;
 }
 
-/* ---------- fetch dedicado por intervalo de tempo (com retry) ----------
-   Usado para garantir que a janela de 8h do CO seja sempre coberta,
-   independentemente de quantos feeds de OUTROS campos existam no canal
-   dentro do limite geral de RESULTS=8000. Sem isso, se o canal registrar
-   muitas entradas por hora (de qualquer campo), os 8000 feeds mais
-   recentes podem não recuar 8h inteiras — cortando o CO antes da hora. */
 async function fetchWindowWithRetry(start, end, maxRetries=3, backoffMs=800){
   let lastError = null;
   for(let attempt=1; attempt<=maxRetries; attempt++){
@@ -535,7 +584,6 @@ async function fetchWindowWithRetry(start, end, maxRetries=3, backoffMs=800){
   return { feeds: [], success:false, error: lastError ? lastError.message : 'Falha desconhecida' };
 }
 
-/* Busca dedicada da janela de 8h de CO, independente do RESULTS geral. */
 async function fetchCOWindow(now){
   const start8 = new Date(now.getTime() - CO_WINDOW_HOURS*60*60*1000);
   const result = await fetchWindowWithRetry(start8, now);
@@ -629,7 +677,6 @@ async function loadDashboard(){
       outlierCard.style.display = 'none';
     }
 
-    /* ---------------- CO: busca dedicada da janela de 8h ---------------- */
     const coWindowNow = (() => {
       for(let i=fc.length-1;i>=0;i--){ if(fc[i].co!==null) return fc[i].time; }
       return last.time;
@@ -978,31 +1025,28 @@ async function loadMonthlyHistory(){
 document.getElementById('btnReloadMonthly').addEventListener('click', ()=>{ monthlyLoaded = false; loadMonthlyHistory(); });
 
 /* ============================================================
-   COMPARAÇÃO REGIONAL — OPENWEATHERMAP
+   COMPARAÇÃO REGIONAL — OPEN-METEO
    ============================================================ */
-async function tryFetchOpenWeather(){
+async function tryFetchOpenMeteo(){
   const hasStationCoords = stationLat !== null && stationLon !== null;
   const lat = hasStationCoords ? stationLat : MG_FALLBACK_LAT;
   const lon = hasStationCoords ? stationLon : MG_FALLBACK_LON;
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric&lang=pt_br`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m&wind_speed_unit=kmh&timezone=auto`;
   const res = await fetch(url);
-  if(!res.ok){
-    let msg = 'HTTP ' + res.status;
-    if(res.status === 401) msg = 'Chave de API inválida ou não ativada ainda (chaves novas da OpenWeatherMap podem levar até 2h para ativar)';
-    throw new Error(msg);
-  }
+  if(!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
-  if(!data || !data.main) throw new Error('Resposta sem dados meteorológicos');
-  const timeUTC = new Date(data.dt * 1000);
+  if(!data || !data.current) throw new Error('Resposta sem dados meteorológicos (current)');
+  const c = data.current;
+  const timeRef = new Date(c.time);
   return {
-    source: `OpenWeatherMap${hasStationCoords ? ' (coordenadas da estação)' : ` (${MG_FALLBACK_NAME})`} — ${data.name || 'local não identificado'}`,
+    source: `Open-Meteo${hasStationCoords ? ' (coordenadas da estação)' : ` (${MG_FALLBACK_NAME})`} — lat ${lat.toFixed(4)}, lon ${lon.toFixed(4)}`,
     usedStationCoords: hasStationCoords,
     record: {
-      timeUTC,
-      temp: toNum(data.main.temp),
-      hum: toNum(data.main.humidity),
-      pres: toNum(data.main.pressure),
-      wind: toNum(data.wind ? data.wind.speed : null) // m/s
+      timeRef,
+      temp: toNum(c.temperature_2m),
+      hum: toNum(c.relative_humidity_2m),
+      pres: toNum(c.pressure_msl),
+      wind: toNum(c.wind_speed_10m)
     }
   };
 }
@@ -1028,16 +1072,16 @@ async function loadInmetComparison(){
   const limitsEl = document.getElementById('inmetLimits');
 
   statusEl.style.display = 'block'; contentEl.style.display = 'none'; tableEl.style.display = 'none';
-  statusEl.textContent = 'Consultando API OpenWeatherMap (Current Weather Data)…';
+  statusEl.textContent = 'Consultando API Open-Meteo (Current Weather)…';
 
   let result = null;
   try{
-    result = await tryFetchOpenWeather();
+    result = await tryFetchOpenMeteo();
     sourceLabelEl.innerHTML = `✅ Fonte utilizada: <strong>${result.source}</strong>.`;
   }catch(err){
-    sourceLabelEl.innerHTML = `⚠️ Falha ao consultar a OpenWeatherMap: ${err.message}.`;
+    sourceLabelEl.innerHTML = `⚠️ Falha ao consultar a Open-Meteo: ${err.message}.`;
     statusEl.innerHTML = `⚠️ Não foi possível obter dados de comparação neste momento.`;
-    limitsEl.innerHTML = 'A API da OpenWeatherMap falhou ou retornou erro. Nenhum valor foi estimado ou simulado.';
+    limitsEl.innerHTML = 'A API da Open-Meteo falhou ou retornou erro. Nenhum valor foi estimado ou simulado.';
     return;
   }
 
@@ -1050,33 +1094,33 @@ async function loadInmetComparison(){
   const localTemp = localLastValid('temp');
   const localHum = localLastValid('hum');
   const localPres = localLastValid('pres');
-  const localWindKmh = localLastValid('wind');
-  const localWindMs = localWindKmh ? { ...localWindKmh, wind: localWindKmh.wind / 3.6 } : null;
+  const localWind = localLastValid('wind');
 
   const ref = result.record;
 
   statusEl.style.display = 'none';
   contentEl.style.display = 'block';
-  contentEl.innerHTML = `<p><strong>Fonte de referência:</strong> ${result.source} — leitura pontual (não histórica), obtida no momento da consulta (${ref.timeUTC.toLocaleString('pt-BR')}).</p>`;
+  contentEl.innerHTML = `<p><strong>Fonte de referência:</strong> ${result.source} — leitura pontual (não histórica), obtida no momento da consulta (${ref.timeRef.toLocaleString('pt-BR')}).</p>`;
 
   tbody.innerHTML =
-    buildCompareRow('Temperatura', localTemp?.temp ?? null, localTemp?.time ?? null, ref.temp, ref.timeUTC, '°C', 1) +
-    buildCompareRow('Umidade', localHum?.hum ?? null, localHum?.time ?? null, ref.hum, ref.timeUTC, '%', 0) +
-    buildCompareRow('Pressão', localPres?.pres ?? null, localPres?.time ?? null, ref.pres, ref.timeUTC, 'hPa', 1) +
-    buildCompareRow('Vento', localWindMs?.wind ?? null, localWindMs?.time ?? null, ref.wind, ref.timeUTC, 'm/s', 1);
+    buildCompareRow('Temperatura', localTemp?.temp ?? null, localTemp?.time ?? null, ref.temp, ref.timeRef, '°C', 1) +
+    buildCompareRow('Umidade', localHum?.hum ?? null, localHum?.time ?? null, ref.hum, ref.timeRef, '%', 0) +
+    buildCompareRow('Pressão', localPres?.pres ?? null, localPres?.time ?? null, ref.pres, ref.timeRef, 'hPa', 1) +
+    buildCompareRow('Vento', localWind?.wind ?? null, localWind?.time ?? null, ref.wind, ref.timeRef, 'km/h', 1);
   tableEl.style.display = 'table';
 
   const insights = [];
-  if(localTemp && ref.temp!==null) insights.push(`<strong>Fato:</strong> diferença de temperatura entre sensor local e OpenWeatherMap é de ${fmtSigned(localTemp.temp-ref.temp,1)}°C.`);
+  if(localTemp && ref.temp!==null) insights.push(`<strong>Fato:</strong> diferença de temperatura entre sensor local e Open-Meteo é de ${fmtSigned(localTemp.temp-ref.temp,1)}°C.`);
   if(localHum && ref.hum!==null) insights.push(`<strong>Fato:</strong> diferença de umidade é de ${fmtSigned(localHum.hum-ref.hum,0)} p.p.`);
   if(localPres && ref.pres!==null) insights.push(`<strong>Fato:</strong> diferença de pressão é de ${fmtSigned(localPres.pres-ref.pres,1)} hPa.`);
   insightsEl.innerHTML = insights.length ? insights.map(i=>`<li>${i}</li>`).join('') : '<li>Dados insuficientes para comparação.</li>';
 
   const limitMsgs = [
     result.usedStationCoords ? 'A comparação usa as coordenadas da própria estação (metadados do canal ThingSpeak).' : `A estação não tem coordenadas cadastradas — foi usado o fallback de ${MG_FALLBACK_NAME}.`,
-    'A OpenWeatherMap (plano Current Weather Data) retorna uma leitura pontual em tempo (quase) real, não uma série histórica — os horários entre sensor local e referência não são sincronizados.',
-    'O vento do sensor local foi convertido de km/h para m/s apenas para permitir comparação direta com a unidade padrão da OpenWeatherMap.',
-    'A chave de API está exposta no código-fonte do cliente (uso recomendado apenas para teste/uso pessoal).',
+    'A Open-Meteo (endpoint "current") retorna uma leitura pontual mais recente disponível, não uma série histórica — os horários entre sensor local e referência não são sincronizados.',
+    'O vento local (km/h) e o vento da Open-Meteo (wind_speed_unit=kmh) já estão na mesma unidade — não há conversão nesta comparação.',
+    'A Open-Meteo é uma API pública gratuita, sem necessidade de chave de acesso.',
+    'Pressão comparada é a pressão ao nível do mar (pressure_msl) da Open-Meteo — pode diferir de pressão local não corrigida por altitude, se houver diferença de elevação relevante.',
     'Nenhum valor foi estimado ou simulado.'
   ];
   limitsEl.innerHTML = limitMsgs.map(m => `• ${m}`).join('<br>');
@@ -1091,7 +1135,7 @@ function buildSatelliteUrl(product){
 function renderSatelliteFrame(){
   const wrap = document.getElementById('satFrameWrap');
   const url = buildSatelliteUrl(satelliteProduct);
-  wrap.innerHTML = `<iframe src="${url}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Satélite CPTEC/INPE" onerror="this.parentNode.innerHTML='<div class=&quot;sat-fallback&quot;>⚠️ O visualizador foi bloqueado pelo CPTEC/INPE para incorporação (iframe). Use o link abaixo para abrir em nova guia.</div>';"></iframe>`;
+  wrap.innerHTML = `<iframe src="${url}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Satélite CPTEC/INPE" onerror="this.parentNode.innerHTML='<div class=&quot;ext-fallback&quot;>⚠️ O visualizador foi bloqueado pelo CPTEC/INPE para incorporação (iframe). Use o link abaixo para abrir em nova guia.</div>';"></iframe>`;
 }
 document.getElementById('satLoadBtn').addEventListener('click', ()=>{
   satelliteLoaded = true;
@@ -1108,6 +1152,35 @@ document.getElementById('satBtnIR').addEventListener('click', ()=>{
   document.getElementById('satBtnIR').classList.add('active');
   document.getElementById('satBtnTrueColor').classList.remove('active');
   if(satelliteLoaded) renderSatelliteFrame();
+});
+
+/* ============================================================
+   ALERTAS CEMADEN
+   ============================================================ */
+function buildCemadenUrl(view){
+  if(view === 'alertas') return 'https://www.gov.br/cemaden/pt-br';
+  return 'https://mapainterativo.cemaden.gov.br/';
+}
+function renderCemadenFrame(){
+  const wrap = document.getElementById('cemadenFrameWrap');
+  const url = buildCemadenUrl(cemadenView);
+  wrap.innerHTML = `<iframe src="${url}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Alertas CEMADEN" onerror="this.parentNode.innerHTML='<div class=&quot;ext-fallback&quot;>⚠️ O visualizador foi bloqueado pelo CEMADEN para incorporação (iframe). Use os links acima para abrir em nova guia.</div>';"></iframe>`;
+}
+document.getElementById('cemadenLoadBtn').addEventListener('click', ()=>{
+  cemadenLoaded = true;
+  renderCemadenFrame();
+});
+document.getElementById('cemadenBtnMapa').addEventListener('click', ()=>{
+  cemadenView = 'mapa';
+  document.getElementById('cemadenBtnMapa').classList.add('active');
+  document.getElementById('cemadenBtnAlertas').classList.remove('active');
+  if(cemadenLoaded) renderCemadenFrame();
+});
+document.getElementById('cemadenBtnAlertas').addEventListener('click', ()=>{
+  cemadenView = 'alertas';
+  document.getElementById('cemadenBtnAlertas').classList.add('active');
+  document.getElementById('cemadenBtnMapa').classList.remove('active');
+  if(cemadenLoaded) renderCemadenFrame();
 });
 
 /* ---------- controle de abas ---------- */
