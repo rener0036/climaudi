@@ -246,7 +246,12 @@
       const scoreEl = document.getElementById('forecastScoreValue');
       const factorsEl = document.getElementById('forecastFactors');
       
-      if(!fc || !fc.length){ labelEl.textContent = 'Sem dados suficientes'; return; }
+      if(!fc || !fc.length){ 
+        labelEl.textContent = 'Sem dados suficientes'; 
+        const lim = document.getElementById('forecastLimits');
+        if(lim) lim.textContent = 'Aguardando volume de dados meteorológicos para gerar a análise de limitações.';
+        return; 
+      }
       
       // Encontra a última leitura válida de cada métrica (proteção contra dados nulos)
       function lastValid(key){ for(let i=fc.length-1;i>=0;i--){ if(fc[i][key]!==null) return fc[i]; } return null; }
@@ -256,7 +261,12 @@
       const lWind = lastValid('wind');
       const lPres = lastValid('pres');
       
-      if(!lTemp || !lHum){ labelEl.textContent = 'Dados insuficientes (Temperatura/Umidade)'; return; }
+      if(!lTemp || !lHum){ 
+        labelEl.textContent = 'Dados insuficientes (Temperatura/Umidade)'; 
+        const lim = document.getElementById('forecastLimits');
+        if(lim) lim.textContent = 'Faltam dados de Temperatura ou Umidade para gerar o modelo heurístico e exibir as limitações.';
+        return; 
+      }
 
       const tempNow = lTemp.temp;
       const humNow = lHum.hum;
