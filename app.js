@@ -255,20 +255,80 @@
     const dewNow = calcDewPoint(tempNow, humNow);
     const dewDepression = (dewNow!==null) ? (tempNow - dewNow) : null;
 
+    // Elementos principais
     document.getElementById('fTempNow').textContent = fmt(tempNow,1)+'°C';
+    document.getElementById('fTempTime').textContent = lTemp.time.toLocaleTimeString('pt-BR');
     document.getElementById('fHumNow').textContent = fmt(humNow,0)+'%';
+    document.getElementById('fHumTime').textContent = lHum.time.toLocaleTimeString('pt-BR');
     document.getElementById('fDewNow').textContent = dewNow!==null ? fmt(dewNow,1)+'°C' : '—';
     document.getElementById('fDewDepr').textContent = dewDepression!==null ? fmt(dewDepression,1)+'°C' : '—';
 
+    document.getElementById('fPresNow').textContent = presNow!==null ? fmt(presNow,1)+' hPa' : '—';
+    document.getElementById('fPresTime').textContent = lPres ? lPres.time.toLocaleTimeString('pt-BR') : '—';
+    document.getElementById('fWindNow').textContent = windNow!==null ? fmt(windNow,1)+' km/h' : '—';
+    document.getElementById('fWindTime').textContent = lWind ? lWind.time.toLocaleTimeString('pt-BR') : '—';
+
+    // Cálculo das tendências (janela de 3 horas passadas)
+    const nowTime = fc[fc.length-1].time.getTime();
+    const threeHoursMs = 3 * 60 * 60 * 1000;
+    let pastPt = fc[0];
+    for(let i=fc.length-1; i>=0; i--){
+      if(nowTime - fc[i].time.getTime() >= threeHoursMs){
+        pastPt = fc[i];
+        break;
+      }
+    }
+
+    const presTrend = (presNow!==null && pastPt.pres!==null) ? (presNow - pastPt.pres) : 0;
+    const humTrend = (humNow!==null && pastPt.hum!==null) ? (humNow - pastPt.hum) : 0;
+    
+    document.getElementById('fPresTrend').textContent = (presNow!==null && pastPt.pres!==null) ? fmtSigned(presTrend,1)+' hPa / 3h' : '—';
+    document.getElementById('fHumTrend').textContent = (humNow!==null && pastPt.hum!==null) ? fmtSigned(humTrend,1)+'% / 3h' : '—';
+
     // Model Logic
     let fDew = dewDepression !== null ? Math.max(0, Math.min(100, 100 - (dewDepression/15)*100)) : 0;
-    let fHum = Math.max(0, Math.min(100, ((humNow-40)/60)*100));
-    let score = Math.max(0, Math.min(100, (fDew*0.30) + (fHum*0.25)));
+    let fH = Math.max(0, Math.min(100, ((humNow-40)/60)*100));
+    let fHT = Math.max(0, Math.min(100, 50 + humTrend * 2.5)); // Tendência de umidade
+    let fPT = Math.max(0, Math.min(100, 50 - presTrend * 15)); // Queda de pressão aumenta score
+    let fW = windNow !== null ? Math.max(0, Math.min(100, (windNow/40)*100)) : 0; // Penalidade se houver ventos fortes
+
+    // Pesos definidos na fórmula
+    const w1 = 0.35, w2 = 0.25, w3 = 0.15, w4 = 0.15, w5 = 0.10;
+    let scoreRaw = (fDew * w1) + (fH * w2) + (fHT * w3) + (fPT * w4) - (fW * w5);
+    let score = Math.max(0, Math.min(100, scoreRaw));
+
     scoreEl.textContent = score.toFixed(0);
 
-    if(score >= 70){ iconEl.textContent='🌧️'; labelEl.textContent='Alta chance de chuva'; subEl.textContent='Instabilidade forte.'; }
-    else if(score >= 45){ iconEl.textContent='⛅'; labelEl.textContent='Possibilidade de nebulosidade'; subEl.textContent='Sinais mistos.'; }
+    // Renderização dos Fatores
+    function renderFactor(name, val, weight, isNeg=false){
+      const width = val;
+      const colorClass = isNeg ? 'neg' : 'pos';
+      return `
+        <div class="factor-row">
+          <div class="factor-name">${name} <span style="opacity:.5;font-size:0.8em">(${(weight*100).toFixed(0)}%)</span></div>
+          <div class="factor-track"><div class="factor-fill ${colorClass}" style="width:${width}%"></div></div>
+          <div class="factor-val">${val.toFixed(0)}</div>
+        </div>
+      `;
+    }
+
+    factorsEl.innerHTML = 
+      renderFactor('Depressão do Orvalho', fDew, w1) +
+      renderFactor('Umidade Atual', fH, w2) +
+      renderFactor('Tendência Umidade (3h)', fHT, w3) +
+      renderFactor('Queda de Pressão (3h)', fPT, w4) +
+      renderFactor('Penalidade de Vento', fW, w5, true);
+
+    // Conclusões / Labels
+    if(score >= 70){ iconEl.textContent='🌧️'; labelEl.textContent='Alta chance de chuva'; subEl.textContent='Instabilidade forte e favorável.'; }
+    else if(score >= 45){ iconEl.textContent='⛅'; labelEl.textContent='Possibilidade de nebulosidade'; subEl.textContent='Sinais mistos. Potencial de transição de tempo.'; }
     else { iconEl.textContent='☀️'; labelEl.textContent='Tempo estável/seco'; subEl.textContent='Baixa probabilidade de chuva.'; }
+
+    // Insights Adicionais
+    document.getElementById('forecastInsights').innerHTML = `
+      <li><strong>Umidade Relativa:</strong> ${humNow >= 70 ? 'Alta. Favorece a formação de nuvens espessas.' : 'Baixa. Dificulta a sustentação de precipitação.'}</li>
+      <li><strong>Pressão Atmosférica:</strong> ${presTrend < -1.5 ? 'Queda brusca detectada nas últimas horas (sinaliza aproximação de instabilidade).' : (presTrend > 1.5 ? 'Subindo, indicando o avanço de ar mais denso e seco.' : 'Condição estabilizada.')}</li>
+    `;
   }
 
   // --- OTIMIZAÇÃO: Polling baseado na Visibilidade (Aba do Navegador) ---
