@@ -10,8 +10,11 @@
 <div class="wrap">
 
 <header>
-  <div>
-    <h1>🌦️ Estação Meteorológica</h1>
+  <div style="width: 100%;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <h1 style="margin: 0;">🌦️ Estação Meteorológica</h1>
+      <div id="liveClock" style="font-family: 'Courier New', Courier, monospace; font-size: 1.05rem; color: var(--accent); font-weight: bold; background: rgba(0,0,0,0.25); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--border); white-space: nowrap;">--/--/---- --:--:--</div>
+    </div>
     <div class="sub">Análise em tempo real de temperatura, umidade, pressão, vento e qualidade do ar (CO)</div>
     <div class="location" id="stationLocation">📍 Localizando estação…</div>
   </div>
