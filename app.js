@@ -84,8 +84,8 @@
   }
 
   async function fetchChannel(){
-    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=${RESULTS}`;
-    const res = await fetch(url);
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=${RESULTS}&_=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if(!data.feeds || data.feeds.length===0) throw new Error('Sem feeds retornados');
@@ -96,8 +96,8 @@
     let lastError = null;
     for(let attempt=1; attempt<=maxRetries; attempt++){
       try{
-        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&start=${formatDateForApi(start)}&end=${formatDateForApi(end)}&results=8000`;
-        const res = await fetch(url);
+        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&start=${formatDateForApi(start)}&end=${formatDateForApi(end)}&results=8000&_=${Date.now()}`;
+        const res = await fetch(url, { cache: 'no-store' });
         if(!res.ok){ lastError = new Error('HTTP '+res.status); if(res.status===429 || res.status>=500){ await sleep(backoffMs*attempt); continue; } throw lastError; }
         const data = await res.json();
         if(!Array.isArray(data.feeds)){ lastError=new Error('Resposta inválida'); await sleep(backoffMs*attempt); continue; }
@@ -228,6 +228,8 @@
         return `<tr class="${isOutlier?'row-outlier':''}"><td>${p.time.toLocaleTimeString('pt-BR')}</td><td>${fmt(p.temp,1)}</td><td>${fmt(p.hum,0)}</td><td>${fmt(p.pres,1)}</td><td>${windCell}</td><td>${fmt(p.co,2)}</td></tr>`;
       }).join('');
 
+      document.getElementById('limitsBox').innerHTML = `Cobertura e consistência dos dados avaliadas. Leituras de vento acima de ${WIND_MAX_PLAUSIBLE_KMH} km/h são ignoradas como anomalia. O cálculo de CO utiliza uma janela móvel para aderir à Portaria CONAMA 506/2024.`;
+
       renderForecast(fc);
 
     }catch(e){
@@ -253,7 +255,6 @@
         return; 
       }
       
-      // Encontra a última leitura válida de cada métrica (proteção contra dados nulos)
       function lastValid(key){ for(let i=fc.length-1;i>=0;i--){ if(fc[i][key]!==null) return fc[i]; } return null; }
       
       const lTemp = lastValid('temp');
@@ -276,7 +277,6 @@
       const dewNow = calcDewPoint(tempNow, humNow);
       const dewDepression = (dewNow!==null) ? (tempNow - dewNow) : null;
 
-      // Elementos principais
       document.getElementById('fTempNow').textContent = fmt(tempNow,1)+'°C';
       document.getElementById('fTempTime').textContent = lTemp.time.toLocaleTimeString('pt-BR');
       document.getElementById('fHumNow').textContent = fmt(humNow,0)+'%';
@@ -289,7 +289,6 @@
       document.getElementById('fWindNow').textContent = windNow!==null ? fmt(windNow,1)+' km/h' : '—';
       document.getElementById('fWindTime').textContent = lWind ? lWind.time.toLocaleTimeString('pt-BR') : '—';
 
-      // Cálculo das tendências (buscando dado de 3h atrás ignorando nulos)
       const nowTime = fc[fc.length-1].time.getTime();
       const threeHoursMs = 3 * 60 * 60 * 1000;
       
@@ -316,7 +315,6 @@
       document.getElementById('fPresTrend').textContent = presNow!==null ? fmtSigned(presTrend,1)+' hPa / 3h' : '—';
       document.getElementById('fHumTrend').textContent = humNow!==null ? fmtSigned(humTrend,1)+'% / 3h' : '—';
 
-      // Lógica do Modelo
       let fDew = dewDepression !== null ? Math.max(0, Math.min(100, 100 - (dewDepression/15)*100)) : 0;
       let fH = Math.max(0, Math.min(100, ((humNow-40)/60)*100));
       let fHT = Math.max(0, Math.min(100, 50 + humTrend * 2.5));
@@ -329,7 +327,6 @@
 
       scoreEl.textContent = score.toFixed(0);
 
-      // Renderização visual dos fatores
       function renderFactor(name, val, weight, isNeg=false, isMissing=false){
         const width = isMissing ? 0 : val;
         const colorClass = isNeg ? 'neg' : 'pos';
@@ -350,33 +347,50 @@
         renderFactor('Queda de Pressão (3h)', fPT, w4, false, presNow===null) +
         renderFactor('Penalidade de Vento', fW, w5, true, windNow===null);
 
-      // Conclusões
       if(score >= 70){ iconEl.textContent='🌧️'; labelEl.textContent='Alta chance de chuva'; subEl.textContent='Instabilidade forte e favorável.'; }
       else if(score >= 45){ iconEl.textContent='⛅'; labelEl.textContent='Possibilidade de nebulosidade'; subEl.textContent='Sinais mistos. Potencial de transição de tempo.'; }
       else { iconEl.textContent='☀️'; labelEl.textContent='Tempo estável/seco'; subEl.textContent='Baixa probabilidade de chuva.'; }
 
-      // Insights Dinâmicos
       document.getElementById('forecastInsights').innerHTML = `
         <li><strong>Umidade Relativa:</strong> ${humNow >= 70 ? 'Alta. Favorece a formação de nuvens espessas.' : 'Baixa. Dificulta a sustentação de precipitação.'}</li>
         <li><strong>Pressão Atmosférica:</strong> ${presNow === null ? 'Sem leitura de pressão atual no sensor.' : (presTrend < -1.5 ? 'Queda brusca detectada nas últimas horas (sinaliza aproximação de instabilidade).' : (presTrend > 1.5 ? 'Subindo, indicando o avanço de ar mais denso e seco.' : 'Condição estabilizada.'))}</li>
       `;
+
+      let limitsHtml = '<ul class="insight" style="margin:0; padding-left:0; list-style-type:none;">';
+      limitsHtml += '<li style="margin-bottom:6px;">🔹 O modelo heurístico atual baseia-se <strong>exclusivamente em dados locais de superfície</strong> (nível do solo).</li>';
+      limitsHtml += '<li style="margin-bottom:6px;">⚠️ Não substitui a meteorologia oficial, pois não analisa frentes frias, massas de ar em altitude ou dados de radar.</li>';
+      if(presNow === null) {
+        limitsHtml += '<li><span style="color:var(--warn)">⚠️ Pressão atmosférica ausente:</span> A tendência barométrica foi ignorada no cálculo do Score.</li>';
+      }
+      if(windNow === null) {
+        limitsHtml += '<li><span style="color:var(--warn)">⚠️ Velocidade do vento ausente:</span> A penalidade por ventos fortes (dispersão de nuvens) foi ignorada.</li>';
+      }
+      limitsHtml += '</ul>';
+      
+      const limitsEl = document.getElementById('forecastLimits');
+      if (limitsEl) limitsEl.innerHTML = limitsHtml;
+
     } catch (e) {
       console.error("Erro na aba de previsão:", e);
       document.getElementById('forecastMainLabel').textContent = 'Erro ao processar modelo';
       document.getElementById('forecastMainSub').textContent = 'Aguardando próxima atualização de dados...';
+      const limErr = document.getElementById('forecastLimits');
+      if(limErr) limErr.innerHTML = '<span style="color:var(--warn)">⚠️ Ocorreu um erro no cálculo. Aguardando novos dados...</span>';
     }
   }
 
-  // --- OTIMIZAÇÃO: Polling baseado na Visibilidade (Aba do Navegador) ---
   async function loadDashboardLoop() {
     if(isFetching) return;
     if(document.visibilityState !== 'visible') {
-      pollTimer = setTimeout(loadDashboardLoop, 10000); // Checa novamente devagar se a aba está oculta
+      pollTimer = setTimeout(loadDashboardLoop, 10000);
       return;
     }
     isFetching = true;
-    await loadDashboard();
-    isFetching = false;
+    try {
+      await loadDashboard();
+    } finally {
+      isFetching = false;
+    }
     
     const interval = currentMode === 'auto' ? 30000 : parseInt(currentMode, 10);
     pollTimer = setTimeout(loadDashboardLoop, interval);
@@ -401,7 +415,6 @@
     });
   });
 
-  // --- OTIMIZAÇÃO: Requisições do Histórico Mensal em Paralelo ---
   async function fetchMonthAggregated(monthStart, monthEnd, onSubProgress){
     const subWindows = [];
     let cursor = new Date(monthStart);
@@ -413,7 +426,7 @@
     }
     
     let allTemps = [], failedWindows = [];
-    const BATCH_SIZE = 4; // Faz 4 requisições ao mesmo tempo
+    const BATCH_SIZE = 4;
     
     for(let i=0; i < subWindows.length; i += BATCH_SIZE) {
        const batch = subWindows.slice(i, i + BATCH_SIZE);
@@ -432,7 +445,7 @@
               allTemps = allTemps.concat(temps);
           }
        }
-       await sleep(300); // Pausa leve para não bloquear API
+       await sleep(300);
     }
     return { temps: allTemps, failedWindows, totalSubWindows: subWindows.length };
   }
@@ -495,11 +508,12 @@
     document.getElementById('monthlyTable').style.display = 'table';
     document.getElementById('btnReloadMonthly').style.display = 'inline-block';
     document.getElementById('monthlyLoading').style.display = 'none';
+    
+    document.getElementById('monthlyLimits').innerHTML = 'Meses indicados como "Parcial" sofreram interrupções de conectividade ou falha do sensor, o que pode enviesar as médias. O gráfico exclui dias em que não houve nenhuma gravação no servidor.';
   }
 
   document.getElementById('btnReloadMonthly').addEventListener('click', ()=>{ monthlyLoaded = false; loadMonthlyHistory(); });
 
-  // --- INMET / Open-Meteo ---
   async function tryFetchOpenMeteo(){
     const hasStationCoords = stationLat !== null && stationLon !== null;
     const lat = hasStationCoords ? stationLat : MG_FALLBACK_LAT;
@@ -551,12 +565,13 @@
         buildCompareRow('Vento', lWind?.wind, lWind?.time, ref.wind, ref.timeRef, 'km/h', 1);
         
       tableEl.style.display = 'table';
+      
+      document.getElementById('inmetLimits').innerHTML = 'A API Open-Meteo fornece dados interpolados de uma malha regional (~10 km de resolução). Discrepâncias para a estação local são normais e decorrem de microclimas e diferenças de elevação.';
     } catch(err) {
       statusEl.innerHTML = `⚠️ Falha ao consultar a Open-Meteo: ${err.message}.`;
     }
   }
 
-  // --- Satélite (INPE/CPTEC) ---
   function renderSatelliteFrame(){
     const url = `https://www.cptec.inpe.br/dsat/?product=${satelliteProduct}&legend=true&options=false&zoom=6&x=3620&y=3260`;
     document.getElementById('satFrameWrap').innerHTML = `<iframe src="${url}" style="width:100%;height:560px;border:none;background:#000;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
@@ -565,7 +580,6 @@
   document.getElementById('satBtnTrueColor')?.addEventListener('click', (e)=>{ satelliteProduct = 'true_color_ch13_dsa'; document.querySelectorAll('#tabSatellite .ext-controls .btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); if(satelliteLoaded) renderSatelliteFrame(); });
   document.getElementById('satBtnIR')?.addEventListener('click', (e)=>{ satelliteProduct = 'ch13_dsa'; document.querySelectorAll('#tabSatellite .ext-controls .btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); if(satelliteLoaded) renderSatelliteFrame(); });
 
-  // --- Alertas CEMADEN ---
   function renderCemadenFrame(){
     const url = cemadenView === 'alertas' ? 'https://www.gov.br/cemaden/pt-br' : 'https://mapainterativo.cemaden.gov.br/';
     document.getElementById('cemadenFrameWrap').innerHTML = `<iframe src="${url}" style="width:100%;height:560px;border:none;background:#000;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
@@ -574,7 +588,6 @@
   document.getElementById('cemadenBtnMapa')?.addEventListener('click', (e)=>{ cemadenView = 'mapa'; document.querySelectorAll('#tabCemaden .ext-controls .btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); if(cemadenLoaded) renderCemadenFrame(); });
   document.getElementById('cemadenBtnAlertas')?.addEventListener('click', (e)=>{ cemadenView = 'alertas'; document.querySelectorAll('#tabCemaden .ext-controls .btn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); if(cemadenLoaded) renderCemadenFrame(); });
 
-  // Controle de abas
   document.querySelectorAll('.tab-btn').forEach(btn=>{
     if(btn.id === 'btnReloadMonthly') return;
     btn.addEventListener('click',()=>{
@@ -589,7 +602,22 @@
     });
   });
 
+  // Relógio em tempo real (Data, Hora, Minuto, Segundo) posicionado à direita do título
+  function startClock() {
+    const clockEl = document.getElementById('liveClock');
+    if (!clockEl) return;
+    
+    const updateTime = () => {
+      const now = new Date();
+      clockEl.textContent = now.toLocaleString('pt-BR'); // Atualiza o timestamp local
+    };
+    
+    setInterval(updateTime, 1000);
+    updateTime();
+  }
+
   // Init
   loadMetadata();
   schedulePolling();
+  startClock();
 })();
